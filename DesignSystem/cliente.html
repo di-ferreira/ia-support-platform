@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cliente — EMSoft Suporte Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: oklch(98.5% 0.002 260); --surface: oklch(100% 0 0); --fg: oklch(18% 0.015 260);
+      --muted: oklch(52% 0.01 260); --border: oklch(91% 0.004 260);
+      --primary: oklch(34.9% 0.122 258); --primary-light: oklch(87% 0.03 258);
+      --success: oklch(62% 0.18 150); --warning: oklch(72% 0.16 75); --danger: oklch(55% 0.20 29);
+      --info: oklch(60% 0.12 240);
+      --table-stripe: oklch(97% 0.003 260); --table-hover: oklch(95% 0.005 260);
+      --sidebar-bg: oklch(22% 0.02 258); --sidebar-active: oklch(36% 0.10 258);
+      --font: 'Inter', -apple-system, system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 5px; --radius-md: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); font-size: 15px; color: var(--fg); background: var(--bg); display: flex; height: 100vh; -webkit-font-smoothing: antialiased; }
+    .sidebar { width: 56px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 8px; flex-shrink: 0; }
+    .sidebar a { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-sm); color: rgba(255,255,255,0.5); transition: background 0.15s; }
+    .sidebar a:hover, .sidebar a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sidebar svg { width: 20px; height: 20px; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .client-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .client-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--primary-light); display: grid; place-items: center; font-size: 20px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
+    .client-info { flex: 1; }
+    .client-name { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+    .client-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-body { padding: 16px 20px; }
+    .info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--muted); }
+    .info-value { font-weight: 500; text-align: right; }
+    .badge { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 500; }
+    .badge-success { background: oklch(93% 0.04 150); color: oklch(35% 0.16 150); }
+    .badge-info { background: var(--primary-light); color: var(--primary); }
+    .badge-danger { background: oklch(93% 0.04 29); color: oklch(40% 0.18 29); }
+    .badge-warning { background: oklch(95% 0.04 75); color: oklch(40% 0.14 75); }
+    .badge-muted { background: var(--table-stripe); color: var(--muted); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .data-table tr:hover td { background: var(--table-hover); }
+    .data-table .mono { font-family: var(--font-mono); font-size: 12px; }
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab { padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .content { padding: 12px; }
+      .client-header { flex-direction: column; text-align: center; }
+      .tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></a>
+    <a href="kanban.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></a>
+    <a href="atendimento.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+    <a href="cliente.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+    <a href="configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></a>
+  </nav>
+  <div class="main">
+    <div class="topbar"><h2 style="font-size:18px;font-weight:600;">CRM de Clientes</h2><input class="input" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;flex:1;max-width:300px;outline:none;" placeholder="Buscar cliente por nome ou CNPJ..." /></div>
+    <div class="content">
+      <div class="client-header">
+        <div class="client-avatar">JM</div>
+        <div class="client-info">
+          <div class="client-name">Comercial JM Ltda <span class="badge badge-success">Ativo</span></div>
+          <div class="client-meta"><span>CNPJ: 12.345.678/0001-90</span><span>IE: 123.456.789.111</span><span>São Paulo, SP</span><span>Regime: Lucro Presumido</span></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active">Dados cadastrais</button>
+        <button class="tab">Contratos</button>
+        <button class="tab">Chamados</button>
+        <button class="tab">NF-e</button>
+        <button class="tab">Financeiro</button>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Dados da empresa</span></div>
+          <div class="card-body">
+            <div class="info-row"><span class="info-label">Razão social</span><span class="info-value">Comercial JM Ltda</span></div>
+            <div class="info-row"><span class="info-label">Nome fantasia</span><span class="info-value">Comercial JM</span></div>
+            <div class="info-row"><span class="info-label">CNPJ</span><span class="info-value mono">12.345.678/0001-90</span></div>
+            <div class="info-row"><span class="info-label">IE</span><span class="info-value mono">123.456.789.111</span></div>
+            <div class="info-row"><span class="info-label">Regime tributário</span><span class="info-value">Lucro Presumido</span></div>
+            <div class="info-row"><span class="info-label">CNAE</span><span class="info-value mono">4711-3/01</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Endereço & Contato</span></div>
+          <div class="card-body">
+            <div class="info-row"><span class="info-label">Endereço</span><span class="info-value">Rua das Flores, 123</span></div>
+            <div class="info-row"><span class="info-label">Bairro</span><span class="info-value">Centro</span></div>
+            <div class="info-row"><span class="info-label">CEP</span><span class="info-value mono">01001-000</span></div>
+            <div class="info-row"><span class="info-label">Telefone</span><span class="info-value">(11) 99999-8888</span></div>
+            <div class="info-row"><span class="info-label">E-mail</span><span class="info-value">contato@comercialjm.com.br</span></div>
+            <div class="info-row"><span class="info-label">WhatsApp</span><span class="info-value">(11) 98888-7777</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Últimos chamados</span><a href="#" style="font-size:12px;">Ver todos</a></div>
+        <div class="card-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Assunto</th><th>Status</th><th>Prioridade</th><th>Abertura</th><th>Atendente</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">#4528</td><td>NF-e rejeitada 403</td><td><span class="badge badge-info">Resolvido</span></td><td><span class="badge badge-danger">Alta</span></td><td class="mono">15/10</td><td>IA</td></tr>
+              <tr><td class="mono">#4524</td><td>Carta correção</td><td><span class="badge badge-info">Em andamento</span></td><td><span class="badge badge-warning">Média</span></td><td class="mono">14/10</td><td>Carlos A.</td></tr>
+              <tr><td class="mono">#4512</td><td>Dúvida CFOP</td><td><span class="badge badge-success">Resolvido</span></td><td><span class="badge badge-muted">Baixa</span></td><td class="mono">10/10</td><td>Maria S.</td></tr>
+            </tbody>
+          </table>
+          <!-- Empty state: <div class="empty-state"><p>Nenhum chamado encontrado para este cliente</p></div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); });
+        t.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configurações — EMSoft Suporte Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: oklch(98.5% 0.002 260); --surface: oklch(100% 0 0); --fg: oklch(18% 0.015 260); --muted: oklch(52% 0.01 260); --border: oklch(91% 0.004 260); --primary: oklch(34.9% 0.122 258); --primary-light: oklch(87% 0.03 258); --success: oklch(62% 0.18 150); --warning: oklch(72% 0.16 75); --danger: oklch(55% 0.20 29); --info: oklch(60% 0.12 240); --table-stripe: oklch(97% 0.003 260); --table-hover: oklch(95% 0.005 260); --sidebar-bg: oklch(22% 0.02 258); --sidebar-active: oklch(36% 0.10 258); --font: 'Inter', -apple-system, system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace; --radius-sm: 5px; --radius-md: 8px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); font-size: 15px; color: var(--fg); background: var(--bg); display: flex; height: 100vh; -webkit-font-smoothing: antialiased; }
+    .sidebar { width: 56px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 8px; flex-shrink: 0; }
+    .sidebar a { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-sm); color: rgba(255,255,255,0.5); }
+    .sidebar a:hover, .sidebar a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sidebar svg { width: 20px; height: 20px; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { display: flex; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar h2 { font-size: 18px; font-weight: 600; }
+    .content { display: flex; flex: 1; min-height: 0; }
+    .config-nav { width: 240px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px 0; }
+    .config-nav a { display: block; padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--muted); border-left: 3px solid transparent; }
+    .config-nav a:hover, .config-nav a.active { background: var(--table-hover); color: var(--fg); }
+    .config-nav a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .config-nav a.active { border-left-color: var(--primary); color: var(--primary); }
+    .config-panel { flex: 1; padding: 24px; overflow-y: auto; }
+    .config-section { margin-bottom: 32px; }
+    .config-section h3 { font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .config-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .config-row:last-child { border-bottom: none; }
+    .config-label { font-size: 14px; }
+    .config-desc { font-size: 12px; color: var(--muted); }
+    .switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-slider { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: background 0.2s; }
+    .switch-slider::before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+    .switch input:checked + .switch-slider { background: var(--primary); }
+    .switch input:checked + .switch-slider::before { transform: translateX(16px); }
+    .btn-sm { padding: 6px 14px; font-size: 13px; font-family: var(--font); font-weight: 500; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; }
+    .btn-sm:hover { background: var(--table-hover); }
+    .btn-primary-sm { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary-sm:hover { background: oklch(28% 0.122 258); }
+    .btn-sm:focus-visible, .btn-primary-sm:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .switch input:focus-visible + .switch-slider { outline: 2px solid var(--primary); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      .sidebar { width: 56px; }
+      .content { flex-direction: column; }
+      .config-nav { width: 100%; border-right: none; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0; }
+      .config-nav a { white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; }
+      .config-nav a.active { border-bottom-color: var(--primary); }
+    }
+    @media (max-width: 480px) {
+      .config-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .config-panel { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></a>
+    <a href="kanban.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></a>
+    <a href="configuracoes.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></a>
+  </nav>
+  <div class="main">
+    <div class="topbar"><h2>Configurações</h2></div>
+    <div class="content">
+      <nav class="config-nav" aria-label="Configurações do sistema">
+        <a href="#" class="active">WhatsApp</a>
+        <a href="#">SLA</a>
+        <a href="#">Equipe</a>
+        <a href="#">Notificações</a>
+        <a href="#">Categorias</a>
+        <a href="#">IA Assistiva</a>
+        <a href="#">Integrações</a>
+        <a href="#">Geral</a>
+      </nav>
+      <div class="config-panel">
+        <div class="config-section">
+          <h3>Integração WhatsApp</h3>
+          <div class="config-row"><div><div class="config-label">WhatsApp Business API</div><div class="config-desc">Conectar conta oficial WhatsApp Business</div></div><label class="switch"><input type="checkbox" checked /><span class="switch-slider"></span></label></div>
+          <div class="config-row"><div><div class="config-label">Número</div><div class="config-desc">(11) 98888-7777</div></div><button class="btn-sm">Alterar</button></div>
+          <div class="config-row"><div><div class="config-label">Webhook URL</div><div class="config-desc">https://api.emsoft.com.br/webhook/whatsapp</div></div><button class="btn-sm">Testar</button></div>
+          <div class="config-row"><div><div class="config-label">Token de acesso</div><div class="config-desc">••••••••••••••••</div></div><button class="btn-sm">Atualizar</button></div>
+        </div>
+        <div class="config-section">
+          <h3>Atendimento</h3>
+          <div class="config-row"><div><div class="config-label">IA atender automaticamente</div><div class="config-desc">Chamados de baixa complexidade são atendidos pela IA primeiro</div></div><label class="switch"><input type="checkbox" checked /><span class="switch-slider"></span></label></div>
+          <div class="config-row"><div><div class="config-label">Transferência para humano</div><div class="config-desc">IA transfere para humano após 2 tentativas sem solução</div></div><label class="switch"><input type="checkbox" checked /><span class="switch-slider"></span></label></div>
+          <div class="config-row"><div><div class="config-label">Limite de chamados por atendente</div><div class="config-desc">Máximo de chamados simultâneos por operador</div></div><input class="input" style="width:80px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:13px;text-align:center;" value="5" /></div>
+        </div>
+      <!-- Empty state: <div class="empty-state"><p>Nenhuma configuração disponível nesta seção</p></div> -->
+    </div>
+  </div>
+</body>
+</html>

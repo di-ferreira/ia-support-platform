@@ -1,0 +1,2069 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMSoft Design System — Plataforma de Suporte Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: oklch(98.5% 0.002 260);
+      --surface: oklch(100% 0 0);
+      --fg: oklch(18% 0.015 260);
+      --muted: oklch(52% 0.01 260);
+      --border: oklch(91% 0.004 260);
+      --primary: oklch(34.9% 0.122 258);
+      --primary-hover: oklch(28% 0.122 258);
+      --primary-light: oklch(87% 0.03 258);
+      --accent: oklch(69.3% 0.179 49);
+      --success: oklch(62% 0.18 150);
+      --warning: oklch(72% 0.16 75);
+      --danger: oklch(55% 0.20 29);
+      --info: oklch(60% 0.12 240);
+      --table-stripe: oklch(97% 0.003 260);
+      --table-hover: oklch(95% 0.005 260);
+      --sidebar-bg: oklch(22% 0.02 258);
+      --sidebar-fg: oklch(85% 0.01 258);
+      --sidebar-active: oklch(36% 0.10 258);
+      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      --radius-xs: 3px;
+      --radius-sm: 5px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-xl: 0 8px 32px rgba(0,0,0,0.12);
+      --sidebar-w: 260px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--fg);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--primary-hover); }
+    code { font-family: var(--font-mono); font-size: 13px; background: var(--table-stripe); padding: 2px 6px; border-radius: var(--radius-xs); }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-fg);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-brand h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+    .sidebar-brand p {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+    }
+    .sidebar nav { padding: 12px 0; flex: 1; }
+    .sidebar nav a {
+      display: block;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.01em;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .sidebar nav a:hover, .sidebar nav a.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      border-left-color: var(--accent);
+    }
+    .sidebar nav .section-label {
+      padding: 16px 20px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .sidebar-screens {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 12px 0;
+    }
+    .sidebar-screens a {
+      display: block;
+      padding: 6px 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.01em;
+    }
+    .sidebar-screens a:hover { color: #fff; }
+    .sidebar-screens .section-label {
+      padding: 8px 20px 2px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 0;
+      max-width: 100%;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--sidebar-bg) 0%, oklch(18% 0.02 258) 100%);
+      padding: 64px 48px;
+      color: #fff;
+    }
+    .hero h1 {
+      font-size: 40px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 12px;
+      max-width: 65ch;
+      line-height: 1.5;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    .hero-tags span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .section {
+      padding: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section:last-child { border-bottom: none; }
+    .section-title {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+    .section-desc {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 65ch;
+    }
+
+    /* Color swatches */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .color-swatch {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .color-swatch-bar {
+      height: 72px;
+      position: relative;
+    }
+    .color-swatch-bar .hex {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      color: rgba(0,0,0,0.5);
+      background: rgba(255,255,255,0.85);
+      padding: 1px 6px;
+      border-radius: var(--radius-xs);
+    }
+    .color-swatch-info {
+      padding: 10px 12px;
+    }
+    .color-swatch-info .name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .color-swatch-info .token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Scale table */
+    .scale-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .scale-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .scale-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .scale-table tr:hover td { background: var(--table-hover); }
+    .scale-table .mono { font-family: var(--font-mono); font-size: 13px; }
+    .scale-table .demo { font-family: var(--font-display); }
+    .scale-table .preview-bar {
+      height: 12px;
+      border-radius: var(--radius-xs);
+      background: var(--primary);
+    }
+
+    .spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .spacing-row .label {
+      width: 80px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .spacing-row .bar {
+      height: 16px;
+      background: var(--primary);
+      border-radius: var(--radius-xs);
+      flex-shrink: 0;
+    }
+    .spacing-row .val {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .radius-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+    }
+    .radius-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px 16px;
+      text-align: center;
+    }
+    .radius-card .box {
+      width: 64px;
+      height: 64px;
+      background: var(--primary-light);
+      margin: 0 auto 12px;
+      border: 1px solid var(--primary);
+    }
+    .radius-card .name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .radius-card .token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .shadow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .shadow-card {
+      background: var(--surface);
+      padding: 32px 20px;
+      text-align: center;
+      border-radius: var(--radius-md);
+    }
+    .shadow-card .box {
+      width: 80px;
+      height: 80px;
+      background: var(--surface);
+      margin: 0 auto 12px;
+      border-radius: var(--radius-sm);
+    }
+    .shadow-card .name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .shadow-card .token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Component showcase */
+    .component-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .component-group {}
+    .component-group-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .component-label {
+      width: 100%;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: -4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 8px 20px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--fg);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { background: var(--table-hover); border-color: var(--muted); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+    .btn-ghost:hover { background: var(--table-hover); color: var(--fg); }
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-danger:hover { background: oklch(48% 0.20 29); }
+    .btn-sm { font-size: 12px; padding: 5px 12px; }
+    .btn-lg { font-size: 16px; padding: 12px 28px; }
+
+    .input {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      width: 240px;
+    }
+    .input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .input::placeholder { color: var(--muted); }
+    .input-error { border-color: var(--danger); }
+    .input-error:focus { box-shadow: 0 0 0 3px oklch(93% 0.04 29); }
+
+    .select {
+      font-family: var(--font-body);
+      font-size: 14px;
+      padding: 8px 32px 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+    .textarea {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--fg);
+      outline: none;
+      resize: vertical;
+      width: 320px;
+      min-height: 80px;
+    }
+    .textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+    .checkbox-group, .radio-group { display: flex; gap: 20px; align-items: center; }
+    .checkbox-label, .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"],
+    .radio-label input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .switch-slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .switch input:checked + .switch-slider { background: var(--primary); }
+    .switch input:checked + .switch-slider::before { transform: translateX(18px); }
+    .switch input:focus-visible + .switch-slider { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+    }
+    .badge-primary { background: var(--primary-light); color: var(--primary); }
+    .badge-success { background: oklch(93% 0.04 150); color: oklch(35% 0.16 150); }
+    .badge-warning { background: oklch(95% 0.04 75); color: oklch(40% 0.14 75); }
+    .badge-danger { background: oklch(93% 0.04 29); color: oklch(40% 0.18 29); }
+    .badge-info { background: oklch(93% 0.03 240); color: oklch(35% 0.10 240); }
+    .badge-neutral { background: var(--table-stripe); color: var(--muted); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-change {
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .kpi-change.up { color: var(--success); }
+    .kpi-change.down { color: var(--danger); }
+
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .alert-icon { flex-shrink: 0; width: 20px; height: 20px; }
+    .alert-info { background: var(--primary-light); border-color: oklch(78% 0.065 256); color: var(--primary); }
+    .alert-success { background: oklch(93% 0.04 150); border-color: oklch(80% 0.08 150); color: oklch(35% 0.16 150); }
+    .alert-warning { background: oklch(95% 0.04 75); border-color: oklch(82% 0.08 75); color: oklch(40% 0.14 75); }
+    .alert-danger { background: oklch(93% 0.04 29); border-color: oklch(80% 0.08 29); color: oklch(40% 0.18 29); }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: var(--font-body);
+    }
+    .tab:hover { color: var(--fg); }
+    .tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 0; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .data-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    .data-table tr:hover td { background: var(--table-hover); }
+    .data-table .mono { font-family: var(--font-mono); font-size: 13px; }
+
+    /* Modal / Drawer */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      width: 520px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 0;
+    }
+    .modal-title { font-size: 18px; font-weight: 600; }
+    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: none; cursor: pointer; border-radius: var(--radius-sm); color: var(--muted); font-size: 18px; }
+    .modal-close:hover { background: var(--table-hover); }
+    .modal-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .modal-body { padding: 16px 24px 24px; }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Tooltip */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip-wrap .tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--fg);
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .tooltip-wrap:hover .tooltip { opacity: 1; }
+
+    /* Kanban card */
+    .kanban-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    .kanban-card:hover { box-shadow: var(--shadow-md); }
+    .kanban-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .kanban-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .kanban-card-body {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .kanban-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Chat */
+    .chat-bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .chat-bubble.received {
+      background: var(--table-stripe);
+      border-bottom-left-radius: var(--radius-xs);
+      align-self: flex-start;
+    }
+    .chat-bubble.sent {
+      background: var(--primary-light);
+      border-bottom-right-radius: var(--radius-xs);
+      align-self: flex-end;
+    }
+    .chat-bubble .time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: right;
+      letter-spacing: 0.02em;
+    }
+
+    /* Avatar */
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .avatar-sm { width: 28px; height: 28px; font-size: 11px; }
+    .avatar-lg { width: 48px; height: 48px; font-size: 18px; }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-left: 2px solid var(--border);
+      padding-left: 20px;
+      margin-left: 6px;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--surface);
+    }
+    .timeline-item:last-child { border-left-color: transparent; }
+    .timeline-time { font-size: 12px; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; }
+    .timeline-content { flex: 1; }
+    .timeline-content .title { font-size: 14px; font-weight: 500; }
+    .timeline-content .desc { font-size: 13px; color: var(--muted); }
+
+    /* ERP components */
+    .fiscal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .fiscal-badge.autorizado { background: oklch(93% 0.04 150); color: oklch(35% 0.16 150); }
+    .fiscal-badge.pendente { background: oklch(95% 0.04 75); color: oklch(40% 0.14 75); }
+    .fiscal-badge.rejeitado { background: oklch(93% 0.04 29); color: oklch(40% 0.18 29); }
+    .fiscal-badge.cancelado { background: var(--table-stripe); color: var(--muted); }
+    .fiscal-badge.em-digitacao { background: var(--primary-light); color: var(--primary); }
+
+    /* Product card */
+    .product-card {
+      display: flex;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    .product-card:hover { box-shadow: var(--shadow-md); }
+    .product-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      background: var(--table-stripe);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 20px;
+      color: var(--muted);
+    }
+    .product-info { flex: 1; min-width: 0; }
+    .product-name { font-size: 14px; font-weight: 600; }
+    .product-sku { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .product-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+    .product-price { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* Status indicator */
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-dot.online { background: var(--success); }
+    .status-dot.away { background: var(--warning); }
+    .status-dot.busy { background: var(--danger); }
+    .status-dot.offline { background: var(--border); }
+
+    /* Screen card (link to screen files) */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      display: block;
+      color: inherit;
+    }
+    .screen-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+    .screen-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .screen-card-preview {
+      height: 160px;
+      background: var(--table-stripe);
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .screen-card-body {
+      padding: 16px;
+    }
+    .screen-card-body h3 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .screen-card-body p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .inline-demo {
+      background: var(--table-stripe);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Toast */
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--fg);
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      font-size: 14px;
+      min-width: 280px;
+    }
+    .toast .toast-close {
+      margin-left: auto;
+      background: none;
+      border: 0;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar { width: 220px; }
+      .main { margin-left: 220px; }
+      .section { padding: 32px 24px; }
+      .hero { padding: 40px 24px; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        max-height: 240px;
+        overflow-y: auto;
+      }
+      .sidebar-brand { padding: 16px 20px; }
+      .main { margin-left: 0; }
+      .hero { padding: 32px 20px; }
+      .hero h1 { font-size: 28px; }
+      .section { padding: 28px 20px; }
+      .color-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .scale-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>EMSoft</h1>
+      <p>Design System · Suporte Inteligente</p>
+    </div>
+    <nav aria-label="Navegação do design system">
+      <div class="section-label">Fundação</div>
+      <a href="#cores">Cores</a>
+      <a href="#tipografia">Tipografia</a>
+      <a href="#espacamento">Espaçamento</a>
+      <a href="#bordas">Bordas</a>
+      <a href="#sombras">Sombras</a>
+      <a href="#tokens">Design Tokens</a>
+
+      <div class="section-label">Componentes</div>
+      <a href="#botoes">Botões</a>
+      <a href="#formularios">Formulários</a>
+      <a href="#badges">Badges & Alertas</a>
+      <a href="#tabelas">Tabelas</a>
+      <a href="#cards">Cards & KPIs</a>
+      <a href="#modal">Modal & Drawer</a>
+      <a href="#kanban-comp">Kanban</a>
+      <a href="#chat-comp">Chat & Atendimento</a>
+      <a href="#erp-comp">Componentes ERP</a>
+    </nav>
+    <div class="sidebar-screens">
+      <div class="section-label">Telas</div>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="kanban.html">Kanban de Chamados</a>
+      <a href="atendimento.html">Atendimento WhatsApp</a>
+      <a href="cliente.html">CRM Cliente</a>
+      <a href="conhecimento.html">Gestão de Conhecimento</a>
+      <a href="ia-dashboard.html">Dashboard IA</a>
+      <a href="relatorios.html">Relatórios</a>
+      <a href="configuracoes.html">Configurações</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <section class="hero">
+      <h1>Design System<br />EMSoft Suporte Inteligente</h1>
+      <p>Um sistema de design corporativo para a plataforma SaaS de atendimento inteligente via WhatsApp baseada no ERP EMSoft. Focado em produtividade, alta densidade de informação e confiabilidade.</p>
+      <div class="hero-tags">
+        <span>NextJS + TailwindCSS</span>
+        <span>Shadcn/UI + Radix</span>
+        <span>Desktop-first</span>
+        <span>High-density</span>
+        <span>Dark mode ready</span>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- CORES -->
+    <!-- ============================================================ -->
+    <section class="section" id="cores">
+      <h2 class="section-title">Cores</h2>
+      <p class="section-desc">Paleta extraída dos screenshots do ERP EMSoft e do site institucional — uma ponte entre o azul navy clássico do ERP (#063778) e o azul moderno.</p>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-bottom:16px;">Neutrais</h3>
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--bg);border-bottom:1px solid var(--border);"><span class="hex">oklch(98.5% 0.002 260)</span></div>
+          <div class="color-swatch-info"><div class="name">Background</div><div class="token">--bg</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--surface);border-bottom:1px solid var(--border);"><span class="hex">oklch(100% 0 0)</span></div>
+          <div class="color-swatch-info"><div class="name">Surface</div><div class="token">--surface</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--fg);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(18% 0.015 260)</span></div>
+          <div class="color-swatch-info"><div class="name">Foreground</div><div class="token">--fg</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--muted);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(52% 0.01 260)</span></div>
+          <div class="color-swatch-info"><div class="name">Muted</div><div class="token">--muted</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--border);"><span class="hex">oklch(91% 0.004 260)</span></div>
+          <div class="color-swatch-info"><div class="name">Border</div><div class="token">--border</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--sidebar-bg);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(22% 0.02 258)</span></div>
+          <div class="color-swatch-info"><div class="name">Sidebar BG</div><div class="token">--sidebar-bg</div></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin:32px 0 16px;">Primary (Azul EMSoft — #063778)</h3>
+      <div class="color-grid">
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(88% 0.052 255);"><span class="hex">100</span></div><div class="color-swatch-info"><div class="name">Primary 100</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(78% 0.065 256);"><span class="hex">200</span></div><div class="color-swatch-info"><div class="name">Primary 200</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(65% 0.082 256);"><span class="hex">300</span></div><div class="color-swatch-info"><div class="name">Primary 300</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(50% 0.102 257);"><span class="hex">400</span></div><div class="color-swatch-info"><div class="name">Primary 400</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:var(--primary);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">500</span></div><div class="color-swatch-info"><div class="name">Primary 500</div><div class="token">--primary</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(28% 0.098 258);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">600</span></div><div class="color-swatch-info"><div class="name">Primary 600</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(22% 0.077 257);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">700</span></div><div class="color-swatch-info"><div class="name">Primary 700</div></div></div>
+        <div class="color-swatch"><div class="color-swatch-bar" style="background:oklch(17% 0.059 257);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">800</span></div><div class="color-swatch-info"><div class="name">Primary 800</div></div></div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin:32px 0 16px;">Semânticas</h3>
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--success);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(62% 0.18 150)</span></div>
+          <div class="color-swatch-info"><div class="name">Success</div><div class="token">--success</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--warning);"><span class="hex" style="color:rgba(0,0,0,0.5);">oklch(72% 0.16 75)</span></div>
+          <div class="color-swatch-info"><div class="name">Warning</div><div class="token">--warning</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--danger);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(55% 0.20 29)</span></div>
+          <div class="color-swatch-info"><div class="name">Danger</div><div class="token">--danger</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--info);"><span class="hex" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);">oklch(60% 0.12 240)</span></div>
+          <div class="color-swatch-info"><div class="name">Info</div><div class="token">--info</div></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin:32px 0 16px;">Accent (Laranja EMSoft — #f17318)</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Extraído do favicon SVG. Usar no máximo 2 vezes por tela.</p>
+      <div class="color-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+        <div class="color-swatch">
+          <div class="color-swatch-bar" style="background:var(--accent);"><span class="hex" style="color:rgba(0,0,0,0.5);">oklch(69.3% 0.179 49)</span></div>
+          <div class="color-swatch-info"><div class="name">Accent</div><div class="token">--accent</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TIPOGRAFIA -->
+    <!-- ============================================================ -->
+    <section class="section" id="tipografia">
+      <h2 class="section-title">Tipografia</h2>
+      <p class="section-desc">Inter como face principal (display + body) para máxima legibilidade em telas de alta densidade. JetBrains Mono para dados tabulares, código e identificadores.</p>
+
+      <table class="scale-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Tamanho</th>
+            <th>Peso</th>
+            <th>Line Height</th>
+            <th>Letter Spacing</th>
+            <th>Exemplo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">h1</td>
+            <td class="mono">40px</td>
+            <td>600</td>
+            <td class="mono">1.2</td>
+            <td class="mono">-0.02em</td>
+            <td style="font-size:40px;font-weight:600;letter-spacing:-0.02em;line-height:1.2;font-family:var(--font-display);">Título principal</td>
+          </tr>
+          <tr>
+            <td class="mono">h2</td>
+            <td class="mono">32px</td>
+            <td>600</td>
+            <td class="mono">1.25</td>
+            <td class="mono">-0.015em</td>
+            <td style="font-size:32px;font-weight:600;letter-spacing:-0.015em;line-height:1.25;font-family:var(--font-display);">Seção de página</td>
+          </tr>
+          <tr>
+            <td class="mono">h3</td>
+            <td class="mono">24px</td>
+            <td>600</td>
+            <td class="mono">1.3</td>
+            <td class="mono">-0.01em</td>
+            <td style="font-size:24px;font-weight:600;letter-spacing:-0.01em;line-height:1.3;font-family:var(--font-display);">Título de card</td>
+          </tr>
+          <tr>
+            <td class="mono">h4</td>
+            <td class="mono">20px</td>
+            <td>600</td>
+            <td class="mono">1.35</td>
+            <td class="mono">0</td>
+            <td style="font-size:20px;font-weight:600;line-height:1.35;">Subtítulo de seção</td>
+          </tr>
+          <tr>
+            <td class="mono">body</td>
+            <td class="mono">15px</td>
+            <td>400</td>
+            <td class="mono">1.5</td>
+            <td class="mono">0</td>
+            <td style="font-size:15px;">Texto corporal padrão para parágrafos e conteúdo.</td>
+          </tr>
+          <tr>
+            <td class="mono">small</td>
+            <td class="mono">13px</td>
+            <td>400</td>
+            <td class="mono">1.5</td>
+            <td class="mono">0.01em</td>
+            <td style="font-size:13px;letter-spacing:0.01em;">Texto auxiliar e metadata</td>
+          </tr>
+          <tr>
+            <td class="mono">caption</td>
+            <td class="mono">12px</td>
+            <td>500</td>
+            <td class="mono">1.4</td>
+            <td class="mono">0.015em</td>
+            <td style="font-size:12px;font-weight:500;letter-spacing:0.015em;">Legendas e timestamps</td>
+          </tr>
+          <tr>
+            <td class="mono">label</td>
+            <td class="mono">14px</td>
+            <td>500</td>
+            <td class="mono">1.4</td>
+            <td class="mono">0.02em</td>
+            <td style="font-size:14px;font-weight:500;letter-spacing:0.02em;">Rótulo de campo</td>
+          </tr>
+          <tr>
+            <td class="mono">overline</td>
+            <td class="mono">11px</td>
+            <td>600</td>
+            <td class="mono">1.3</td>
+            <td class="mono">0.08em</td>
+            <td style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">TÍTULO DE SEÇÃO (UPPERCASE)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- ESPACAMENTO -->
+    <!-- ============================================================ -->
+    <section class="section" id="espacamento">
+      <h2 class="section-title">Espaçamento</h2>
+      <p class="section-desc">Escala linear baseada em 4px, projetada para layouts de alta densidade com hierarquia visual clara.</p>
+      <div class="spacing-grid">
+        <div class="spacing-row"><span class="label">4px</span><div class="bar" style="width:4px;"></div><span class="val">--space-1</span></div>
+        <div class="spacing-row"><span class="label">8px</span><div class="bar" style="width:8px;"></div><span class="val">--space-2</span></div>
+        <div class="spacing-row"><span class="label">12px</span><div class="bar" style="width:12px;"></div><span class="val">--space-3</span></div>
+        <div class="spacing-row"><span class="label">16px</span><div class="bar" style="width:16px;"></div><span class="val">--space-4</span></div>
+        <div class="spacing-row"><span class="label">20px</span><div class="bar" style="width:20px;"></div><span class="val">--space-5</span></div>
+        <div class="spacing-row"><span class="label">24px</span><div class="bar" style="width:24px;"></div><span class="val">--space-6</span></div>
+        <div class="spacing-row"><span class="label">32px</span><div class="bar" style="width:32px;"></div><span class="val">--space-7</span></div>
+        <div class="spacing-row"><span class="label">40px</span><div class="bar" style="width:40px;"></div><span class="val">--space-8</span></div>
+        <div class="spacing-row"><span class="label">48px</span><div class="bar" style="width:48px;"></div><span class="val">--space-9</span></div>
+        <div class="spacing-row"><span class="label">64px</span><div class="bar" style="width:64px;"></div><span class="val">--space-10</span></div>
+        <div class="spacing-row"><span class="label">80px</span><div class="bar" style="width:80px;"></div><span class="val">--space-11</span></div>
+        <div class="spacing-row"><span class="label">96px</span><div class="bar" style="width:96px;"></div><span class="val">--space-12</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- BORDAS -->
+    <!-- ============================================================ -->
+    <section class="section" id="bordas">
+      <h2 class="section-title">Border Radius</h2>
+      <p class="section-desc">Cantos sutis para manter o caráter profissional e sóbrio do ERP. Nada excessivamente arredondado.</p>
+      <div class="radius-grid">
+        <div class="radius-card"><div class="box" style="border-radius:var(--radius-xs);"></div><div class="name">xs</div><div class="token">3px</div></div>
+        <div class="radius-card"><div class="box" style="border-radius:var(--radius-sm);"></div><div class="name">sm</div><div class="token">5px</div></div>
+        <div class="radius-card"><div class="box" style="border-radius:var(--radius-md);"></div><div class="name">md</div><div class="token">8px</div></div>
+        <div class="radius-card"><div class="box" style="border-radius:var(--radius-lg);"></div><div class="name">lg</div><div class="token">12px</div></div>
+        <div class="radius-card"><div class="box" style="border-radius:var(--radius-xl);"></div><div class="name">xl</div><div class="token">16px</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SOMBRAS -->
+    <!-- ============================================================ -->
+    <section class="section" id="sombras">
+      <h2 class="section-title">Sombras</h2>
+      <p class="section-desc">Sutis e contidas — a hierarquia visual é definida por tipografia e espaçamento, não por elevação.</p>
+      <div class="shadow-grid">
+        <div class="shadow-card"><div class="box" style="box-shadow:var(--shadow-sm);"></div><div class="name">sm</div><div class="token">--shadow-sm</div></div>
+        <div class="shadow-card"><div class="box" style="box-shadow:var(--shadow-md);"></div><div class="name">md</div><div class="token">--shadow-md</div></div>
+        <div class="shadow-card"><div class="box" style="box-shadow:var(--shadow-lg);"></div><div class="name">lg</div><div class="token">--shadow-lg</div></div>
+        <div class="shadow-card"><div class="box" style="box-shadow:var(--shadow-xl);"></div><div class="name">xl</div><div class="token">--shadow-xl</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- DESIGN TOKENS -->
+    <!-- ============================================================ -->
+    <section class="section" id="tokens">
+      <h2 class="section-title">Design Tokens</h2>
+      <p class="section-desc">Formato compatível com Tailwind CSS, Shadcn/UI e Figma Variables. Todos os tokens são CSS custom properties no <code>:root</code>.</p>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-bottom:12px;">Configuração Tailwind</h3>
+      <pre style="background:oklch(22% 0.02 258);color:oklch(85% 0.02 258);padding:20px;border-radius:var(--radius-md);overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.6;"><code>// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50:  'oklch(95% 0.043 255)',
+          100: 'oklch(88% 0.052 255)',
+          200: 'oklch(78% 0.065 256)',
+          300: 'oklch(65% 0.082 256)',
+          400: 'oklch(50% 0.102 257)',
+          500: 'oklch(34.9% 0.122 258)',
+          600: 'oklch(28% 0.098 258)',
+          700: 'oklch(22% 0.077 257)',
+          800: 'oklch(17% 0.059 257)',
+          900: 'oklch(12% 0.042 257)',
+        },
+        success: {
+          DEFAULT: 'oklch(62% 0.18 150)',
+          light:   'oklch(93% 0.04 150)',
+          dark:    'oklch(30% 0.16 150)',
+        },
+        warning: {
+          DEFAULT: 'oklch(72% 0.16 75)',
+          light:   'oklch(95% 0.04 75)',
+          dark:    'oklch(35% 0.14 75)',
+        },
+        danger: {
+          DEFAULT: 'oklch(55% 0.20 29)',
+          light:   'oklch(93% 0.04 29)',
+          dark:    'oklch(30% 0.18 29)',
+        },
+      },
+      fontFamily: {
+        display: ['Inter', 'system-ui', 'sans-serif'],
+        body:    ['Inter', 'system-ui', 'sans-serif'],
+        mono:    ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      borderRadius: {
+        xs:  '3px',
+        sm:  '5px',
+        md:  '8px',
+        lg:  '12px',
+        xl:  '16px',
+      },
+    },
+  },
+}</code></pre>
+
+      <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin:24px 0 12px;">Configuração Shadcn/UI</h3>
+      <pre style="background:oklch(22% 0.02 258);color:oklch(85% 0.02 258);padding:20px;border-radius:var(--radius-md);overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.6;"><code>// components.json
+{
+  "style": "default",
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "cssVariables": true,
+    "css": "app/globals.css"
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+
+/* globals.css */
+@layer base {
+  :root {
+    --background: oklch(98.5% 0.002 260);
+    --foreground: oklch(18% 0.015 260);
+    --card: oklch(100% 0 0);
+    --popover: oklch(100% 0 0);
+    --primary: oklch(34.9% 0.122 258);
+    --primary-foreground: oklch(100% 0 0);
+    --secondary: oklch(88% 0.052 255);
+    --secondary-foreground: oklch(22% 0.02 258);
+    --muted: oklch(52% 0.01 260);
+    --accent: oklch(69.3% 0.179 49);
+    --destructive: oklch(55% 0.20 29);
+    --border: oklch(91% 0.004 260);
+    --input: oklch(91% 0.004 260);
+    --ring: oklch(34.9% 0.122 258);
+    --radius: 0.5rem;
+  }
+}</code></pre>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- BOTÕES -->
+    <!-- ============================================================ -->
+    <section class="section" id="botoes">
+      <h2 class="section-title">Botões</h2>
+      <p class="section-desc">Três níveis de ênfase + variantes de tamanho e cor. Botões primários usam <code>--primary</code>; ações destrutivas usam <code>--danger</code>.</p>
+      <div class="component-grid">
+        <div class="component-group">
+          <div class="component-group-title">Por ênfase</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-danger">Danger</button>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Por tamanho</div>
+          <div class="component-row">
+            <button class="btn btn-primary btn-sm">Pequeno</button>
+            <button class="btn btn-primary">Padrão</button>
+            <button class="btn btn-primary btn-lg">Grande</button>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Estados</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Normal</button>
+            <button class="btn btn-primary" disabled style="opacity:0.5;cursor:not-allowed;">Disabled</button>
+            <button class="btn btn-primary" style="transform:scale(0.97);">Pressed</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FORMULÁRIOS -->
+    <!-- ============================================================ -->
+    <section class="section" id="formularios">
+      <h2 class="section-title">Formulários</h2>
+      <p class="section-desc">Inputs, selects, textareas, checkboxes, radios e switches com foco visível e estados de erro.</p>
+      <div class="component-grid">
+        <div class="component-group">
+          <div class="component-group-title">Inputs</div>
+          <div class="component-row">
+            <input class="input" type="text" placeholder="Nome do cliente" />
+            <input class="input input-error" type="text" placeholder="Campo com erro" value="Valor inválido" />
+            <input class="input" type="text" placeholder="Disabled" disabled style="opacity:0.5;cursor:not-allowed;" />
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Select & Textarea</div>
+          <div class="component-row">
+            <select class="select"><option>Selecione um status</option><option>Aberto</option><option>Em andamento</option><option>Resolvido</option></select>
+            <textarea class="textarea" placeholder="Descreva o chamado..."></textarea>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Checkbox & Radio</div>
+          <div class="component-row">
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" checked /> Opção A</label>
+              <label class="checkbox-label"><input type="checkbox" /> Opção B</label>
+            </div>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="r" checked /> Sim</label>
+              <label class="radio-label"><input type="radio" name="r" /> Não</label>
+            </div>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Switch</div>
+          <div class="component-row">
+            <label class="switch"><input type="checkbox" checked /><span class="switch-slider"></span></label>
+            <label class="switch"><input type="checkbox" /><span class="switch-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- BADGES & ALERTAS -->
+    <!-- ============================================================ -->
+    <section class="section" id="badges">
+      <h2 class="section-title">Badges & Alertas</h2>
+      <p class="section-desc">Badges para status e metadata; alertas para feedback contextual.</p>
+      <div class="component-grid">
+        <div class="component-group">
+          <div class="component-group-title">Badges</div>
+          <div class="component-row">
+            <span class="badge badge-primary">Primary</span>
+            <span class="badge badge-success">Ativo</span>
+            <span class="badge badge-warning">Pendente</span>
+            <span class="badge badge-danger">Erro</span>
+            <span class="badge badge-info">Info</span>
+            <span class="badge badge-neutral">Rascunho</span>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Alertas</div>
+          <div class="component-row" style="flex-direction:column;align-items:stretch;">
+            <div class="alert alert-info">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Chamado #4523 foi atualizado para "Em andamento".</span>
+            </div>
+            <div class="alert alert-success">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>Solução enviada ao cliente com sucesso.</span>
+            </div>
+            <div class="alert alert-warning">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>SLA do chamado #4510 expira em 30 minutos.</span>
+            </div>
+            <div class="alert alert-danger">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <span>Falha na integração com WhatsApp. Verifique as credenciais.</span>
+            </div>
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="component-group-title">Toast</div>
+          <div class="component-row">
+            <div class="toast">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Chamado #4528 resolvido com sucesso
+              <button class="toast-close">&times;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TABELAS -->
+    <!-- ============================================================ -->
+    <section class="section" id="tabelas">
+      <h2 class="section-title">Tabelas</h2>
+      <p class="section-desc">Tabelas de dados de alta densidade com linhas hoveráveis, numeração tabular e badges de status inline.</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Chamado</th>
+            <th>Cliente</th>
+            <th>Assunto</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>SLA</th>
+            <th>Atendente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">#4528</td>
+            <td>Comercial JM Ltda</td>
+            <td>NF-e rejeitada — CST incorreto</td>
+            <td><span class="badge badge-success">Resolvido</span></td>
+            <td><span class="badge badge-warning">Média</span></td>
+            <td>—</td>
+            <td>Carlos A.</td>
+          </tr>
+          <tr>
+            <td class="mono">#4527</td>
+            <td>Distribuidora Solar</td>
+            <td>Erro ao emitir DANFE</td>
+            <td><span class="badge badge-info">Em andamento</span></td>
+            <td><span class="badge badge-danger">Alta</span></td>
+            <td class="mono" style="color:var(--danger)">00:32:14</td>
+            <td>Maria S.</td>
+          </tr>
+          <tr>
+            <td class="mono">#4526</td>
+            <td>Auto Peças ABC</td>
+            <td>Dúvida sobre cálculo de ST</td>
+            <td><span class="badge badge-warning">Aguardando cliente</span></td>
+            <td><span class="badge badge-neutral">Baixa</span></td>
+            <td class="mono">—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="mono">#4525</td>
+            <td>Farmácia Saúde Ltda</td>
+            <td>Integração com SAT</td>
+            <td><span class="badge badge-warning">Aguardando humano</span></td>
+            <td><span class="badge badge-warning">Média</span></td>
+            <td class="mono" style="color:var(--warning)">02:15:00</td>
+            <td>IA Assistiva</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- CARDS & KPIs -->
+    <!-- ============================================================ -->
+    <section class="section" id="cards">
+      <h2 class="section-title">Cards & KPIs</h2>
+      <p class="section-desc">Cards de conteúdo e indicadores-chave para dashboards operacionais.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
+        <div class="kpi-card">
+          <span class="kpi-label">Chamados abertos</span>
+          <span class="kpi-value">147</span>
+          <span class="kpi-change up">+12% vs. ontem</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Resolvidos hoje</span>
+          <span class="kpi-value">38</span>
+          <span class="kpi-change up">+5% vs. ontem</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">SLA em risco</span>
+          <span class="kpi-value" style="color:var(--warning);">12</span>
+          <span class="kpi-change down">+3 vs. ontem</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Tempo médio</span>
+          <span class="kpi-value">18min</span>
+          <span class="kpi-change up">-2min vs. ontem</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Satisfação</span>
+          <span class="kpi-value">4.8</span>
+          <span class="kpi-change up">+0.2 vs. ontem</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">IA resolvidos</span>
+          <span class="kpi-value">64%</span>
+          <span class="kpi-change up">+8% vs. ontem</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Últimos chamados</span>
+            <a href="#" style="font-size:13px;">Ver todos</a>
+          </div>
+          <div class="card-desc">Resumo dos 5 chamados mais recentes com prioridade e status.</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Atividade da equipe</span>
+            <span class="badge badge-primary">Ao vivo</span>
+          </div>
+          <div class="card-desc">3 atendentes online · 2 ausentes · 1 em pausa</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Resumo IA</span>
+            <span class="badge badge-info">Assistiva</span>
+          </div>
+          <div class="card-desc">12 sugestões geradas hoje · 8 aceitas · 4 pendentes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MODAL & DRAWER -->
+    <!-- ============================================================ -->
+    <section class="section" id="modal">
+      <h2 class="section-title">Modal & Drawer</h2>
+      <p class="section-desc">Modais para ações focadas, drawers para painéis laterais. Demonstração estática abaixo.</p>
+      <div style="position:relative;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);background:var(--table-stripe);padding:24px;">
+        <div class="modal" style="position:relative;margin:0 auto;box-shadow:var(--shadow-xl);">
+          <div class="modal-header">
+            <span class="modal-title">Novo chamado</span>
+            <button class="modal-close">&times;</button>
+          </div>
+          <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="font-size:12px;font-weight:500;letter-spacing:0.02em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Cliente</label>
+              <input class="input" style="width:100%;" type="text" placeholder="Nome do cliente ou CNPJ" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:500;letter-spacing:0.02em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Assunto</label>
+              <select class="select" style="width:100%;"><option>Selecione o assunto</option><option>NF-e</option><option>DANFE</option><option>SAT</option><option>Fiscal</option></select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:500;letter-spacing:0.02em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Descrição</label>
+              <textarea class="textarea" style="width:100%;min-height:100px;" placeholder="Descreva o problema..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary">Cancelar</button>
+            <button class="btn btn-primary">Criar chamado</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- KANBAN -->
+    <!-- ============================================================ -->
+    <section class="section" id="kanban-comp">
+      <h2 class="section-title">Kanban</h2>
+      <p class="section-desc">Cards de Kanban para o fluxo de chamados: Novo → IA Analisando → Aguardando Cliente → Aguardando Humano → Em Atendimento → Resolvido → Encerrado.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="background:var(--table-stripe);border-radius:var(--radius-md);padding:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);">Novo</span>
+            <span class="badge badge-neutral">3</span>
+          </div>
+          <div class="kanban-card" style="margin-bottom:8px;">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4530 — NF-e</span>
+              <span class="badge badge-danger">Alta</span>
+            </div>
+            <div class="kanban-card-body">Cliente: Comercial ABC — Rejeição 403: CST não informado</div>
+            <div class="kanban-card-footer">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="avatar avatar-sm">C</div>
+                <span style="font-size:11px;color:var(--muted);">Carlos</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">12:30</span>
+            </div>
+          </div>
+          <div class="kanban-card" style="margin-bottom:8px;">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4529 — SAT</span>
+              <span class="badge badge-warning">Média</span>
+            </div>
+            <div class="kanban-card-body">Farmácia Saúde — Erro de integração SAT 5.0</div>
+            <div class="kanban-card-footer">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="avatar avatar-sm">M</div>
+                <span style="font-size:11px;color:var(--muted);">Maria</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">11:45</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--table-stripe);border-radius:var(--radius-md);padding:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);">IA Analisando</span>
+            <span class="badge badge-info">2</span>
+          </div>
+          <div class="kanban-card" style="margin-bottom:8px;">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4528 — DANFE</span>
+              <span class="badge badge-warning">Média</span>
+            </div>
+            <div class="kanban-card-body">Distribuidora Solar — Erro ao gerar DANFE em lote</div>
+            <div class="kanban-card-footer">
+              <span class="badge badge-info" style="font-size:10px;letter-spacing:0.06em;">IA</span>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">12:15</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--table-stripe);border-radius:var(--radius-md);padding:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);">Aguardando</span>
+            <span class="badge badge-warning">3</span>
+          </div>
+          <div class="kanban-card" style="margin-bottom:8px;border-left:3px solid var(--warning);">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4526 — ST</span>
+              <span class="badge badge-neutral">Baixa</span>
+            </div>
+            <div class="kanban-card-body">Auto Peças — Dúvida cálculo ST (cliente)</div>
+            <div class="kanban-card-footer">
+              <span style="font-size:11px;color:var(--muted);">Aguardando cliente</span>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">10:20</span>
+            </div>
+          </div>
+          <div class="kanban-card" style="border-left:3px solid var(--danger);">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4525 — SAT</span>
+              <span class="badge badge-danger">Alta</span>
+            </div>
+            <div class="kanban-card-body">Farmácia — sem solução IA, requer humano</div>
+            <div class="kanban-card-footer">
+              <span style="font-size:11px;color:var(--danger);">SLA: 32min</span>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">09:50</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--table-stripe);border-radius:var(--radius-md);padding:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);">Em Atendimento</span>
+            <span class="badge badge-primary">2</span>
+          </div>
+          <div class="kanban-card" style="margin-bottom:8px;border-left:3px solid var(--primary);">
+            <div class="kanban-card-header">
+              <span class="kanban-card-title">#4524 — NF-e</span>
+              <span class="badge badge-warning">Média</span>
+            </div>
+            <div class="kanban-card-body">JM Ltda — Carta de correção eletrônica</div>
+            <div class="kanban-card-footer">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="avatar avatar-sm">C</div>
+                <span style="font-size:11px;color:var(--muted);">Carlos</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">28:15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- CHAT & ATENDIMENTO -->
+    <!-- ============================================================ -->
+    <section class="section" id="chat-comp">
+      <h2 class="section-title">Chat & Atendimento</h2>
+      <p class="section-desc">Componentes de atendimento WhatsApp: bolhas de chat, timeline de atendimento, avatar, indicador IA/humano e resumo de IA.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div>
+          <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-bottom:16px;">Chat WhatsApp</h3>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;display:flex;flex-direction:column;gap:12px;max-width:400px;">
+            <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+              <div class="avatar">JS</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;">João Silva</div>
+                <div style="display:flex;align-items:center;gap:4px;"><span class="status-dot online"></span><span style="font-size:12px;color:var(--muted);">Online</span></div>
+              </div>
+              <span class="badge badge-info" style="margin-left:auto;font-size:10px;letter-spacing:0.06em;">IA</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="chat-bubble received">
+                Bom dia! Estou com problema na emissão de NF-e. O sistema está rejeitando com código 403 — CST não informado.
+                <div class="time">09:32</div>
+              </div>
+              <div class="chat-bubble sent" style="background:var(--primary-light);">
+                Olá João! Vou verificar aqui. O erro 403 indica que o CST do produto não foi preenchido na nota. Pode confirmar o CFOP da operação?
+                <div class="time">09:33</div>
+              </div>
+              <div class="chat-bubble received">
+                CFOP 5.102 — venda de mercadoria.
+                <div class="time">09:34</div>
+              </div>
+              <div class="chat-bubble sent" style="background:var(--primary-light);">
+                Perfeito! Para CFOP 5.102 com operação interestadual, o CST deve ser 00 ou 60. Vou ajustar aqui e reenviar.
+                <div class="time">09:35</div>
+              </div>
+              <div class="chat-bubble sent" style="background:var(--primary-light);">
+                Pronto, NF-e autorizada! Segue anexo o DANFE.
+                <div class="time">09:37</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border);">
+              <input class="input" style="flex:1;" type="text" placeholder="Digite sua mensagem..." />
+              <button class="btn btn-primary btn-sm">Enviar</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-bottom:16px;">Resumo da IA</h3>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span class="badge badge-info" style="font-size:10px;letter-spacing:0.06em;">IA Assistiva</span>
+              <span style="font-size:12px;color:var(--muted);">Sugestão de solução</span>
+            </div>
+            <p style="font-size:14px;line-height:1.5;color:var(--fg);">
+              <strong>Problema identificado:</strong> NF-e rejeitada por CST não informado (código 403).<br />
+              <strong>Causa provável:</strong> Produto sem CST configurado no cadastro ou CFOP incompatível.<br />
+              <strong>Solução sugerida:</strong> Acessar Cadastro de Produtos → Aba Fiscal → Preencher CST com 00 (Operação interna) ou 60 (Interestadual) conforme CFOP 5.102.
+            </p>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button class="btn btn-primary btn-sm">Aplicar solução</button>
+              <button class="btn btn-secondary btn-sm">Recusar</button>
+              <button class="btn btn-ghost btn-sm">Detalhes</button>
+            </div>
+          </div>
+
+          <h3 style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-bottom:16px;">Timeline de Atendimento</h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="timeline-time">09:32</span>
+              <div class="timeline-content">
+                <div class="title">Chamado criado</div>
+                <div class="desc">João Silva — NF-e rejeitada (403)</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-time">09:33</span>
+              <div class="timeline-content">
+                <div class="title">IA assumiu chamado</div>
+                <div class="desc">Análise automática do histórico do cliente</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-time">09:35</span>
+              <div class="timeline-content">
+                <div class="title">Sugestão de solução gerada</div>
+                <div class="desc">CST não informado → cadastro de produto</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-time">09:37</span>
+              <div class="timeline-content">
+                <div class="title">Chamado resolvido</div>
+                <div class="desc">NF-e autorizada · DANFE gerado</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- COMPONENTES ERP -->
+    <!-- ============================================================ -->
+    <section class="section" id="erp-comp">
+      <h2 class="section-title">Componentes ERP</h2>
+      <p class="section-desc">Componentes especializados para o domínio do ERP: busca de produtos, cards fiscais, badges de NF-e, cliente card, financeiro.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+        <div>
+          <h3 style="font-size:15px;font-weight:600;letter-spacing:-0.01em;margin-bottom:12px;">Product Search / Card</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input class="input" style="width:100%;" type="text" placeholder="Buscar produto por código, nome ou referência..." />
+            <div class="product-card">
+              <div class="product-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+              <div class="product-info">
+                <div class="product-name">Notebook Dell Inspiron 15</div>
+                <div class="product-sku">SKU: NB-DELL-3501 · Cód: 45821-0</div>
+                <div class="product-meta">
+                  <span>NCM: 8471.30.12</span>
+                  <span>CST: 00</span>
+                  <span>CFOP: 5.102</span>
+                </div>
+              </div>
+              <div class="product-price">R$ 4.899,00</div>
+            </div>
+            <div class="product-card">
+              <div class="product-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+              <div class="product-info">
+                <div class="product-name">Servidor Dell PowerEdge R750</div>
+                <div class="product-sku">SKU: SRV-DELL-R750 · Cód: 87122-1</div>
+                <div class="product-meta">
+                  <span>NCM: 8471.41.90</span>
+                  <span>CST: 60</span>
+                  <span>CFOP: 6.102</span>
+                </div>
+              </div>
+              <div class="product-price">R$ 28.450,00</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size:15px;font-weight:600;letter-spacing:-0.01em;margin-bottom:12px;">Fiscal & NF-e Status</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="fiscal-badge autorizado">Autorizado</span>
+              <span class="fiscal-badge pendente">Pendente</span>
+              <span class="fiscal-badge rejeitado">Rejeitado</span>
+              <span class="fiscal-badge cancelado">Cancelado</span>
+              <span class="fiscal-badge em-digitacao">Em digitação</span>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <div class="card-header">
+                <span class="card-title">NF-e #000.123.456</span>
+                <span class="fiscal-badge autorizado">Autorizado</span>
+              </div>
+              <div class="card-desc">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                  <div><span style="font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Emissão</span><br /><span style="font-size:14px;">15/10/2025 14:32</span></div>
+                  <div><span style="font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Valor</span><br /><span style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;">R$ 12.450,00</span></div>
+                  <div><span style="font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Destinatário</span><br /><span style="font-size:14px;">Comercial JM Ltda</span></div>
+                  <div><span style="font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Protocolo</span><br /><span class="mono" style="font-size:12px;">3525101234567890</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Cliente</span>
+            <span class="badge badge-success">Ativo</span>
+          </div>
+          <div class="card-desc">
+            <div style="font-size:16px;font-weight:600;">Comercial JM Ltda</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">CNPJ: 12.345.678/0001-90</div>
+            <div style="font-size:13px;color:var(--muted);">São Paulo, SP</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Loja</span>
+            <span class="badge badge-primary">Matriz</span>
+          </div>
+          <div class="card-desc">
+            <div style="font-size:16px;font-weight:600;">Filial São Paulo</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">IE: 123.456.789.111</div>
+            <div style="font-size:13px;color:var(--muted);">Regime: Lucro Presumido</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Estoque</span>
+            <span class="badge badge-warning">Crítico</span>
+          </div>
+          <div class="card-desc">
+            <div style="font-size:16px;font-weight:600;">1.234 itens</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">12 abaixo do mínimo</div>
+            <div style="font-size:13px;color:var(--muted);">3 em excesso</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Financeiro</span>
+            <span class="badge badge-info">Aberto</span>
+          </div>
+          <div class="card-desc">
+            <div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--success);">R$ 45.230,00</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">Receber · 12 títulos</div>
+            <div style="font-size:13px;color:var(--muted);">Vencimento: 30/10/2025</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TELAS -->
+    <!-- ============================================================ -->
+    <section class="section" id="telas">
+      <h2 class="section-title">Telas do Sistema</h2>
+      <p class="section-desc">Wireframes de alta fidelidade para as principais telas da plataforma de suporte inteligente. Clique para abrir cada tela em versão dedicada.</p>
+      <div class="screen-grid">
+        <a href="dashboard.html" class="screen-card">
+          <div class="screen-card-preview" style="background:linear-gradient(135deg,var(--sidebar-bg) 0%,var(--primary) 100%);color:#fff;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Dashboard</h3>
+            <p>KPIs operacionais, gráficos de performance, chamados recentes e atividades da equipe em tempo real.</p>
+          </div>
+        </a>
+        <a href="kanban.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Kanban de Chamados</h3>
+            <p>Fluxo visual dos chamados: Novo → IA Analisando → Aguardando → Em Atendimento → Resolvido.</p>
+          </div>
+        </a>
+        <a href="atendimento.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Atendimento WhatsApp</h3>
+            <p>Inbox de conversas, chat em tempo real, resumo da IA, timeline e transferência de chamados.</p>
+          </div>
+        </a>
+        <a href="cliente.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="screen-card-body">
+            <h3>CRM Cliente</h3>
+            <p>Visão completa do cliente: dados cadastrais, contratos, histórico de chamados, NFs e financeiro.</p>
+          </div>
+        </a>
+        <a href="conhecimento.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Gestão de Conhecimento</h3>
+            <p>Base de conhecimento com artigos, procedimentos fiscais, soluções categorizadas e busca full-text.</p>
+          </div>
+        </a>
+        <a href="ia-dashboard.html" class="screen-card">
+          <div class="screen-card-preview" style="background:linear-gradient(135deg,var(--sidebar-bg) 0%,oklch(30% 0.10 258) 100%);color:#fff;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Dashboard IA</h3>
+            <p>Métricas de performance da IA: taxa de resolução, tempo médio, sugestões aceitas/recusadas.</p>
+          </div>
+        </a>
+        <a href="relatorios.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Relatórios</h3>
+            <p>Relatórios operacionais e gerenciais: volume de chamados, SLA, satisfação, desempenho da equipe.</p>
+          </div>
+        </a>
+        <a href="configuracoes.html" class="screen-card">
+          <div class="screen-card-preview" style="background:var(--table-stripe);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+          <div class="screen-card-body">
+            <h3>Configurações</h3>
+            <p>Integração WhatsApp, regras de SLA, equipe, notificações, categorias de chamado e parametrizações.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.sidebar nav a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.querySelectorAll('.sidebar nav a').forEach(function(x) { x.classList.remove('active'); });
+        a.classList.add('active');
+      });
+    });
+
+    var hash = location.hash || '#cores';
+    var target = document.querySelector('.sidebar nav a[href="' + hash + '"]');
+    if (target) target.classList.add('active');
+  </script>
+
+</body>
+</html>

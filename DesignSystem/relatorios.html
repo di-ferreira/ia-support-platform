@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatórios — EMSoft Suporte Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: oklch(98.5% 0.002 260); --surface: oklch(100% 0 0); --fg: oklch(18% 0.015 260); --muted: oklch(52% 0.01 260); --border: oklch(91% 0.004 260); --primary: oklch(34.9% 0.122 258); --primary-light: oklch(87% 0.03 258); --success: oklch(62% 0.18 150); --warning: oklch(72% 0.16 75); --danger: oklch(55% 0.20 29); --info: oklch(60% 0.12 240); --table-stripe: oklch(97% 0.003 260); --table-hover: oklch(95% 0.005 260); --sidebar-bg: oklch(22% 0.02 258); --sidebar-active: oklch(36% 0.10 258); --font: 'Inter', -apple-system, system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace; --radius-sm: 5px; --radius-md: 8px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); font-size: 15px; color: var(--fg); background: var(--bg); display: flex; height: 100vh; -webkit-font-smoothing: antialiased; }
+    .sidebar { width: 56px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 8px; flex-shrink: 0; }
+    .sidebar a { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-sm); color: rgba(255,255,255,0.5); }
+    .sidebar a:hover, .sidebar a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sidebar svg { width: 20px; height: 20px; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar h2 { font-size: 18px; font-weight: 600; }
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .report-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; cursor: pointer; transition: box-shadow 0.15s; display: flex; flex-direction: column; gap: 8px; }
+    .report-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .report-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .report-icon { font-size: 24px; }
+    .report-title { font-size: 15px; font-weight: 600; }
+    .report-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .report-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .report-meta span { font-size: 11px; color: var(--muted); }
+    @media (max-width: 768px) { .report-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></a>
+    <a href="kanban.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></a>
+    <a href="relatorios.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></a>
+    <a href="configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></a>
+  </nav>
+  <div class="main">
+    <div class="topbar"><h2>Relatórios</h2><select style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;outline:none;"><option>Outubro 2025</option><option>Setembro 2025</option></select></div>
+    <div class="content">
+      <div class="report-grid">
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="report-title">Volume de chamados</div><div class="report-desc">Distribuição de chamados por período, canal e categoria.</div><div class="report-meta"><span>Atualizado hoje 09:00</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="report-title">SLA & Tempo de resposta</div><div class="report-desc">Métricas de SLA por prioridade, tempo médio de primeira resposta e resolução.</div><div class="report-meta"><span>Atualizado hoje 09:00</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="report-title">Satisfação (CSAT/NPS)</div><div class="report-desc">Pesquisa de satisfação após resolução, tendências e análise.</div><div class="report-meta"><span>Atualizado semanalmente</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="report-title">Desempenho da equipe</div><div class="report-desc">Chamados resolvidos por atendente, tempo médio, avaliação.</div><div class="report-meta"><span>Atualizado hoje 09:00</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="report-title">Performance IA</div><div class="report-desc">Taxa de resolução IA, sugestões aceitas/recusadas, tempo médio.</div><div class="report-meta"><span>Atualizado hoje 09:00</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div><div class="report-title">Chamados por categoria</div><div class="report-desc">Distribuição de chamados por assunto, produto e módulo do ERP.</div><div class="report-meta"><span>Atualizado hoje 09:00</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="report-title">Tendências mensais</div><div class="report-desc">Comparativo mensal de volume, SLA e satisfação com projeções.</div><div class="report-meta"><span>Atualizado mensalmente</span><span style="color:var(--primary);font-size:12px;">Gerar →</span></div></div>
+        <div class="report-card" tabindex="0" role="button"><div class="report-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="report-title">Relatório completo</div><div class="report-desc">Relatório consolidado para exportação em PDF/Excel.</div><div class="report-meta"><span>Disponível para download</span><span style="color:var(--primary);font-size:12px;">Exportar →</span></div></div>
+      <!-- Empty state: <div class="empty-state"><p>Nenhum relatório disponível</p></div> -->
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard IA — EMSoft Suporte Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: oklch(98.5% 0.002 260); --surface: oklch(100% 0 0); --fg: oklch(18% 0.015 260); --muted: oklch(52% 0.01 260); --border: oklch(91% 0.004 260); --primary: oklch(34.9% 0.122 258); --primary-light: oklch(87% 0.03 258); --success: oklch(62% 0.18 150); --warning: oklch(72% 0.16 75); --danger: oklch(55% 0.20 29); --info: oklch(60% 0.12 240); --table-stripe: oklch(97% 0.003 260); --table-hover: oklch(95% 0.005 260); --sidebar-bg: oklch(22% 0.02 258); --sidebar-active: oklch(36% 0.10 258); --font: 'Inter', -apple-system, system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace; --radius-sm: 5px; --radius-md: 8px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); font-size: 15px; color: var(--fg); background: var(--bg); display: flex; height: 100vh; -webkit-font-smoothing: antialiased; }
+    .sidebar { width: 56px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 8px; flex-shrink: 0; }
+    .sidebar a { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-sm); color: rgba(255,255,255,0.5); }
+    .sidebar a:hover, .sidebar a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sidebar svg { width: 20px; height: 20px; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar h2 { font-size: 18px; font-weight: 600; }
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
+    .kpi-label { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .kpi-value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .kpi-change { font-size: 11px; font-weight: 500; margin-top: 2px; }
+    .kpi-change.up { color: var(--success); } .kpi-change.down { color: var(--danger); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-body { padding: 16px 20px; }
+    .badge { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 500; }
+    .badge-info { background: var(--primary-light); color: var(--primary); }
+    .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .stat-row:last-child { border-bottom: none; }
+    @media (max-width: 768px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .sidebar { width: 56px; }
+      .content { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></a>
+    <a href="ia-dashboard.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5a7 7 0 0 0 7 7"/></svg></a>
+    <a href="relatorios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></a>
+    <a href="configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></a>
+  </nav>
+  <div class="main">
+    <div class="topbar"><h2>Dashboard IA</h2><span class="badge badge-info" style="font-size:10px;letter-spacing:0.06em;">Assistiva · Online</span></div>
+    <div class="content">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">Taxa de resolução</div><div class="kpi-value">64%</div><div class="kpi-change up">+8% vs. ontem</div></div>
+        <div class="kpi-card"><div class="kpi-label">Sugestões hoje</div><div class="kpi-value">128</div><div class="kpi-change up">+12 vs. ontem</div></div>
+        <div class="kpi-card"><div class="kpi-label">Tempo médio IA</div><div class="kpi-value">2.4min</div><div class="kpi-change up">-0.3min vs. ontem</div></div>
+        <div class="kpi-card"><div class="kpi-label">Precisão</div><div class="kpi-value">87%</div><div class="kpi-change up">+2% vs. ontem</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Sugestões por período</span></div>
+          <div class="card-body">
+            <div class="stat-row"><span>Aceitas</span><span style="font-weight:600;color:var(--success);">82 (64%)</span></div>
+            <div class="stat-row"><span>Recusadas</span><span style="font-weight:600;color:var(--danger);">38 (30%)</span></div>
+            <div class="stat-row"><span>Pendentes</span><span style="font-weight:600;color:var(--warning);">8 (6%)</span></div>
+            <div class="stat-row"><span>Total</span><span style="font-weight:600;">128 (100%)</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Top categorias resolvidas pela IA</span></div>
+          <div class="card-body">
+            <div class="stat-row"><span>NF-e / Rejeição</span><span style="font-weight:600;">34</span></div>
+            <div class="stat-row"><span>Dúvidas CFOP</span><span style="font-weight:600;">22</span></div>
+            <div class="stat-row"><span>SAT / Integração</span><span style="font-weight:600;">18</span></div>
+            <div class="stat-row"><span>Cadastro de produtos</span><span style="font-weight:600;">15</span></div>
+            <div class="stat-row"><span>SPED / Obrigações</span><span style="font-weight:600;">10</span></div>
+          </div>
+        </div>
+      <!-- Empty state: <div class="empty-state"><p>Nenhum dado de IA disponível no período</p></div> -->
+    </div>
+  </div>
+</body>
+</html>
