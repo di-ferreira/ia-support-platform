@@ -1,8 +1,18 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes import (
+    auth_router,
+    chats_router,
+    clientes_router,
+    kanban_router,
+    knowledge_base_router,
+    mensagens_router,
+    webhooks_router,
+)
+from app.api.websocket_manager import manager
 from app.core.config import settings
 
 
@@ -24,6 +34,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(clientes_router)
+app.include_router(chats_router)
+app.include_router(mensagens_router)
+app.include_router(kanban_router)
+app.include_router(knowledge_base_router)
+app.include_router(webhooks_router)
+
+
+@app.websocket("/ws/chat/{chat_id}")
+async def websocket_chat(websocket: WebSocket, chat_id: int):
+    await manager.connect(chat_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_json()
+            await manager.broadcast(chat_id, data)
+    except WebSocketDisconnect:
+        manager.disconnect(chat_id, websocket)
 
 
 @app.get("/health")

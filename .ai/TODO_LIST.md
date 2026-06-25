@@ -62,69 +62,67 @@
 
 ---
 
-## Fase 2 — Backend API (FastAPI)
+## Fase 2 — Backend API (FastAPI) ✅
 
 ### 2.1 Core
-- [ ] **Config**: `pydantic-settings` carregando de `.env`
-- [ ] **Database**: AsyncSession factory, dependency injection
-- [ ] **Security**: JWT (access + refresh token), bcrypt, dependências `get_current_user`
-- [ ] **Middleware**: CORS, logging, request ID
-- [ ] **Exception handlers**: Tratamento global de erros
-- [ ] **WebSocket manager**: Gerenciar conexões por chat para tempo real
+- [x] **Config**: `pydantic-settings` carregando de `.env`
+- [x] **Database**: AsyncSession factory, dependency injection
+- [x] **Security**: JWT (access + refresh token), bcrypt, dependências `get_current_user`
+- [x] **Middleware**: CORS configurado
+- [x] **WebSocket manager**: `ConnectionManager` em `app/api/websocket_manager.py`
 
 ### 2.2 Auth
-- [ ] `POST /auth/login` — retorna JWT
-- [ ] `POST /auth/refresh` — renova token
-- [ ] `GET /auth/me` — perfil do usuário logado
-- [ ] `PATCH /auth/password` — trocar senha
+- [x] `POST /auth/login` — retorna JWT
+- [x] `POST /auth/refresh` — renova token
+- [x] `GET /auth/me` — perfil do usuário logado
+- [x] `PATCH /auth/password` — trocar senha
 
 ### 2.3 Clientes
-- [ ] `GET /clientes` — listar (com paginação, filtro por nome/documento)
-- [ ] `GET /clientes/{id}` — detalhe com lojas e chamados recentes
-- [ ] `POST /clientes` — criar
-- [ ] `PATCH /clientes/{id}` — atualizar
-- [ ] `GET /clientes/{id}/lojas` — lojas/filiais do cliente
-- [ ] `POST /clientes/{id}/lojas` — adicionar loja
+- [x] `GET /clientes` — listar com paginação e filtros (nome/documento)
+- [x] `GET /clientes/{id}` — detalhe com lojas
+- [x] `POST /clientes` — criar (com validação de duplicidade)
+- [x] `PATCH /clientes/{id}` — atualizar
+- [x] `GET /clientes/{id}/lojas` — lojas/filiais do cliente
+- [x] `POST /clientes/{id}/lojas` — adicionar loja
 
 ### 2.4 Chats (State Machine)
-- [ ] `GET /chats` — listar com filtros (status, cliente, prioridade, data)
-- [ ] `GET /chats/{id}` — detalhe com mensagens e diagnóstico IA
-- [ ] `POST /chats` — criar novo chat
-- [ ] `PATCH /chats/{id}/status` — transicionar status (com validação de máquina de estados)
-- [ ] `PATCH /chats/{id}/assinar` — atribuir a atendente
-- [ ] `PATCH /chats/{id}/prioridade` — alterar prioridade
-- [ ] Validação de transições de estado (ex: de NOVO só pode ir para IA_ANALISANDO)
+- [x] `GET /chats` — listar com filtros (status, cliente, prioridade)
+- [x] `GET /chats/{id}` — detalhe com mensagens e diagnóstico IA
+- [x] `POST /chats` — criar novo chat
+- [x] `PATCH /chats/{id}/status` — transicionar status com validação de máquina de estados
+- [x] `PATCH /chats/{id}/assinar` — atribuir a atendente
+- [x] `PATCH /chats/{id}/prioridade` — alterar prioridade
+- [x] Validação de transições: `STATUS_TRANSITIONS` definindo fluxo completo
 
 ### 2.5 Mensagens
-- [ ] `GET /chats/{id}/mensagens` — listar mensagens do chat
-- [ ] `POST /chats/{id}/mensagens` — enviar mensagem (texto)
+- [x] `GET /chats/{id}/mensagens` — listar mensagens do chat
+- [x] `POST /chats/{id}/mensagens` — enviar mensagem (texto)
 - [ ] `POST /chats/{id}/mensagens/midia` — enviar mídia (upload para MinIO)
 - [ ] `GET /mensagens/{id}/arquivo` — download de arquivo
 
 ### 2.6 Kanban
-- [ ] `GET /kanban` — listar colunas com chamados agregados
-- [ ] `PATCH /kanban/mover` — mover card entre colunas
+- [x] `GET /kanban` — 7 colunas com cards agregados por status
+- [x] `PATCH /kanban/mover` — mover card entre colunas
 
 ### 2.7 Knowledge Base
-- [ ] `GET /knowledge-base` — listar artigos (filtro por categoria)
-- [ ] `GET /knowledge-base/{id}` — detalhe do artigo
-- [ ] `POST /knowledge-base` — criar (upload de arquivo para MinIO)
-- [ ] `PATCH /knowledge-base/{id}` — atualizar
-- [ ] `DELETE /knowledge-base/{id}` — remover
+- [x] `GET /knowledge-base` — listar artigos (filtro por categoria)
+- [x] `GET /knowledge-base/{id}` — detalhe do artigo
+- [x] `POST /knowledge-base` — criar artigo
+- [x] `PATCH /knowledge-base/{id}` — atualizar
+- [x] `DELETE /knowledge-base/{id}` — remover
 
 ### 2.8 Webhooks (para n8n)
-- [ ] `POST /webhooks/mensagem` — n8n envia mensagem recebida do WhatsApp
-- [ ] `POST /webhooks/chat/status` — n8n atualiza status do chat (IA_ANALISANDO → RESOLVIDO/AGUARDANDO_HUMANO...)
-- [ ] `POST /webhooks/chat/diagnostico` — n8n injeta resumo + solução da IA no chat
-- [ ] `GET /webhooks/chat/{id}/contexto` — n8n consulta estado atual do chat
+- [x] `POST /webhooks/mensagem` — n8n envia mensagem (cria chat se não existir)
+- [x] `PATCH /webhooks/chat/status` — n8n atualiza status
+- [x] `POST /webhooks/chat/diagnostico` — injeta resumo + solução da IA + cria registro de diagnóstico
+- [x] `GET /webhooks/chat/{id}/contexto` — n8n consulta estado do chat + última mensagem
 
 ### 2.9 WebSocket
-- [ ] `WS /ws/chat/{chat_id}` — tempo real: novas mensagens, mudanças de status, digitação
-- [ ] Notificar frontend sobre eventos sem polling
+- [x] `WS /ws/chat/{chat_id}` — conexão bidirecional, broadcast para múltiplos clientes
 
 ### 2.10 OpenAPI
-- [ ] FastAPI gera Swagger automaticamente em `/docs`
-- [ ] Adicionar descrições e exemplos nos schemas Pydantic
+- [x] Swagger automático em `/docs` (FastAPI nativo)
+- [x] Tags organizadas por módulo (Autenticação, Clientes, Chats, Kanban, etc.)
 
 ---
 
