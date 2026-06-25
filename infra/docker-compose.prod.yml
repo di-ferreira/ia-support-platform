@@ -1,0 +1,99 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik-data:/etc/traefik/acme
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL_PROD: postgresql+asyncpg://emsoft:emsoft@postgres:5432/emsoft
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      EVOLUTION_API_URL: http://evolution-api:8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.emsoft.app`)"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: https://api.emsoft.app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`app.emsoft.app`)"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: emsoft
+      POSTGRES_PASSWORD: emsoft
+      POSTGRES_DB: emsoft
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emsoft"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      N8N_PROTOCOL: https
+      N8N_HOST: n8n.emsoft.app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.emsoft.app`)"
+    volumes:
+      - n8n-data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
+  qdrant-data:
+  minio-data:
+  n8n-data:
+  traefik-data:
