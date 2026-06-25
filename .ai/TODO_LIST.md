@@ -183,51 +183,35 @@
 
 ---
 
-## Fase 4 — Orquestração n8n (com RAG)
+## Fase 4 — Orquestração n8n (com RAG) ✅
 
 ### 4.1 Fluxo Principal — Recebimento de Mensagem
-- [ ] Webhook da Evolution API → n8n
-- [ ] Extrair: número WhatsApp, conteúdo da mensagem, tipo, mídia (se houver)
-- [ ] Nó HTTP: `GET /webhooks/chat/{id}/contexto` (ou criar/se o chat não existir)
-- [ ] Se chat NOVO → criar no banco via `POST /webhooks/mensagem`
-- [ ] Se chat existente → adicionar mensagem ao histórico
+- [x] Webhook da Evolution API → n8n (`POST /webhook/emsoft-whatsapp`)
+- [x] Extrair número WhatsApp, conteúdo, tipo do payload
+- [x] Nó HTTP: `GET /webhooks/chat/{whatsapp}/contexto` (cria se não existir)
+- [x] IF Node: chat existe → salvar mensagem / não existe → criar + salvar
 
 ### 4.2 Fluxo Principal — Consulta IA + RAG
-- [ ] Se chat com IA ativa → nó RAG (Qdrant nativo do n8n)
-- [ ] Embedding da mensagem do cliente → busca vetorial na base de conhecimento
-- [ ] Contexto recuperado → nó OpenAI (ou Ollama) com prompt estruturado
-- [ ] Prompt para IA:
-  ```
-  Você é um especialista em suporte técnico do ERP EMSoft para autopeças.
-  Com base no contexto RAG e na mensagem do cliente, classifique:
-  1. Status: RESOLVIDO_PELA_IA | TRANSFERIR_COM_SOLUCAO | TRANSFERIR_SEM_SOLUCAO
-  2. Resumo do problema
-  3. Causa provável
-  4. Solução encontrada (se houver)
-  5. Nível de confiança (0-100)
-  6. Necessita humano (true/false)
-  
-  Contexto RAG: {{contexto}}
-  Mensagem: {{mensagem_cliente}}
-  ```
+- [x] IF Node: verifica se IA deve analisar (status NOVO/IA_ANALISANDO/AGUARDANDO_CLIENTE)
+- [x] Nó Qdrant: busca vetorial na coleção `emsoft-knowledge-base` (limite 5)
+- [x] Nó LLM Chain (OpenAI/Ollama) com prompt JSON estruturado
+- [x] Nó Set: parse do JSON de saída da IA em campos individuais
 
 ### 4.3 Fluxo Principal — Atualização via API
-- [ ] Nó HTTP: `PATCH /webhooks/chat/diagnostico` com JSON de saída da IA
-- [ ] Se RESOLVIDO → nó HTTP `PATCH /webhooks/chat/status` → RESOLVIDO
-- [ ] Se TRANSFERIR_COM_SOLUCAO → status `AGUARDANDO_HUMANO_COM_SOLUCAO`
-- [ ] Se TRANSFERIR_SEM_SOLUCAO → status `AGUARDANDO_HUMANO_SEM_SOLUCAO`
-- [ ] Nó Evolution API: Responder cliente (se for o caso)
+- [x] Nó HTTP: `POST /webhooks/chat/diagnostico` com diagnóstico completo
+- [x] Switch Node: roteia para Cenário A/B/C baseado em `status_ia`
 
 ### 4.4 Fluxo Condicional — Cenários
-- [ ] **Cenário A** (IA resolve): Responder cliente + marcar RESOLVIDO
-- [ ] **Cenário B** (IA achou solução mas precisa de humano): Status `AGUARDANDO_HUMANO_COM_SOLUCAO`, anexar solução
-- [ ] **Cenário C** (IA não achou solução): Status `AGUARDANDO_HUMANO_SEM_SOLUCAO`, relatório técnico
+- [x] **Cenário A** (RESOLVIDO_PELA_IA): PATCH status → RESOLVIDO + Evolution API
+- [x] **Cenário B** (TRANSFERIR_COM_SOLUCAO): PATCH → AGUARDANDO_HUMANO_COM_SOLUCAO
+- [x] **Cenário C** (TRANSFERIR_SEM_SOLUCAO): PATCH → AGUARDANDO_HUMANO_SEM_SOLUCAO
 
 ### 4.5 Configuração de RAG no n8n
-- [ ] Conector Qdrant no n8n (coleção `emsoft-knowledge-base`)
-- [ ] Pipeline de ingestão: webhook de upload → chunking → embedding → inserir no Qdrant
-- [ ] Estratégia de chunking: 500 tokens com overlap de 50 (para manuais ERP)
-- [ ] Metadata: categoria, título, data
+- [x] Workflow JSON exportável em `infra/n8n/workflow-support-ai.json` (19 nós)
+- [x] Documentação completa em `docs/n8n-workflow.md` (arquitetura, nós, variáveis, testes)
+- [x] Pipeline de ingestão: upload → extrair texto → chunking (500/50 tokens) → embedding → Qdrant
+- [x] Estratégia de chunking + metadados (categoria, título, fonte, data)
+- [x] Script de ingestão em massa + instruções de setup
 
 ---
 
