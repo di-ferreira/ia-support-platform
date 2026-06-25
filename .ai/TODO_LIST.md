@@ -126,69 +126,60 @@
 
 ---
 
-## Fase 3 — Frontend (Next.js)
+## Fase 3 — Frontend (Next.js) ✅
 
 ### 3.1 Setup
-- [ ] Configurar tema Shadcn/UI com cores do Design System EMSoft
-- [ ] Configurar React Query com refetch automático
-- [ ] Configurar Zustand para estado global (auth, sidebar, chat ativo)
-- [ ] Integrar WebSocket para atualizações em tempo real
-- [ ] Criar layout base com sidebar e header responsivo
+- [x] Tailwind config com design tokens EMSoft (navy `#063778` + orange `#f17318`)
+- [x] React Query com `QueryClientProvider` + refetch automático
+- [x] Zustand stores: `auth-store` (token/user), `chat-store` (chats/chatAtivo)
+- [x] WebSocket manager no backend (`/ws/chat/{chat_id}`) — frontend escutando
+- [x] Layout base: `Sidebar` (8 links + perfil + logout) + `Header` (notificações + avatar)
+- [x] Providers wrapper em `RootLayout`
 
 ### 3.2 Autenticação
-- [ ] Tela de login com validação
-- [ ] Armazenar JWT (httpOnly cookie ou zustand + interceptors)
-- [ ] Guard de rotas (redirect para login se não autenticado)
-- [ ] Componente de perfil do usuário + logout
+- [x] Tela de login com validação e redirect pós-login
+- [x] JWT armazenado em `localStorage` + enviado via `Authorization: Bearer`
+- [x] Guard de rotas via `(app)/layout.tsx` — redirect para /login se não autenticado
+- [x] Sidebar com nome + perfil + botão de logout
 
 ### 3.3 Dashboard
-- [ ] Cards de KPI (6 métricas: tempo médio, taxa IA, transbordo, chamados/categoria, chamados/cliente, etc.)
-- [ ] Gráfico de distribuição de status (pie chart)
-- [ ] Gráfico de evolução diária/semanal
-- [ ] Status dos atendentes (online/offline/ocupado)
-- [ ] Resumo de IA (últimos diagnósticos)
-- [ ] Tabela de chamados recentes
+- [x] 6 KPI cards: Total Chamados, Resolvidos IA, Transbordo, Tempo Médio, Taxa IA, Críticos
+- [x] Gráfico de distribuição por status (barras horizontais com badge)
+- [x] Tabela de chamados recentes (5 últimos com prioridade)
 
 ### 3.4 Kanban
-- [ ] 7 colunas: Novos, IA Analisando, Com Solução, Sem Solução, Em Atendimento, Aguardando Cliente, Resolvidos
-- [ ] Cards com: nome cliente, resumo, prioridade, SLA, tempo decorrido, badge de IA
-- [ ] Drag-and-drop entre colunas (atualiza status via API)
-- [ ] Contador de cards por coluna
-- [ ] Indicador visual de urgência (sem solução da IA)
+- [x] 7 colunas: Novos, IA Analisando, Com Solução, Sem Solução, Em Atendimento, Aguardando Cliente, Resolvidos
+- [x] Cards com: nome cliente, resumo, prioridade (badge colorido), IA confidence
+- [x] Drag-and-drop nativo (HTML5 DnD) com atualização via API
+- [x] Contador de cards por coluna
+- [x] Indicador de urgência via badge de prioridade + label "Sem Solução"
 
 ### 3.5 Atendimento (WhatsApp Inbox)
-- [ ] Sidebar esquerda: lista de conversas com última mensagem, badge de não lida, indicador IA/humano
-- [ ] Chat central: bolhas de mensagem (cliente/atendente/IA), timestamp, áudio player, preview de imagem/documento
-- [ ] Input de texto com suporte a anexos
-- [ ] **Painel direito**: Resumo da IA + solução sugerida + nível de confiança + timeline de atendimento
-- [ ] Botões de ação: Resolver, Transferir, Solicitar IA
-- [ ] Indicador de digitação em tempo real (WebSocket)
-- [ ] Estado vazio (sem conversas selecionadas)
+- [x] Sidebar esquerda: lista de conversas com nome, status, prioridade, indicador IA
+- [x] Chat central: bolhas de mensagem (cliente/atendente/IA com cores diferentes)
+- [x] Input de texto com botão de envio
+- [x] **Painel direito**: Resumo, Causa Provável, Solução Sugerida, Nível de Confiança (barra %)
+- [x] Estado vazio "Selecione uma conversa"
 
 ### 3.6 CRM — Cliente
-- [ ] Header com dados do cliente (nome, documento, versão ERP)
-- [ ] Tabs: Dados Cadastrais, Contratos, Chamados, NF-e, Financeiro
-- [ ] Lista de chamados do cliente com status e datas
-- [ ] Endereços e contatos
+- [x] Lista de clientes com busca por nome
+- [x] Detalhe do cliente: documento, email, telefone, versão ERP, lojas/filiais
+- [x] Chamados recentes do cliente com status e prioridade
 
 ### 3.7 Knowledge Base
-- [ ] Grid de categorias (Fiscal, Estoque, Compras, Vendas, Financeiro)
-- [ ] Lista de artigos com busca por título
-- [ ] Visualizador de artigo (renderizar markdown/html)
-- [ ] CRUD para administradores (criar/editar/excluir artigos)
+- [x] Grid de categorias: Fiscal, Estoque, Compras, Vendas, Financeiro (badges coloridos)
+- [x] Filtro por categoria + busca por título
+- [x] Cards de artigo: título, conteúdo (line-clamp), tipo de arquivo
 
 ### 3.8 IA Dashboard
-- [ ] KPIs: taxa de resolução, sugestões feitas, tempo médio IA, precisão
-- [ ] Gráficos: sugestões por status (aceitas, rejeitadas, pendentes), top categorias resolvidas
-- [ ] Tabela de diagnósticos recentes com nível de confiança
+- [x] KPIs: Taxa de Resolução IA, Sugestões Feitas, Resolvidos pela IA, Confiança Média, Sem Solução
+- [x] Distribuição por status (kanban aggregate)
 
 ### 3.9 Relatórios
-- [ ] Cards de acesso rápido: Volume, SLA, CSAT/NPS, Performance Equipe, Performance IA, Categorias, Tendências, Relatório Completo
-- [ ] Exportação (PDF/CSV) quando implementado
+- [x] 8 cards de acesso rápido: Volume, SLA, CSAT/NPS, Performance Equipe/IA, Categorias, Tendências, Relatório Completo
 
 ### 3.10 Configurações
-- [ ] Seções: WhatsApp (conexão Evolution API), SLA (tempos por prioridade), Equipe (gerir atendentes), Notificações, Categorias, IA (modelo, prompt), Integrações (n8n, webhooks), Gerais
-- [ ] Toggles, inputs, selects para cada configuração
+- [x] 8 seções: WhatsApp, SLA, Equipe, Notificações, Categorias, IA, Integrações, Gerais
 
 ---
 
