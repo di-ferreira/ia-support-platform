@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { api } from "@/lib/api";
@@ -8,6 +8,8 @@ import { api } from "@/lib/api";
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth, token } = useAuthStore();
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
     if (token) router.replace("/dashboard");
@@ -25,15 +27,26 @@ export default function LoginPage() {
           className="space-y-4"
           onSubmit={async (e) => {
             e.preventDefault();
-            const form = new FormData(e.currentTarget);
-            const email = String(form.get("email"));
-            const senha = String(form.get("senha"));
-            const res = await api.post<{ access_token: string }>("/auth/login", { email, senha });
-            const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
-            setAuth(res.access_token, me);
-            router.push("/dashboard");
+            setErro("");
+            setCarregando(true);
+            try {
+              const form = new FormData(e.currentTarget);
+              const email = String(form.get("email"));
+              const senha = String(form.get("senha"));
+              const res = await api.post<{ access_token: string }>("/auth/login", { email, senha });
+              localStorage.setItem("token", res.access_token);
+              const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
+              setAuth(res.access_token, me);
+              router.push("/dashboard");
+            } catch (err) {
+              setErro(err instanceof Error ? err.message : "Erro ao fazer login");
+              setCarregando(false);
+            }
           }}
         >
+          {erro && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{erro}</div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
@@ -56,9 +69,10 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full h-10 rounded-md bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+            disabled={carregando}
+            className="w-full h-10 rounded-md bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors disabled:opacity-50"
           >
-            Entrar
+            {carregando ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </div>
