@@ -47,8 +47,8 @@ app.include_router(ai_router)
 
 
 @app.websocket("/ws/chat/{chat_id}")
-async def websocket_chat(websocket: WebSocket, chat_id: int):
-    await manager.connect(chat_id, websocket)
+async def websocket_chat(websocket: WebSocket, chat_id: int, token: str | None = None):
+    await manager.connect(chat_id, websocket, token)
     try:
         while True:
             data = await websocket.receive_json()

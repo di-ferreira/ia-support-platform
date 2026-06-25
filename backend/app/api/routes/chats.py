@@ -29,7 +29,7 @@ async def listar_chats(
     user: Atendente = Depends(get_current_user),
 ):
     service = ChatService(session)
-    chats, _ = await service.listar(skip, limit, status, cliente_id, prioridade)
+    chats, _ = await service.listar(skip, limit, status, cliente_id, prioridade, user)
     result = []
     for chat in chats:
         result.append(
@@ -87,7 +87,7 @@ async def assinar_chat(
     chat_id: int,
     body: ChatAssign,
     session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
+    user: Atendente = Depends(require_perfil("admin", "supervisor")),
 ):
     service = ChatService(session)
     return await service.assinar(chat_id, body.atendente_id)

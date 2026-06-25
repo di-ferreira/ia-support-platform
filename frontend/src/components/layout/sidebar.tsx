@@ -9,9 +9,6 @@ import {
   MessageSquare,
   Users,
   BookOpen,
-  Bot,
-  BarChart3,
-  Settings,
   LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
@@ -22,9 +19,6 @@ const links = [
   { href: "/atendimento", label: "Atendimento", icon: MessageSquare },
   { href: "/cliente", label: "Clientes", icon: Users },
   { href: "/conhecimento", label: "Base de Conhecimento", icon: BookOpen },
-  { href: "/ia-dashboard", label: "IA Dashboard", icon: Bot },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 export function Sidebar() {

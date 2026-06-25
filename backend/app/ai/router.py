@@ -3,8 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.ai_cache import ai_cache
-from app.ai.openai_service import OpenAIService
 from app.ai.ollama_service import OllamaService
+from app.ai.openai_service import OpenAIService
 from app.ai.prompts import (
     CLASSIFY_SYSTEM,
     DIAGNOSE_SYSTEM,
@@ -46,9 +46,10 @@ async def classificar(
     return result
 
 
-@router.post("/sumarizar")
-async def sumarizar(
+@router.post("/analisar")
+async def analisar_chat(
     chat_id: int,
+    tipo: str = "diagnosticar",
     session: AsyncSession = Depends(get_session),
     user: Atendente = Depends(get_current_user),
 ):
@@ -71,38 +72,9 @@ async def sumarizar(
         for m in msgs.scalars().all()
     )
 
+    system_prompt = SUMMARIZE_SYSTEM if tipo == "sumarizar" else DIAGNOSE_SYSTEM
     llm = _get_llm()
-    messages = build_messages(SUMMARIZE_SYSTEM, historico)
-    return await llm.chat_json(messages)
-
-
-@router.post("/diagnosticar")
-async def diagnosticar(
-    chat_id: int,
-    session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
-):
-    result = await session.execute(
-        select(Chat).where(Chat.id == chat_id)
-    )
-    chat = result.scalar_one_or_none()
-    if not chat:
-        from fastapi import HTTPException, status
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado")
-
-    from app.models.mensagem import Mensagem
-    msgs = await session.execute(
-        select(Mensagem)
-        .where(Mensagem.chat_id == chat_id)
-        .order_by(Mensagem.created_at.asc())
-    )
-    historico = "\n".join(
-        f"[{m.remetente.value}] {m.conteudo or '(mídia)'}"
-        for m in msgs.scalars().all()
-    )
-
-    llm = _get_llm()
-    messages = build_messages(DIAGNOSE_SYSTEM, historico)
+    messages = build_messages(system_prompt, historico)
     return await llm.chat_json(messages)
 
 
@@ -130,7 +102,7 @@ async def solucionar(
     mensagem_cliente = ultima_msg.conteudo if ultima_msg else ""
 
     kb = await session.execute(
-        select(KnowledgeBase).where(KnowledgeBase.ativo == True).limit(5)
+        select(KnowledgeBase).where(KnowledgeBase.ativo).limit(5)
     )
     rag_context = "\n\n".join(
         f"Título: {a.titulo}\nConteúdo: {a.conteudo or '(sem conteúdo)'}"

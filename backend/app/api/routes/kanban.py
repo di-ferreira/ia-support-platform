@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_perfil
+from app.api.deps import get_current_user
 from app.core.database import get_session
 from app.models.atendente import Atendente
 from app.schemas.kanban import KanbanResponse, MoverCardRequest
@@ -17,7 +17,7 @@ async def obter_kanban(
     user: Atendente = Depends(get_current_user),
 ):
     service = KanbanService(session)
-    colunas = await service.obter_kanban()
+    colunas = await service.obter_kanban(user)
     return KanbanResponse(colunas=colunas)
 
 
@@ -25,7 +25,7 @@ async def obter_kanban(
 async def mover_card(
     body: MoverCardRequest,
     session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(require_perfil("admin", "supervisor", "atendente")),
+    user: Atendente = Depends(get_current_user),
 ):
     service = ChatService(session)
     await service.atualizar_status(body.chat_id, body.novo_status)

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.chat import Chat
-from app.models.mensagem import Mensagem, RemetenteMensagem, TipoMensagem
+from app.models.mensagem import Mensagem
 
 
 class MensagemService:

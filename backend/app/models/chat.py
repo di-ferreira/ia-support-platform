@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -60,9 +60,6 @@ class Chat(Base):
         back_populates="chat", cascade="all, delete-orphan"
     )
     diagnosticos: Mapped[list["IADiagnostico"]] = relationship(
-        back_populates="chat", cascade="all, delete-orphan"
-    )
-    historico: Mapped[list["Historico"]] = relationship(
         back_populates="chat", cascade="all, delete-orphan"
     )
     tags: Mapped[list["Tag"]] = relationship(

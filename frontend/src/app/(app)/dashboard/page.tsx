@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Bot, Clock, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { MessageSquare, Bot, Clock, TrendingUp, AlertTriangle, Users, Brain } from "lucide-react";
 
 const kpis = [
   { label: "Total de Chamados", key: "total", icon: MessageSquare, color: "text-blue-600" },
@@ -13,6 +13,8 @@ const kpis = [
   { label: "Tempo Médio", key: "tempo_medio", icon: Clock, color: "text-purple-600" },
   { label: "Taxa de Resolução IA", key: "taxa_ia", icon: TrendingUp, color: "text-primary-600" },
   { label: "Críticos", key: "criticos", icon: AlertTriangle, color: "text-red-600" },
+  { label: "Confiança Média IA", key: "confianca_media", icon: Brain, color: "text-indigo-600" },
+  { label: "Sugestões Feitas", key: "sugestoes", icon: Brain, color: "text-teal-600" },
 ];
 
 export default function DashboardPage() {
@@ -30,8 +32,21 @@ export default function DashboardPage() {
   const criticos = chats?.filter((c: any) => c.status === "AGUARDANDO_HUMANO_SEM_SOLUCAO").length || 0;
   const ia_resolvidos = chats?.filter((c: any) => c.status === "RESOLVIDO").length || 0;
   const taxa_ia = total > 0 ? Math.round((ia_resolvidos / total) * 100) : 0;
+  const confianca_media = chats?.length
+    ? Math.round(chats.reduce((a: number, c: any) => a + (c.nivel_confianca_ia || 0), 0) / chats.length) + "%"
+    : "—";
+  const sugestoes = chats?.filter((c: any) => c.solucao_sugerida_ia).length || 0;
 
-  const stats = { total, ia_resolvidos, transbordo: total - ia_resolvidos, tempo_medio: "—", taxa_ia: `${taxa_ia}%`, criticos };
+  const stats = {
+    total,
+    ia_resolvidos,
+    transbordo: total - ia_resolvidos,
+    tempo_medio: "—",
+    taxa_ia: `${taxa_ia}%`,
+    criticos,
+    confianca_media,
+    sugestoes,
+  };
 
   return (
     <div className="space-y-6">

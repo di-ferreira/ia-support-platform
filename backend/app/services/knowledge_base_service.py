@@ -15,8 +15,8 @@ class KnowledgeBaseService:
         limit: int = 50,
         categoria: CategoriaConhecimento | None = None,
     ) -> tuple[list[KnowledgeBase], int]:
-        query = select(KnowledgeBase).where(KnowledgeBase.ativo == True).order_by(KnowledgeBase.titulo)
-        count_query = select(KnowledgeBase.id).where(KnowledgeBase.ativo == True)
+        query = select(KnowledgeBase).where(KnowledgeBase.ativo).order_by(KnowledgeBase.titulo)
+        count_query = select(KnowledgeBase.id).where(KnowledgeBase.ativo)
 
         if categoria:
             query = query.where(KnowledgeBase.categoria == categoria)

@@ -2,7 +2,6 @@
 
 from app.ai.openai_service import Message
 
-
 CLASSIFY_SYSTEM = """Você é um especialista em suporte técnico do ERP EMSoft, um sistema para empresas de autopeças.
 
 Sua função é CLASSIFICAR o problema relatado pelo cliente em um dos módulos do ERP.

@@ -3,8 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
-    create_access_token,
-    create_refresh_token,
+    create_tokens,
     decode_token,
     hash_password,
     verify_password,
@@ -31,11 +30,7 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Usuário inativo",
             )
-        return {
-            "access_token": create_access_token({"sub": str(user.id)}),
-            "refresh_token": create_refresh_token({"sub": str(user.id)}),
-            "token_type": "bearer",
-        }
+        return create_tokens(user.id, user.perfil.value)
 
     async def refresh(self, refresh_token: str) -> dict:
         payload = decode_token(refresh_token)
@@ -52,11 +47,7 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado"
             )
-        return {
-            "access_token": create_access_token({"sub": str(user.id)}),
-            "refresh_token": create_refresh_token({"sub": str(user.id)}),
-            "token_type": "bearer",
-        }
+        return create_tokens(user.id, user.perfil.value)
 
     async def alterar_senha(
         self, user: Atendente, senha_atual: str, nova_senha: str

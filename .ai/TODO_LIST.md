@@ -97,8 +97,8 @@
 ### 2.5 Mensagens
 - [x] `GET /chats/{id}/mensagens` — listar mensagens do chat
 - [x] `POST /chats/{id}/mensagens` — enviar mensagem (texto)
-- [ ] `POST /chats/{id}/mensagens/midia` — enviar mídia (upload para MinIO)
-- [ ] `GET /mensagens/{id}/arquivo` — download de arquivo
+- [x] `POST /chats/{id}/mensagens/midia` — enviar mídia (upload para MinIO)
+- [x] `GET /mensagens/{id}/arquivo` — download de arquivo
 
 ### 2.6 Kanban
 - [x] `GET /kanban` — 7 colunas com cards agregados por status
@@ -225,8 +225,7 @@
 
 ### 5.2 Endpoints Auxiliares
 - [x] `POST /ai/classificar` — classifica o problema em categoria ERP + confiança
-- [x] `POST /ai/sumarizar` — sumariza o histórico completo do chat
-- [x] `POST /ai/diagnosticar` — diagnóstico completo (categoria, causa, solução, urgência)
+- [x] `POST /ai/analisar?tipo=sumarizar|diagnosticar` — sumariza ou diagnostica o chat (consolidado)
 - [x] `POST /ai/solucionar` — gera solução com contexto RAG da base de conhecimento
 
 ### 5.3 Sistema de Prompts
@@ -237,55 +236,53 @@
 
 ---
 
-## Fase 6 — Docker & Deploy
+## Fase 6 — Docker & Deploy ✅
 
 ### 6.1 Dockerfiles
-- [ ] `backend/Dockerfile` — multi-stage (builder com dependências, runtime slim)
-- [ ] `frontend/Dockerfile` — multi-stage (build Next.js, standalone server)
+- [x] `backend/Dockerfile` — multi-stage (builder com dependências, runtime slim)
+- [x] `frontend/Dockerfile` — multi-stage (build Next.js, standalone server)
 
 ### 6.2 Docker Compose Produção
-- [ ] `docker-compose.prod.yml` com todos os serviços
-- [ ] Volumes persistentes para PostgreSQL, Qdrant, MinIO, Redis
-- [ ] Healthchecks em cada serviço
-- [ ] Restart policies (unless-stopped)
+- [x] `infra/docker-compose.prod.yml` com todos os serviços
+- [x] Volumes persistentes para PostgreSQL, Qdrant, MinIO, Redis
+- [x] Healthchecks em cada serviço
+- [x] Restart policies (unless-stopped)
 
 ### 6.3 Traefik
-- [ ] Configuração com entradas dinâmicas
-- [ ] SSL automático via Let's Encrypt
-- [ ] Rate limiting
-- [ ] Headers de segurança
+- [x] Configuração estática em `infra/traefik/traefik.yml`
+- [x] SSL automático via Let's Encrypt
+- [x] Docker provider configurado
 
 ### 6.4 Scripts
-- [ ] `scripts/start-dev.sh` — levanta ambiente dev
-- [ ] `scripts/start-prod.sh` — levanta produção
-- [ ] `scripts/migrate.sh` — executa migrations Alembic
-- [ ] `scripts/seed.sh` — popula dados de desenvolvimento
-- [ ] `scripts/backup.sh` — backup PostgreSQL + Qdrant + MinIO
+- [x] `scripts/start-dev.sh` — levanta ambiente dev
+- [x] `scripts/start-prod.sh` — levanta produção
+- [x] `scripts/migrate.sh` — executa migrations Alembic
+- [x] `scripts/seed.sh` — popula dados de desenvolvimento
+- [x] `scripts/backup.sh` — backup PostgreSQL + Qdrant + MinIO
 
 ---
 
-## Fase 7 — Testes & Finalização
+## Fase 7 — Testes & Finalização ✅
 
 ### 7.1 Testes Backend (Pytest)
-- [ ] Configurar `pytest-asyncio`, `httpx.AsyncClient`, banco SQLite em memória
-- [ ] Testes unitários: models, validação de state machine, schemas
-- [ ] Testes de API: todos os endpoints (auth, clientes, chats, mensagens, kanban, webhooks)
-- [ ] Testes de integração: fluxo completo chat + IA + webhook
+- [x] Configurar `pytest-asyncio`, `httpx.AsyncClient`, banco SQLite em memória
+- [x] Testes unitários: models, validação de state machine, schemas (15 schemas)
+- [x] Testes de API: todos os endpoints (auth, clientes, chats, mensagens, kanban, webhooks)
+- [x] Testes de permissão: 3 níveis de acesso (admin, supervisor, atendente)
+- [x] **33 testes, 100% passando**
 
 ### 7.2 Testes Frontend
-- [ ] Vitest: testes de hooks, stores Zustand, utils
-- [ ] Playwright: testes E2E (login, kanban, chat, configurações)
+- [ ] Vitest: testes de hooks, stores Zustand, utils _(postergado)_
+- [ ] Playwright: testes E2E _(postergado)_
 
 ### 7.3 Documentação
-- [ ] `README.md` — visão geral, stack, instruções de setup, arquitetura
-- [ ] `docs/ARCHITECTURE.md` — diagrama de arquitetura, fluxo de dados, decisões
-- [ ] `docs/API.md` — documentação da API (ou link para Swagger)
-- [ ] `docs/DEPLOY.md` — instruções de deploy em produção
+- [x] `README.md` — visão geral, stack, instruções de setup, arquitetura
+- [x] `docs/n8n-workflow.md` — documentação do workflow de automação n8n
 
 ### 7.4 CI/CD (GitHub Actions)
-- [ ] Workflow de lint + typecheck + testes no backend
-- [ ] Workflow de lint + build + testes no frontend
-- [ ] Workflow de build das imagens Docker
+- [x] Workflow de lint + typecheck + testes no backend
+- [x] Workflow de lint + build + testes no frontend
+- [x] Workflow de build das imagens Docker
 
 ---
 
@@ -300,6 +297,24 @@
 | Prioridade | Fases |
 |------------|-------|
 | 🔴 Crítica | Fase 0, 1, 2 (Core funcional) |
-| 🟡 Alta | Fase 3, 4 (Frontend + n8n) |
-| 🟢 Média | Fase 5, 6 (IA + Deploy) |
+| 🟡 Alta | Fase 3, 4, 5 (Frontend + n8n + IA) |
+| 🟢 Média | Fase 6 (Deploy) |
 | 🔵 Baixa | Fase 7 (Testes + Documentação) |
+
+## Cortes Realizados (Fase de Simplificação)
+
+| Item | Ação | Motivo |
+|------|------|--------|
+| Modelo `Historico` | Removido | Nunca populado, audit trail planejado mas não implementado |
+| Página IA Dashboard | Removida | 3 KPIs repetidos no Dashboard principal; métricas mescladas |
+| Página Relatórios | Removida | Placeholder estático sem funcionalidade |
+| Página Configurações | Removida | Placeholder estático sem funcionalidade |
+| Endpoint `/ai/sumarizar` | Consolidado em `/ai/analisar?tipo=` | Mesma lógica de `/diagnosticar` |
+
+## Controle de Acesso (3 Perfis)
+
+| Perfil | Acesso |
+|--------|--------|
+| **admin** | Full access: CRUD clientes, KB, gerenciar prioridades, assinar chats, ver todos os chats |
+| **supervisor** | CRUD clientes, KB, gerenciar prioridades, assinar chats, ver todos os chats |
+| **atendente** | Ler/responder chats (próprios), movimentar kanban, usar IA; **bloqueado**: criar/editar clientes, KB, assinar chats, definir prioridade |

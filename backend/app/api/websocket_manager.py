@@ -1,11 +1,17 @@
-from fastapi import WebSocket
+from fastapi import WebSocket, status
+
+from app.core.security import decode_token
 
 
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[int, list[WebSocket]] = {}
 
-    async def connect(self, chat_id: int, websocket: WebSocket):
+    async def connect(self, chat_id: int, websocket: WebSocket, token: str | None = None):
+        payload = decode_token(token or "")
+        if payload is None:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
         await websocket.accept()
         if chat_id not in self.active_connections:
             self.active_connections[chat_id] = []

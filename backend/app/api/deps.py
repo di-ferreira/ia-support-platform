@@ -1,4 +1,3 @@
-from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -12,17 +11,22 @@ from app.models.atendente import Atendente
 security = HTTPBearer()
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    session: AsyncSession = Depends(get_session),
+async def _get_user_from_token(
+    credentials: HTTPAuthorizationCredentials | None,
+    session: AsyncSession,
 ) -> Atendente:
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token obrigatório"
+        )
     payload = decode_token(credentials.credentials)
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
         )
+    user_id = int(payload.get("sub"))
     result = await session.execute(
-        select(Atendente).where(Atendente.id == int(payload.get("sub")))
+        select(Atendente).where(Atendente.id == user_id)
     )
     user = result.scalar_one_or_none()
     if user is None or not user.ativo:
@@ -30,6 +34,13 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado"
         )
     return user
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    session: AsyncSession = Depends(get_session),
+) -> Atendente:
+    return await _get_user_from_token(credentials, session)
 
 
 def require_perfil(*perfis: str):

@@ -2,7 +2,6 @@ import json
 
 import httpx
 
-from app.core.config import settings
 from app.ai.openai_service import Message
 
 

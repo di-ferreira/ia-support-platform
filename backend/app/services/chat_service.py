@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.atendente import Atendente
 from app.models.chat import Chat, PrioridadeChat, StatusChat
 from app.models.cliente import Cliente
 
@@ -44,10 +45,14 @@ class ChatService:
         status: StatusChat | None = None,
         cliente_id: int | None = None,
         prioridade: PrioridadeChat | None = None,
+        user: Atendente | None = None,
     ) -> tuple[list[Chat], int]:
         query = select(Chat).order_by(Chat.created_at.desc())
         count_query = select(Chat.id)
 
+        if user and user.perfil.value == "atendente":
+            query = query.where(Chat.atendente_id == user.id)
+            count_query = count_query.where(Chat.atendente_id == user.id)
         if status:
             query = query.where(Chat.status == status)
             count_query = count_query.where(Chat.status == status)
@@ -72,7 +77,6 @@ class ChatService:
                 selectinload(Chat.cliente),
                 selectinload(Chat.mensagens),
                 selectinload(Chat.diagnosticos),
-                selectinload(Chat.historico),
             )
         )
         chat = result.scalar_one_or_none()

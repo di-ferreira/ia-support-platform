@@ -20,16 +20,15 @@ class KanbanService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def obter_kanban(self) -> list[dict]:
+    async def obter_kanban(self, user: Atendente | None = None) -> list[dict]:
         result = []
         for status_key, label in COLUNAS:
             status_enum = StatusChat(status_key)
-            stmt = (
-                select(Chat)
-                .where(Chat.status == status_enum)
-                .options(selectinload(Chat.cliente), selectinload(Chat.atendente))
-                .order_by(Chat.prioridade.desc(), Chat.created_at.asc())
-            )
+            stmt = select(Chat).where(Chat.status == status_enum)
+            if user and user.perfil.value == "atendente":
+                stmt = stmt.where(Chat.atendente_id == user.id)
+            stmt = stmt.options(selectinload(Chat.cliente), selectinload(Chat.atendente))
+            stmt = stmt.order_by(Chat.prioridade.desc(), Chat.created_at.asc())
             rows = (await self.session.execute(stmt)).scalars().all()
             cards = []
             for chat in rows:
