@@ -215,24 +215,25 @@
 
 ---
 
-## Fase 5 — Integração LLM (IA Generativa)
+## Fase 5 — Integração LLM (IA Generativa) ✅
 
 ### 5.1 Módulo app/ai/
-- [ ] Serviço `OpenAIService`: wrapper para chat completion + embedding
-- [ ] Serviço `OllamaService`: fallback local
-- [ ] Serviço `AICache`: cache de respostas via Redis (evita reprocessar mensagens iguais)
-- [ ] Fallback automático: tenta OpenAI, se falhar usa Ollama
+- [x] `OpenAIService`: chat completion, chat_json, embed (text-embedding-3-small)
+- [x] `OllamaService`: fallback local (llama3.2, nomic-embed-text)
+- [x] `AICache`: cache via Redis com TTL de 1h (chave SHA256 do prompt + modelo)
+- [x] Fallback automático: se `OPENAI_API_KEY` configurada → OpenAI, senão → Ollama
 
 ### 5.2 Endpoints Auxiliares
-- [ ] `POST /ai/sumarizar` — sumariza conversa de um chat
-- [ ] `POST /ai/diagnosticar` — gera diagnóstico completo
-- [ ] `POST /ai/classificar` — classifica apenas o problema
+- [x] `POST /ai/classificar` — classifica o problema em categoria ERP + confiança
+- [x] `POST /ai/sumarizar` — sumariza o histórico completo do chat
+- [x] `POST /ai/diagnosticar` — diagnóstico completo (categoria, causa, solução, urgência)
+- [x] `POST /ai/solucionar` — gera solução com contexto RAG da base de conhecimento
 
 ### 5.3 Sistema de Prompts
-- [ ] Template para classificação de problema (qual módulo ERP)
-- [ ] Template para sumarização de conversa
-- [ ] Template para geração de solução (com contexto RAG)
-- [ ] Template para diagnóstico técnico
+- [x] Template CLASSIFY_SYSTEM: classificação em 7 categorias ERP com subcategoria
+- [x] Template SUMMARIZE_SYSTEM: resumo com problema, tentativas, situação
+- [x] Template SOLUTION_SYSTEM: solução com contexto RAG + instruções + referência
+- [x] Template DIAGNOSE_SYSTEM: diagnóstico completo com urgência e confiança
 
 ---
 

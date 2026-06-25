@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.router import router as ai_router
 from app.api.routes import (
     auth_router,
     chats_router,
@@ -42,6 +43,7 @@ app.include_router(mensagens_router)
 app.include_router(kanban_router)
 app.include_router(knowledge_base_router)
 app.include_router(webhooks_router)
+app.include_router(ai_router)
 
 
 @app.websocket("/ws/chat/{chat_id}")
