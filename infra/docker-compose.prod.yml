@@ -16,10 +16,13 @@ services:
       dockerfile: Dockerfile
     environment:
       ENVIRONMENT: production
-      DATABASE_URL_PROD: postgresql+asyncpg://emsoft:emsoft@postgres:5432/emsoft
+      DATABASE_URL_PROD: ${DATABASE_URL_PROD}
       REDIS_URL: redis://redis:6379/0
       MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       EVOLUTION_API_URL: http://evolution-api:8080
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.emsoft.app`)"
@@ -72,8 +75,8 @@ services:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
       - minio-data:/data
     restart: unless-stopped
@@ -83,11 +86,31 @@ services:
     environment:
       N8N_PROTOCOL: https
       N8N_HOST: n8n.emsoft.app
+      EVOLUTION_API_URL: http://evolution-api:8080
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.rule=Host(`n8n.emsoft.app`)"
     volumes:
       - n8n-data:/home/node/.n8n
+    restart: unless-stopped
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    environment:
+      SERVER_URL: https://evolution.emsoft.app
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://emsoft:emsoft@postgres:5432/emsoft
+      REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.evolution.rule=Host(`evolution.emsoft.app`)"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
 
 volumes:

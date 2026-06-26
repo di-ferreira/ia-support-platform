@@ -19,30 +19,53 @@ Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSo
 | **Orquestração** | n8n |
 | **LLM** | OpenAI (gpt-4o-mini) / Ollama (fallback local) |
 | **WhatsApp** | Evolution API |
+| **Armazenamento** | MinIO (S3) |
 | **Infra** | Docker, Docker Compose, Traefik |
 
 ---
 
 ## Quick Start
 
+### Pré-requisitos
+
+- Python 3.11+, Node.js 20+, Docker + Docker Compose
+- Copiar e configurar variáveis de ambiente:
+
 ```bash
-# 1. Backend
+cp infra/.env.example infra/.env
+# Editar infra/.env com suas chaves (OpenAI, Evolution API, etc.)
+```
+
+### 1. Infraestrutura (Redis, Qdrant, MinIO, n8n, Evolution API)
+
+```bash
+docker compose -f infra/docker-compose.dev.yml up -d
+```
+
+Tudo em uma única stack: Redis, Qdrant, MinIO, n8n e Evolution API.
+
+### 2. Backend
+
+```bash
 cd backend
-pip install .
+pip install -r requirements.txt
 cp .env.example .env   # configure if needed
 alembic upgrade head
-python scripts/seed.sh
-uvicorn app.main:app --reload
-# → http://localhost:8000/docs
+python3 -m app.scripts.seed
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+# → http://localhost:8001/docs
+```
 
-# 2. Frontend
+> A porta 8000 é usada pelo Portainer. O backend usa 8001 por padrão.
+
+### 3. Frontend
+
+```bash
 cd frontend
 npm install
+echo "NEXT_PUBLIC_API_URL=http://localhost:8001" > .env.local
 npm run dev
 # → http://localhost:3000
-
-# 3. Infra (Redis, Qdrant, MinIO, n8n)
-docker compose -f infra/docker-compose.dev.yml up -d
 ```
 
 ### Credenciais Padrão (dev)
@@ -51,6 +74,19 @@ docker compose -f infra/docker-compose.dev.yml up -d
 |---|---|---|
 | `admin@emsoft.app` | `admin123` | Admin |
 | `suporte@emsoft.app` | `suporte123` | Atendente |
+
+---
+
+## Setup Automático
+
+```bash
+./scripts/setup.sh
+```
+
+Cria venv, instala dependências, aplica migrations, popula seed,
+configura frontend e verifica containers Docker.
+
+---
 
 ---
 
@@ -64,23 +100,25 @@ docker compose -f infra/docker-compose.dev.yml up -d
 │   │   │   ├── routes/      # Endpoints (auth, clientes, chats, etc.)
 │   │   │   └── websocket_manager.py
 │   │   ├── core/            # Config, database, security
-│   │   ├── models/          # SQLAlchemy models (10 tabelas)
+│   │   ├── models/          # SQLAlchemy models (9 tabelas)
 │   │   ├── schemas/         # Pydantic schemas
 │   │   └── services/        # Business logic
 │   ├── alembic/             # Migrations
-│   └── tests/               # Pytest tests
+│   ├── requirements.txt     # Dependências (fonte canônica)
+│   └── tests/               # Pytest (33 testes)
 ├── frontend/
 │   └── src/
-│       ├── app/             # Next.js pages (9 páginas)
+│       ├── app/             # Next.js pages (7 páginas)
 │       ├── components/      # UI components
 │       ├── hooks/           # Custom hooks
 │       └── lib/             # API client, stores
 ├── infra/
-│   ├── docker-compose.yml   # Dev services
-│   ├── docker-compose.prod.yml
+│   ├── .env.example         # Template de variáveis de ambiente
+│   ├── docker-compose.dev.yml   # Dev (Redis, Qdrant, MinIO, n8n, Evolution)
+│   ├── docker-compose.prod.yml  # Prod (+Traefik, PostgreSQL)
 │   ├── traefik/
 │   └── n8n/                 # Workflow export
-├── scripts/                 # Start, migrate, seed, backup
+├── scripts/                 # setup, start-dev, start-prod, migrate, seed, backup
 └── docs/                    # Documentation
 ```
 
@@ -90,8 +128,8 @@ docker compose -f infra/docker-compose.dev.yml up -d
 
 Com o backend rodando, acesse:
 
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
+- **Swagger UI:** http://localhost:8001/docs
+- **ReDoc:** http://localhost:8001/redoc
 
 ### Endpoints
 
@@ -109,8 +147,8 @@ Com o backend rodando, acesse:
 | POST | `/webhooks/mensagem` | Webhook n8n (mensagem) |
 | POST | `/webhooks/chat/diagnostico` | Webhook n8n (diagnóstico IA) |
 | POST | `/ai/classificar` | Classificar problema |
-| POST | `/ai/sumarizar` | Sumarizar conversa |
-| POST | `/ai/diagnosticar` | Diagnóstico completo |
+| POST | `/ai/analisar?tipo=sumarizar\|diagnosticar` | Sumarizar ou diagnosticar |
+| POST | `/ai/solucionar` | Solução com RAG |
 | WS | `/ws/chat/{id}` | WebSocket tempo real |
 
 ---
@@ -163,4 +201,72 @@ python -m pytest tests/ -v
 ./scripts/backup.sh
 ```
 
-Ver `docs/n8n-workflow.md` para configurar o n8n e o RAG.
+## Infraestrutura Docker
+
+### Dev (ambiente local)
+
+```bash
+# Subir todos os serviços
+docker compose -f infra/docker-compose.dev.yml up -d
+
+# Serviços:
+#   Redis      → localhost:6379
+#   Qdrant     → localhost:6333
+#   MinIO      → localhost:9000 (API) / 9001 (Console)
+#   n8n        → localhost:5678
+#   Evolution  → localhost:8080
+
+# Parar tudo
+docker compose -f infra/docker-compose.dev.yml down
+```
+
+### Prod (ambiente production)
+
+```bash
+# Configurar variáveis
+cp infra/.env.example infra/.env
+# Editar infra/.env com SECRET_KEY, EVOLUTION_API_KEY, etc.
+
+# Subir produção
+./scripts/start-prod.sh
+
+# Backup
+./scripts/backup.sh
+```
+
+### Variáveis de Ambiente
+
+Copie `infra/.env.example` para `infra/.env` e ajuste:
+
+| Variável | Default (dev) | Obrigatório |
+|---|---|---|
+| `ENVIRONMENT` | `development` | Sim |
+| `SECRET_KEY` | `dev-secret-key...` | Sim (mude em prod) |
+| `EVOLUTION_API_KEY` | `evolution_dev_key` | Sim (mude em prod) |
+| `OPENAI_API_KEY` | — | Para usar OpenAI |
+| `MINIO_ROOT_USER` | `minioadmin` | Opcional |
+| `MINIO_ROOT_PASSWORD` | `minioadmin` | Opcional |
+
+---
+
+## Fluxo de Mensagens (WhatsApp)
+
+```
+Cliente WhatsApp
+       ↓
+Evolution API (:8080)  ← recebe mensagem
+       ↓
+n8n (:5678)            ← webhook, orquestra fluxo
+       ↓
+Backend API (:8001)    ← salva chat/mensagem
+       ↓
+Qdrant (:6333)         ← busca RAG na base de conhecimento
+       ↓
+LLM (OpenAI/Ollama)    ← gera diagnóstico/solução
+       ↓
+n8n                    ← decide cenário A/B/C
+       ↓
+Evolution API          ← envia resposta ao cliente
+```
+
+Ver `docs/n8n-workflow.md` para detalhes do fluxo.

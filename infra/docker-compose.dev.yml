@@ -19,11 +19,11 @@ services:
   minio:
     image: minio/minio:latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     command: server /data --console-address ":9001"
     volumes:
       - minio-data:/data
@@ -32,14 +32,32 @@ services:
   n8n:
     image: n8nio/n8n:latest
     ports:
-      - "5678:5678"
+      - "${N8N_PORT:-5678}:5678"
     environment:
-      N8N_PORT: 5678
-      N8N_PROTOCOL: http
-      N8N_HOST: localhost
-      WEBHOOK_URL: http://localhost:5678
+      N8N_PORT: ${N8N_PORT:-5678}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_HOST: ${N8N_HOST:-localhost}
+      WEBHOOK_URL: http://${N8N_HOST:-localhost}:${N8N_PORT:-5678}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://evolution-api:8080}
     volumes:
       - n8n-data:/home/node/.n8n
+    restart: unless-stopped
+    depends_on:
+      evolution-api:
+        condition: service_started
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    ports:
+      - "${EVOLUTION_API_PORT:-8080}:8080"
+    environment:
+      SERVER_URL: http://localhost:${EVOLUTION_API_PORT:-8080}
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-evolution_dev_key}
+      REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_started
     restart: unless-stopped
 
 volumes:
