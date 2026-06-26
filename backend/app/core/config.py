@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     app_name: str = "EMSoft Support API"
     debug: bool = True
 
-    database_url: str = "sqlite+aiosqlite:///./dev.db"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     database_url_prod: str | None = None
 
     secret_key: str = "change-me-in-production"
@@ -15,13 +15,13 @@ class Settings(BaseSettings):
 
     redis_url: str = "redis://localhost:6379/0"
 
+    llm_provider: str = "ollama"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
 
-    minio_endpoint: str = "localhost:9000"
-    minio_access_key: str = "minioadmin"
-    minio_secret_key: str = "minioadmin"
-    minio_bucket: str = "emsoft-media"
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2"
+    ollama_embed_model: str = "nomic-embed-text"
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None

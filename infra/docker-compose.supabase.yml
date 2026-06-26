@@ -1,0 +1,165 @@
+# Full Supabase self-hosted stack (Opção A)
+# Use com: docker compose -f infra/docker-compose.prod.yml -f infra/docker-compose.supabase.yml up -d
+# Remove os serviços postgres e minio do docker-compose.prod.yml antes de usar
+
+services:
+  # ── Database ──────────────────────────────────────────────
+  supabase-db:
+    image: supabase/postgres:17.6.1.136
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - supabase-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Meta (metadata API for Studio) ───────────────────────
+  supabase-meta:
+    image: supabase/postgres-meta:v0.96.6
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PG_META_DB_NAME: postgres
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Studio (Admin UI) ────────────────────────────────────
+  studio:
+    image: supabase/studio:2026.06.03-sha-0bca601
+    ports:
+      - "${STUDIO_PORT:-54323}:3000"
+    environment:
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:54323}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+    depends_on:
+      supabase-meta:
+        condition: service_started
+    restart: unless-stopped
+
+  # ── Kong (API Gateway) ───────────────────────────────────
+  kong:
+    image: kong/kong:3.9.1
+    ports:
+      - "${KONG_HTTP_PORT:-8000}:8000"
+      - "${KONG_HTTPS_PORT:-8443}:8443"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+      KONG_DNS_ORDER: LAST, AAAA, A
+      KONG_PLUGINS: request-transformer, cors, key-auth, basic-auth, hmac-auth, jwt, acl, ip-restriction
+      KONG_NGINX_WORKER_PROCESSES: 1
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    volumes:
+      - ./supabase/kong.yml:/etc/kong/kong.yml:ro
+    restart: unless-stopped
+
+  # ── Auth (GoTrue) ────────────────────────────────────────
+  auth:
+    image: supabase/gotrue:v2.189.0
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:3000}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@supabase-db:5432/postgres
+      GOTRUE_DB_MAX_OPEN_CONNS: 100
+      GOTRUE_MAILER_AUTOCONFIRM: true
+      GOTRUE_LOG_LEVEL: info
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── PostgREST (REST API) ─────────────────────────────────
+  rest:
+    image: postgrest/postgrest:v14.12
+    environment:
+      PGRST_DB_URI: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@supabase-db:5432/postgres
+      PGRST_DB_SCHEMA: public,storage
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_AGGREGATES_ENABLED: true
+      PGRST_DB_EXTRA_SEARCH_PATH: public,storage,extensions
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Realtime ─────────────────────────────────────────────
+  realtime:
+    image: supabase/realtime:v2.102.3
+    ports:
+      - "${REALTIME_PORT:-4000}:4000"
+    environment:
+      DB_HOST: supabase-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: ${REALTIME_ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      REPLICATION_MODE: RLS
+      REPLICATION_POLL_INTERVAL: 100
+      SECURE_CHANNELS: "true"
+      SLOT_NAME: supabase_realtime
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Storage API ──────────────────────────────────────────
+  storage-api:
+    image: supabase/storage-api:v1.60.4
+    ports:
+      - "${STORAGE_PORT:-5000}:5000"
+    environment:
+      ANON_KEY: ${SUPABASE_ANON_KEY}
+      SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+      TENANT_ID: self-hosted
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@supabase-db:5432/postgres
+      PGREF_URL: http://rest:3000
+      REGION: self-hosted
+      GLOBAL_S3_BUCKET: ${STORAGE_BUCKET:-emsoft-media}
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+    volumes:
+      - supabase-storage-data:/var/lib/storage
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Image Proxy ──────────────────────────────────────────
+  imgproxy:
+    image: darthsim/imgproxy:v3.30.1
+    environment:
+      IMGPROXY_BIND: ":8080"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+      IMGPROXY_ENABLE_WEBP_DETECTION: "true"
+    restart: unless-stopped
+
+volumes:
+  supabase-pg-data:
+  supabase-storage-data:

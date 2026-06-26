@@ -25,19 +25,13 @@ if [ -d "docker-data/qdrant" ]; then
   echo "  -> $BACKUP_DIR/qdrant_$DATE.tar.gz"
 fi
 
-# MinIO
-if [ -d "docker-data/minio" ]; then
-  echo "Backing up MinIO..."
-  tar -czf "$BACKUP_DIR/minio_$DATE.tar.gz" -C docker-data minio
-  echo "  -> $BACKUP_DIR/minio_$DATE.tar.gz"
-fi
-
-# SQLite (dev)
-if [ -f "backend/dev.db" ]; then
-  echo "Backing up SQLite (dev)..."
-  cp backend/dev.db "$BACKUP_DIR/dev_$DATE.db"
-  gzip "$BACKUP_DIR/dev_$DATE.db"
-  echo "  -> $BACKUP_DIR/dev_$DATE.db.gz"
+# Supabase PostgreSQL (dev local)
+if command -v supabase &>/dev/null && supabase status &>/dev/null; then
+  echo "Backing up Supabase PostgreSQL..."
+  supabase db dump -f "$BACKUP_DIR/supabase_$DATE.sql" 2>/dev/null || \
+    pg_dump -h localhost -p 54322 -U postgres postgres > "$BACKUP_DIR/supabase_$DATE.sql"
+  gzip "$BACKUP_DIR/supabase_$DATE.sql"
+  echo "  -> $BACKUP_DIR/supabase_$DATE.sql.gz"
 fi
 
 echo "=== Backup complete: $BACKUP_DIR ==="

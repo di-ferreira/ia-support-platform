@@ -23,6 +23,8 @@ router = APIRouter(prefix="/ai", tags=["IA"])
 
 
 def _get_llm():
+    if settings.llm_provider == "ollama":
+        return OllamaService()
     if settings.openai_api_key:
         return OpenAIService()
     return OllamaService()

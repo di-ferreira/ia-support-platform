@@ -11,15 +11,15 @@ Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSo
 |---|---|
 | **Backend** | Python 3.11+, FastAPI, SQLAlchemy 2.0 (async) |
 | **Frontend** | Next.js 15, Tailwind CSS 4, React Query, Zustand |
-| **Banco Dev** | SQLite (via aiosqlite) |
-| **Banco Prod** | PostgreSQL (via asyncpg) |
+| **Banco Dev** | PostgreSQL (Supabase local) |
+| **Banco Prod** | PostgreSQL (Supabase Cloud) |
 | **Migrations** | Alembic |
 | **Cache** | Redis |
 | **Vetores** | Qdrant |
 | **Orquestração** | n8n |
 | **LLM** | OpenAI (gpt-4o-mini) / Ollama (fallback local) |
 | **WhatsApp** | Evolution API |
-| **Armazenamento** | MinIO (S3) |
+| **Armazenamento** | Supabase Storage |
 | **Infra** | Docker, Docker Compose, Traefik |
 
 ---
@@ -36,13 +36,21 @@ cp infra/.env.example infra/.env
 # Editar infra/.env com suas chaves (OpenAI, Evolution API, etc.)
 ```
 
-### 1. Infraestrutura (Redis, Qdrant, MinIO, n8n, Evolution API)
+### 1. Infraestrutura (PostgreSQL, Redis, Qdrant, n8n, Evolution API, Studio)
 
 ```bash
 docker compose -f infra/docker-compose.dev.yml up -d
 ```
 
-Tudo em uma única stack: Redis, Qdrant, MinIO, n8n e Evolution API.
+Serviços incluídos:
+| Serviço | Porta |
+|---|---|
+| PostgreSQL (Supabase) | `5432` |
+| Redis | `6379` |
+| Qdrant | `6333` |
+| n8n | `5678` |
+| Evolution API | `8080` |
+| Supabase Studio (admin DB) | `54323` |
 
 ### 2. Backend
 
@@ -113,11 +121,13 @@ configura frontend e verifica containers Docker.
 │       ├── hooks/           # Custom hooks
 │       └── lib/             # API client, stores
 ├── infra/
-│   ├── .env.example         # Template de variáveis de ambiente
-│   ├── docker-compose.dev.yml   # Dev (Redis, Qdrant, MinIO, n8n, Evolution)
+│   ├── .env.example             # Template de variáveis de ambiente
+│   ├── docker-compose.dev.yml   # Dev (Redis, Qdrant, n8n, Evolution, Supabase PG + Studio)
 │   ├── docker-compose.prod.yml  # Prod (+Traefik, PostgreSQL)
+│   ├── docker-compose.supabase.yml  # Prod (+ stack completo Supabase self-hosted)
+│   ├── supabase/kong.yml        # Config do Kong API Gateway
 │   ├── traefik/
-│   └── n8n/                 # Workflow export
+│   └── n8n/                     # Workflow export
 ├── scripts/                 # setup, start-dev, start-prod, migrate, seed, backup
 └── docs/                    # Documentation
 ```
@@ -193,28 +203,35 @@ python -m pytest tests/ -v
 
 ## Deploy
 
+### Produção (com Supabase self-hosted)
+
 ```bash
-# Produção
-./scripts/start-prod.sh
+# Subir stack completa (aplicação + Supabase)
+docker compose -f infra/docker-compose.prod.yml -f infra/docker-compose.supabase.yml up -d
 
 # Backup
 ./scripts/backup.sh
 ```
+
+> O `docker-compose.supabase.yml` adiciona o stack completo do Supabase:
+> Kong (API Gateway), Auth (GoTrue), PostgREST, Realtime, Storage API, Studio e Image Proxy.
+> Remove os serviços `postgres` e `minio` do `docker-compose.prod.yml` ao usar este stack.
 
 ## Infraestrutura Docker
 
 ### Dev (ambiente local)
 
 ```bash
-# Subir todos os serviços
+# Subir tudo
 docker compose -f infra/docker-compose.dev.yml up -d
 
 # Serviços:
-#   Redis      → localhost:6379
-#   Qdrant     → localhost:6333
-#   MinIO      → localhost:9000 (API) / 9001 (Console)
-#   n8n        → localhost:5678
-#   Evolution  → localhost:8080
+#   PostgreSQL (Supabase) → localhost:5432
+#   Supabase Studio       → http://localhost:54323
+#   Redis                 → localhost:6379
+#   Qdrant                → localhost:6333
+#   n8n                   → localhost:5678
+#   Evolution             → localhost:8080
 
 # Parar tudo
 docker compose -f infra/docker-compose.dev.yml down
@@ -244,8 +261,6 @@ Copie `infra/.env.example` para `infra/.env` e ajuste:
 | `SECRET_KEY` | `dev-secret-key...` | Sim (mude em prod) |
 | `EVOLUTION_API_KEY` | `evolution_dev_key` | Sim (mude em prod) |
 | `OPENAI_API_KEY` | — | Para usar OpenAI |
-| `MINIO_ROOT_USER` | `minioadmin` | Opcional |
-| `MINIO_ROOT_PASSWORD` | `minioadmin` | Opcional |
 
 ---
 
