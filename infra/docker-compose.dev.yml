@@ -58,6 +58,7 @@ services:
       PG_META_DB_USER: postgres
       PG_META_DB_PASSWORD: postgres
       PG_META_DB_NAME: postgres
+      CRYPTO_KEY: SAMPLE_KEY
     depends_on:
       supabase-db:
         condition: service_healthy
@@ -131,6 +132,9 @@ services:
       SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:54323}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+      POSTGRES_HOST: supabase-db
+      POSTGRES_PASSWORD: postgres
+      PG_META_CRYPTO_KEY: SAMPLE_KEY
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)}).catch(() => process.exit(1))\""]
       interval: 10s
