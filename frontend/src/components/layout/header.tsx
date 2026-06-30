@@ -1,14 +1,26 @@
 "use client";
 
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { Bell } from "lucide-react";
+import { useSidebarStore } from "@/lib/stores/sidebar-store";
+import { Bell, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export function Header() {
   const { user } = useAuthStore();
+  const { collapsed, toggle } = useSidebarStore();
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-      <div />
+      <button
+        onClick={toggle}
+        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+        title={collapsed ? "Expandir menu" : "Recolher menu"}
+      >
+        {collapsed ? (
+          <PanelLeftOpen className="h-5 w-5" />
+        ) : (
+          <PanelLeftClose className="h-5 w-5" />
+        )}
+      </button>
       <div className="flex items-center gap-4">
         <button className="relative rounded-full p-2 hover:bg-gray-100">
           <Bell className="h-5 w-5 text-gray-600" />
