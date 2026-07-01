@@ -21,7 +21,7 @@ export function Header() {
   });
 
   const whatsappConnected =
-    whatsappStatus?.state === "open" || whatsappStatus?.connected === true;
+    whatsappStatus?.instance?.state === "open" || whatsappStatus?.connected === true;
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">

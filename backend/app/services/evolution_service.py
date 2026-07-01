@@ -23,10 +23,15 @@ class EvolutionService:
             return response.json()
 
     async def criar_instancia(self, instance_name: str = "emsoft-support") -> dict:
-        return await self._request(
-            "POST", "/instance/create",
-            json={"instanceName": instance_name, "integration": "WHATSAPP-BAILEYS"},
-        )
+        try:
+            return await self._request(
+                "POST", "/instance/create",
+                json={"instanceName": instance_name, "integration": "WHATSAPP-BAILEYS"},
+            )
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 403:
+                return {"instance": {"instanceName": instance_name}, "hash": None}
+            raise
 
     async def obter_qrcode(self, instance_name: str) -> dict:
         return await self._request(

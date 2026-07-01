@@ -33,7 +33,7 @@ export default function ConfiguracoesPage() {
   });
 
   const connected =
-    statusData?.state === "open" || statusData?.connected === true;
+    statusData?.instance?.state === "open" || statusData?.connected === true;
 
   const createInstance = useMutation({
     mutationFn: () =>
@@ -103,7 +103,7 @@ export default function ConfiguracoesPage() {
               <div className="text-sm text-gray-600 space-y-1">
                 <p>
                   <span className="font-medium">Estado:</span>{" "}
-                  {statusData.state || statusData.status || "desconhecido"}
+                  {statusData.instance?.state || statusData.status || "desconhecido"}
                 </p>
               </div>
             )}
