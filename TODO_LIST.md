@@ -122,12 +122,13 @@
 - [x] **5.2** Adicionar indicador de status no Header (bolinha verde/vermelha)
 - [x] **5.3** Adicionar link "Configurações" na Sidebar (ícone Settings)
 
-#### Fase 6 — Base de Conhecimento
+#### Fase 6 — Base de Conhecimento ✅
 
-- [ ] **6.1** Popular artigos na base de conhecimento via API
+- [x] **6.1** Popular artigos na base de conhecimento via API
       - Criar artigos para categorias: fiscal, estoque, compras, vendas, financeiro
       - Mínimo 3-5 artigos por categoria para RAG funcionar
-- [ ] **6.2** Opcional: script de ingestão de documentos em lote
+- [x] **6.2** Script `scripts/seed_knowledge_base.py` com 20+ artigos em lote
+      - Executar: `python scripts/seed_knowledge_base.py` (idempotente)
 
 ---
 
