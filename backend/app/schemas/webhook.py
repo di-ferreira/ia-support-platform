@@ -30,6 +30,15 @@ class WebhookDiagnostico(BaseModel):
     tokens_usados: int | None = None
 
 
+class WebhookClienteUpdate(BaseModel):
+    nome: str | None = None
+    documento: str | None = None
+    email: str | None = None
+    telefone: str | None = None
+    endereco: str | None = None
+    versao_erp: str | None = None
+
+
 class WebhookContexto(BaseModel):
     chat_id: int
     status: StatusChat

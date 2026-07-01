@@ -17,6 +17,9 @@ class WebhookService:
         whatsapp = data.get("whatsapp_number")
         chat_id = data.get("chat_id")
 
+        if whatsapp and "@" in whatsapp:
+            whatsapp = whatsapp.split("@")[0]
+
         if not chat_id:
             result = await self.session.execute(
                 select(Chat).where(Chat.whatsapp_number == whatsapp)
@@ -28,10 +31,13 @@ class WebhookService:
                 )
                 cliente = result.scalar_one_or_none()
                 if not cliente:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Cliente não encontrado para este WhatsApp",
+                    cliente = Cliente(
+                        nome=f"Novo {whatsapp[-8:]}",
+                        documento=whatsapp,
+                        telefone=whatsapp,
                     )
+                    self.session.add(cliente)
+                    await self.session.flush()
                 chat = Chat(
                     cliente_id=cliente.id,
                     whatsapp_number=whatsapp,
@@ -66,6 +72,29 @@ class WebhookService:
         await self.session.commit()
         await self.session.refresh(chat)
         return chat
+
+    async def atualizar_cliente(self, chat_id: int, data: dict) -> Cliente:
+        result = await self.session.execute(
+            select(Chat).where(Chat.id == chat_id).options(selectinload(Chat.cliente))
+        )
+        chat = result.scalar_one_or_none()
+        if not chat:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
+            )
+        cliente = chat.cliente
+        if not cliente:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cliente não encontrado para este chat",
+            )
+        for field in ("nome", "documento", "email", "telefone", "endereco", "versao_erp"):
+            value = data.get(field)
+            if value is not None:
+                setattr(cliente, field, value)
+        await self.session.commit()
+        await self.session.refresh(cliente)
+        return cliente
 
     async def salvar_diagnostico(self, data: dict) -> IADiagnostico:
         chat_id = data.get("chat_id")

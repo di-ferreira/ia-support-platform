@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.websocket_manager import manager
 from app.core.database import get_session
 from app.schemas.webhook import (
+    WebhookClienteUpdate,
     WebhookContexto,
     WebhookDiagnostico,
     WebhookMensagem,
@@ -54,6 +55,16 @@ async def webhook_diagnostico(
         {"chat_id": body.chat_id, "diagnostico_id": diagnostico.id},
     )
     return diagnostico
+
+
+@router.patch("/cliente/{chat_id}")
+async def webhook_atualizar_cliente(
+    chat_id: int,
+    body: WebhookClienteUpdate,
+    session: AsyncSession = Depends(get_session),
+):
+    service = WebhookService(session)
+    return await service.atualizar_cliente(chat_id, body.model_dump(exclude_none=True))
 
 
 @router.get("/chat/{chat_id}/contexto", response_model=WebhookContexto)
