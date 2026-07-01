@@ -47,9 +47,16 @@ class WebhookService:
                 await self.session.flush()
             chat_id = chat.id
 
+        remetente_str = data.get("remetente", "cliente")
+        remetente = (
+            RemetenteMensagem(remetente_str)
+            if remetente_str in tuple(e.value for e in RemetenteMensagem)
+            else RemetenteMensagem.cliente
+        )
+
         mensagem = Mensagem(
             chat_id=chat_id,
-            remetente=RemetenteMensagem.cliente,
+            remetente=remetente,
             tipo=data.get("tipo", "texto"),
             conteudo=data.get("conteudo"),
             url_arquivo=data.get("url_arquivo"),

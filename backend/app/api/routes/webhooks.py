@@ -17,9 +17,16 @@ router = APIRouter(prefix="/webhooks", tags=["Webhooks (n8n)"])
 
 def _normalizar_payload(body: dict) -> dict:
     whatsapp = body.get("whatsapp_number")
-    conteudo = body.get("conteudo")
+    remetente = body.get("remetente")
+
     if whatsapp:
-        return body
+        result = dict(body)
+        if "chat_id" in result:
+            try:
+                result["chat_id"] = int(result["chat_id"])
+            except (ValueError, TypeError):
+                del result["chat_id"]
+        return result
 
     data = body.get("data") or {}
     key = data.get("key") or {}
@@ -32,7 +39,10 @@ def _normalizar_payload(body: dict) -> dict:
             or (message.get("extendedTextMessage") or {}).get("text")
             or ""
         )
-        return {"whatsapp_number": remote_jid, "conteudo": content}
+        result = {"whatsapp_number": remote_jid, "conteudo": content}
+        if remetente:
+            result["remetente"] = remetente
+        return result
 
     return body
 

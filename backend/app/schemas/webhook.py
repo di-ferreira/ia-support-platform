@@ -9,6 +9,7 @@ class WebhookMensagem(BaseModel):
     chat_id: int | None = None
     whatsapp_number: str
     cliente_id: int | None = None
+    remetente: str | None = None
     conteudo: str | None = None
     tipo: TipoMensagem = TipoMensagem.texto
     url_arquivo: str | None = None
