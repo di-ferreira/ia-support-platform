@@ -59,6 +59,11 @@ async def websocket_chat(websocket: WebSocket, chat_id: int, token: str | None =
         manager.disconnect(chat_id, websocket)
 
 
+@app.get("/settings/ia-name")
+async def get_ia_name():
+    return {"name": settings.ia_name}
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}

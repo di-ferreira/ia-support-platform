@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/lib/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Send, Bot, User, Loader2 } from "lucide-react";
@@ -10,10 +11,18 @@ import { useChatSocket } from "@/hooks/use-chat-socket";
 
 export default function AtendimentoPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [chatAtivo, setChatAtivo] = useState<number | null>(null);
   const [novaMsg, setNovaMsg] = useState("");
 
   useChatSocket(chatAtivo);
+
+  const { data: iaSettings } = useQuery({
+    queryKey: ["settings", "ia-name"],
+    queryFn: () => api.get<{ name: string }>("/settings/ia-name"),
+    staleTime: 600000,
+  });
+  const iaName = iaSettings?.name || "EMSoft IA";
 
   const { data: chats } = useQuery({
     queryKey: ["chats"],
@@ -125,14 +134,23 @@ export default function AtendimentoPage() {
                     }`}
                   >
                     <div className="flex items-center gap-1 mb-1">
-                      {msg.remetente === "ia" ? (
-                        <Bot className="h-3 w-3" />
-                      ) : msg.remetente === "atendente" ? (
-                        <User className="h-3 w-3" />
-                      ) : null}
-                      <span className="text-[10px] opacity-70 capitalize">{msg.remetente}</span>
+                      {msg.remetente === "ia" ? <Bot className="h-3 w-3" /> : null}
+                      {msg.remetente === "atendente" ? <User className="h-3 w-3" /> : null}
+                      <span className="text-[10px] opacity-70">
+                        {msg.remetente === "atendente"
+                          ? user?.nome || "Atendente"
+                          : msg.remetente === "ia"
+                          ? iaName
+                          : chatDetail?.cliente_nome || "Cliente"}
+                      </span>
                     </div>
                     <p>{msg.conteudo}</p>
+                    <span className="text-[10px] opacity-50 block mt-1">
+                      {new Date(msg.created_at).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
                   </div>
                 </div>
               ))}

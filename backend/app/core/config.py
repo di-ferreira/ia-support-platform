@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2"
     ollama_embed_model: str = "nomic-embed-text"
 
+    ia_name: str = "EMSoft IA"
+
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None
 
