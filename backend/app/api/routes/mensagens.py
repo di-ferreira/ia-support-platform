@@ -50,7 +50,7 @@ async def enviar_mensagem(
                 await evolution.enviar_texto(
                     instance_name="emsoft-support",
                     number=chat.whatsapp_number,
-                    text=f"*{user.nome}:* {body.conteudo}",
+                    text=f"{user.nome}:\n{body.conteudo}",
                 )
             except Exception as e:
                 raise HTTPException(
