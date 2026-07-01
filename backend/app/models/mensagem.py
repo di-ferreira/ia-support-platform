@@ -35,7 +35,7 @@ class Mensagem(Base):
     conteudo: Mapped[str | None] = mapped_column(Text)
     url_arquivo: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), index=True
+        DateTime(timezone=True), server_default=func.now(), index=True
     )
 
     chat: Mapped["Chat"] = relationship(back_populates="mensagens")

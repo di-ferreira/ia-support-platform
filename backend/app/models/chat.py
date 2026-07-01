@@ -47,11 +47,11 @@ class Chat(Base):
     necessita_humano: Mapped[bool | None] = mapped_column(Boolean)
 
     whatsapp_number: Mapped[str | None] = mapped_column(String(20))
-    ultima_mensagem_em: Mapped[datetime | None] = mapped_column(DateTime)
+    ultima_mensagem_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     cliente: Mapped["Cliente"] = relationship(back_populates="chats")

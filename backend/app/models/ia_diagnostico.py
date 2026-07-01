@@ -25,6 +25,6 @@ class IADiagnostico(Base):
     confianca: Mapped[float | None] = mapped_column(Float)
     modelo_usado: Mapped[str | None] = mapped_column(String(100))
     tokens_usados: Mapped[int | None] = mapped_column(Integer)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     chat: Mapped["Chat"] = relationship(back_populates="diagnosticos")

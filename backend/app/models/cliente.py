@@ -16,9 +16,9 @@ class Cliente(Base):
     telefone: Mapped[str | None] = mapped_column(String(20))
     endereco: Mapped[str | None] = mapped_column(Text)
     versao_erp: Mapped[str | None] = mapped_column(String(50))
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     lojas: Mapped[list["Loja"]] = relationship(back_populates="cliente", cascade="all, delete-orphan")
@@ -33,6 +33,6 @@ class Loja(Base):
     nome: Mapped[str] = mapped_column(String(255))
     documento: Mapped[str | None] = mapped_column(String(20))
     endereco: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     cliente: Mapped["Cliente"] = relationship(back_populates="lojas")
