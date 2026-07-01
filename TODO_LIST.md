@@ -13,7 +13,6 @@
 | 7 | Qdrant + RAG Semântico | ✅ |
 | 8 | Workflow n8n Completo | ✅ |
 | 9 | Gerenciamento de Usuários | ✅ |
-| 10 | Enviar WhatsApp pelo Sistema | ✅ |
 
 ---
 
@@ -88,17 +87,6 @@
 - [x] Supervisor cria apenas perfil `atendente`; Admin pode todos os perfis
 - [x] Frontend `/usuarios` — tabela + modal criar/editar
 - [x] Sidebar: link Usuários visível para admin e supervisor
-
-## Fase 10 — Enviar WhatsApp pelo Sistema ✅
-
-- [x] `POST /chats/enviar-whatsapp` — enviar para qualquer número
-  - Cria Cliente se não existir
-  - Cria Chat se não existir
-  - Salva mensagem (remetente=atendente)
-  - Envia via Evolution API
-  - Retorna `chat_id` para navegação
-- [x] Frontend: botão "Nova Conversa" na janela de chats
-- [x] Modal com número + mensagem
 
 ## Próximas Melhorias (backlog)
 
