@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
 
     redis_url: str = "redis://localhost:6379/0"
+    qdrant_url: str = "http://localhost:6333"
 
     llm_provider: str = "ollama"
     openai_api_key: str | None = None

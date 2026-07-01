@@ -17,7 +17,8 @@ from app.core.config import settings
 from app.core.database import get_session
 from app.models.atendente import Atendente
 from app.models.chat import Chat
-from app.models.knowledge_base import KnowledgeBase
+from app.models.mensagem import Mensagem
+from app.services.qdrant_service import search_similar
 
 router = APIRouter(prefix="/ai", tags=["IA"])
 
@@ -94,28 +95,40 @@ async def solucionar(
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado")
 
-    from app.models.mensagem import Mensagem
     msgs = await session.execute(
         select(Mensagem)
         .where(Mensagem.chat_id == chat_id)
         .order_by(Mensagem.created_at.asc())
     )
-    ultima_msg = msgs.scalars().all()[-1] if msgs.scalars().all() else None
+    todas = msgs.scalars().all()
+    ultima_msg = todas[-1] if todas else None
     mensagem_cliente = ultima_msg.conteudo if ultima_msg else ""
 
-    kb = await session.execute(
-        select(KnowledgeBase).where(KnowledgeBase.ativo).limit(5)
-    )
-    rag_context = "\n\n".join(
-        f"Título: {a.titulo}\nConteúdo: {a.conteudo or '(sem conteúdo)'}"
-        for a in kb.scalars().all()
+    historico = "\n".join(
+        f"[{m.remetente.value}] {m.conteudo or '(mídia)'}" for m in todas
     )
 
     llm = _get_llm()
+
+    rag_context = ""
+    if mensagem_cliente:
+        try:
+            embedding = await llm.embed(mensagem_cliente)
+            similar = await search_similar(embedding, limit=5)
+            if similar:
+                rag_context = "\n\n".join(
+                    f"Título: {a['titulo']}\nConteúdo: {a['conteudo']}"
+                    for a in similar
+                )
+        except Exception:
+            rag_context = ""
+
+    context = rag_context or "Nenhum artigo relevante encontrado na base de conhecimento."
     messages = build_messages(
         SOLUTION_SYSTEM,
         mensagem_cliente,
-        rag_context=rag_context or "Nenhum artigo encontrado na base de conhecimento.",
+        rag_context=context,
         mensagem_cliente=mensagem_cliente,
+        historico=historico,
     )
     return await llm.chat_json(messages)

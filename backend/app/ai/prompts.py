@@ -32,10 +32,13 @@ Responda APENAS com um JSON:
 
 SOLUTION_SYSTEM = """Você é um especialista em suporte técnico do ERP EMSoft para autopeças.
 
-Com base no contexto da base de conhecimento abaixo, gere uma solução para o problema do cliente.
+Com base no contexto da base de conhecimento e no histórico da conversa, gere uma solução para o problema do cliente.
 
 Contexto RAG:
 {rag_context}
+
+Histórico da conversa:
+{historico}
 
 Mensagem do cliente: {mensagem_cliente}
 
