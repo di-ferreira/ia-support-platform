@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useSidebarStore } from "@/lib/stores/sidebar-store";
 import { Bell, PanelLeftClose, PanelLeftOpen } from "lucide-react";
@@ -7,6 +9,19 @@ import { Bell, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 export function Header() {
   const { user } = useAuthStore();
   const { collapsed, toggle } = useSidebarStore();
+
+  const { data: whatsappStatus } = useQuery({
+    queryKey: ["evolution-status", "emsoft-support"],
+    queryFn: () =>
+      api
+        .get<any>("/evolution/instance/status/emsoft-support")
+        .catch(() => ({ connected: false })),
+    retry: false,
+    refetchInterval: 30000,
+  });
+
+  const whatsappConnected =
+    whatsappStatus?.state === "open" || whatsappStatus?.connected === true;
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
@@ -22,6 +37,20 @@ export function Header() {
         )}
       </button>
       <div className="flex items-center gap-4">
+        {/* WhatsApp Status */}
+        <div
+          className="flex items-center gap-1.5 text-xs"
+          title={whatsappConnected ? "WhatsApp Conectado" : "WhatsApp Desconectado"}
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              whatsappConnected ? "bg-green-500" : "bg-red-400"
+            }`}
+          />
+          <span className="text-gray-400 hidden sm:inline">
+            {whatsappConnected ? "WhatsApp" : "Desconectado"}
+          </span>
+        </div>
         <button className="relative rounded-full p-2 hover:bg-gray-100">
           <Bell className="h-5 w-5 text-gray-600" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent-500" />

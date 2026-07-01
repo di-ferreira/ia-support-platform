@@ -111,14 +111,16 @@
       - Webhooks (`mensagem`, `status`, `diagnostico`) agora broadcast via WS
       - Rota de mensagens do atendente também broadcast
 
-#### Fase 5 — Frontend (Configuração WhatsApp)
+#### Fase 5 — Frontend (Configuração WhatsApp) ✅
 
-- [ ] **5.1** Criar página `/configuracoes/whatsapp`
+- [x] **5.1** Criar página `/configuracoes`
       - Botão "Criar Instância"
       - Exibir QR code (imagem)
       - Status da conexão (conectado/desconectado/escanear)
       - Botão "Desconectar"
-- [ ] **5.2** Adicionar indicador de status no Header (bolinha verde/vermelha)
+      - Botão "Configurar Webhook" (aponta para n8n)
+- [x] **5.2** Adicionar indicador de status no Header (bolinha verde/vermelha)
+- [x] **5.3** Adicionar link "Configurações" na Sidebar (ícone Settings)
 
 #### Fase 6 — Base de Conhecimento
 
