@@ -28,7 +28,7 @@ class InstanceStatusResponse(BaseModel):
 
 class WebhookConfig(BaseModel):
     webhookUrl: str
-    events: list[str] = ["messages.upsert"]
+    events: list[str] = ["MESSAGES_UPSERT"]
 
 
 class SendTextRequest(BaseModel):

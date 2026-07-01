@@ -40,7 +40,7 @@ async def obter_qrcode(
     service: EvolutionService = Depends(get_evolution_service),
 ):
     try:
-        return await service.obter_qrcode_base64(instance_name)
+        return await service.obter_qrcode(instance_name)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

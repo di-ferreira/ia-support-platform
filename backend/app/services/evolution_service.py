@@ -25,7 +25,7 @@ class EvolutionService:
     async def criar_instancia(self, instance_name: str = "emsoft-support") -> dict:
         return await self._request(
             "POST", "/instance/create",
-            json={"instanceName": instance_name},
+            json={"instanceName": instance_name, "integration": "WHATSAPP-BAILEYS"},
         )
 
     async def obter_qrcode(self, instance_name: str) -> dict:
@@ -48,10 +48,10 @@ class EvolutionService:
         events: list[str] | None = None,
     ) -> dict:
         if events is None:
-            events = ["messages.upsert"]
+            events = ["MESSAGES_UPSERT"]
         return await self._request(
             "POST", f"/webhook/set/{instance_name}",
-            json={"webhookUrl": webhook_url, "events": events},
+            json={"webhook": {"url": webhook_url, "enabled": True, "events": events}},
         )
 
     async def desconectar(self, instance_name: str) -> dict:
