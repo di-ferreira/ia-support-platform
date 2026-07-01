@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.websocket_manager import manager
@@ -15,13 +15,38 @@ from app.services.webhook_service import WebhookService
 router = APIRouter(prefix="/webhooks", tags=["Webhooks (n8n)"])
 
 
+def _normalizar_payload(body: dict) -> dict:
+    whatsapp = body.get("whatsapp_number")
+    conteudo = body.get("conteudo")
+    if whatsapp:
+        return body
+
+    data = body.get("data") or {}
+    key = data.get("key") or {}
+    message = data.get("message") or {}
+
+    remote_jid = key.get("remoteJid", "")
+    if remote_jid:
+        content = (
+            message.get("conversation")
+            or (message.get("extendedTextMessage") or {}).get("text")
+            or ""
+        )
+        return {"whatsapp_number": remote_jid, "conteudo": content}
+
+    return body
+
+
 @router.post("/mensagem", status_code=201)
 async def webhook_mensagem(
-    body: WebhookMensagem,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ):
+    body = await request.json()
+    payload = _normalizar_payload(body)
+    validated = WebhookMensagem(**payload)
     service = WebhookService(session)
-    mensagem = await service.receber_mensagem(body.model_dump())
+    mensagem = await service.receber_mensagem(validated.model_dump())
     await manager.send_event(
         mensagem.chat_id, "nova_mensagem",
         {"chat_id": mensagem.chat_id, "mensagem_id": mensagem.id},
