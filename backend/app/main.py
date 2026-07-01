@@ -8,6 +8,7 @@ from app.api.routes import (
     auth_router,
     chats_router,
     clientes_router,
+    dashboard_router,
     evolution_router,
     kanban_router,
     knowledge_base_router,
@@ -43,6 +44,7 @@ app.include_router(auth_router)
 app.include_router(clientes_router)
 app.include_router(chats_router)
 app.include_router(mensagens_router)
+app.include_router(dashboard_router)
 app.include_router(kanban_router)
 app.include_router(knowledge_base_router)
 app.include_router(evolution_router)

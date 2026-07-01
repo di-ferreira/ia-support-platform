@@ -4,49 +4,77 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Bot, Clock, TrendingUp, AlertTriangle, Users, Brain } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from "recharts";
+import {
+  MessageSquare, Bot, Users, Clock, TrendingUp, AlertTriangle, Brain,
+} from "lucide-react";
 
-const kpis = [
-  { label: "Total de Chamados", key: "total", icon: MessageSquare, color: "text-blue-600" },
-  { label: "Resolvidos por IA", key: "ia_resolvidos", icon: Bot, color: "text-green-600" },
-  { label: "Transbordo Humano", key: "transbordo", icon: Users, color: "text-orange-600" },
-  { label: "Tempo Médio", key: "tempo_medio", icon: Clock, color: "text-purple-600" },
-  { label: "Taxa de Resolução IA", key: "taxa_ia", icon: TrendingUp, color: "text-primary-600" },
-  { label: "Críticos", key: "criticos", icon: AlertTriangle, color: "text-red-600" },
-  { label: "Confiança Média IA", key: "confianca_media", icon: Brain, color: "text-indigo-600" },
-  { label: "Sugestões Feitas", key: "sugestoes", icon: Brain, color: "text-teal-600" },
+const KPI_COLORS = [
+  "text-blue-600", "text-green-600", "text-orange-600", "text-purple-600",
+  "text-primary-600", "text-red-600", "text-indigo-600", "text-teal-600",
 ];
 
+const PIE_COLORS = [
+  "#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#3b82f6", "#a855f7", "#14b8a6", "#6b7280",
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  NOVO: "Novo",
+  IA_ANALISANDO: "IA Analisando",
+  AGUARDANDO_HUMANO_COM_SOLUCAO: "Com Solução",
+  AGUARDANDO_HUMANO_SEM_SOLUCAO: "Sem Solução",
+  EM_ATENDIMENTO: "Em Atendimento",
+  AGUARDANDO_CLIENTE: "Aguardando Cliente",
+  RESOLVIDO: "Resolvido",
+  ENCERRADO: "Encerrado",
+};
+
 export default function DashboardPage() {
-  const { data: chats } = useQuery({
-    queryKey: ["chats"],
-    queryFn: () => api.get<any[]>("/chats"),
+  const { data: dash } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => api.get<any>("/dashboard"),
+    refetchInterval: 30000,
   });
 
-  const { data: kanban } = useQuery({
-    queryKey: ["kanban"],
-    queryFn: () => api.get<{ colunas: any[] }>("/kanban"),
-  });
+  const kpis = dash?.kpis;
 
-  const total = chats?.length || 0;
-  const criticos = chats?.filter((c: any) => c.status === "AGUARDANDO_HUMANO_SEM_SOLUCAO").length || 0;
-  const ia_resolvidos = chats?.filter((c: any) => c.status === "RESOLVIDO").length || 0;
-  const taxa_ia = total > 0 ? Math.round((ia_resolvidos / total) * 100) : 0;
-  const confianca_media = chats?.length
-    ? Math.round(chats.reduce((a: number, c: any) => a + (c.nivel_confianca_ia || 0), 0) / chats.length) + "%"
-    : "—";
-  const sugestoes = chats?.filter((c: any) => c.solucao_sugerida_ia).length || 0;
+  const kpiCards = kpis
+    ? [
+        { label: "Total de Chamados", value: kpis.total, icon: MessageSquare },
+        { label: "Resolvidos por IA", value: kpis.ia_resolvidos, icon: Bot },
+        { label: "Transbordo Humano", value: kpis.transbordo_humano, icon: Users },
+        {
+          label: "Tempo Médio Resposta",
+          value: kpis.tempo_medio_resposta != null
+            ? `${Math.round(kpis.tempo_medio_resposta / 60)} min`
+            : "—",
+          icon: Clock,
+        },
+        {
+          label: "Taxa Resolução IA",
+          value: `${Math.round(kpis.taxa_resolucao_ia * 100)}%`,
+          icon: TrendingUp,
+        },
+        { label: "Críticos", value: kpis.criticos, icon: AlertTriangle },
+        {
+          label: "Confiança Média IA",
+          value: kpis.confianca_media != null
+            ? `${Math.round(kpis.confianca_media * 100)}%`
+            : "—",
+          icon: Brain,
+        },
+        { label: "Sugestões Feitas", value: kpis.sugestoes_feitas, icon: Brain },
+      ]
+    : [];
 
-  const stats = {
-    total,
-    ia_resolvidos,
-    transbordo: total - ia_resolvidos,
-    tempo_medio: "—",
-    taxa_ia: `${taxa_ia}%`,
-    criticos,
-    confianca_media,
-    sugestoes,
-  };
+  const barData = (dash?.por_status || []).map((s: any) => ({
+    name: STATUS_LABELS[s.status] || s.status,
+    quantidade: s.quantidade,
+  }));
+
+  const pieData = barData.filter((d: any) => d.quantidade > 0);
 
   return (
     <div className="space-y-6">
@@ -55,18 +83,16 @@ export default function DashboardPage() {
         <p className="mt-1 text-sm text-gray-500">Visão geral do atendimento</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {kpis.map((kpi) => (
-          <Card key={kpi.key}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiCards.map((kpi, i) => (
+          <Card key={kpi.label}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">{kpi.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">
-                    {stats[kpi.key as keyof typeof stats]}
-                  </p>
+                  <p className="mt-1 text-3xl font-bold text-gray-900">{kpi.value}</p>
                 </div>
-                <kpi.icon className={`h-10 w-10 ${kpi.color} opacity-20`} />
+                <kpi.icon className={`h-10 w-10 ${KPI_COLORS[i]} opacity-20`} />
               </div>
             </CardContent>
           </Card>
@@ -77,49 +103,81 @@ export default function DashboardPage() {
         <Card>
           <CardHeader><CardTitle>Chamados por Status</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {kanban?.colunas?.map((col: any) => (
-                <div key={col.status} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{col.label}</span>
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-32 rounded-full bg-gray-100">
-                      <div
-                        className="h-2 rounded-full bg-primary-500"
-                        style={{ width: `${total > 0 ? (col.cards.length / total) * 100 : 0}%` }}
-                      />
-                    </div>
-                    <Badge variant={col.cards.length > 0 ? "primary" : "neutral"}>
-                      {col.cards.length}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {barData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={barData}>
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="quantidade" fill="#063778" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-8">Nenhum chamado</p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Chamados Recentes</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Distribuição</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {chats?.slice(0, 5).map((chat: any) => (
-                <div key={chat.id} className="flex items-center justify-between rounded-lg border p-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{chat.cliente_nome || `Cliente #${chat.cliente_id}`}</p>
-                    <p className="text-xs text-gray-500">{chat.status?.replace(/_/g, " ")}</p>
-                  </div>
-                  <Badge variant={chat.prioridade === "alta" || chat.prioridade === "urgente" ? "danger" : "neutral"}>
-                    {chat.prioridade}
-                  </Badge>
-                </div>
-              ))}
-              {(!chats || chats.length === 0) && (
-                <p className="text-sm text-gray-400 text-center py-4">Nenhum chamado recente</p>
-              )}
-            </div>
+            {pieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="quantidade"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  >
+                    {pieData.map((_: any, i: number) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-8">Nenhum chamado</p>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader><CardTitle>Chamados Recentes</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {dash?.recentes?.map((chat: any) => (
+              <div key={chat.id} className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {chat.cliente_nome || `Cliente #${chat.cliente_id}`}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {STATUS_LABELS[chat.status] || chat.status}
+                  </p>
+                </div>
+                <Badge
+                  variant={
+                    chat.prioridade === "urgente" || chat.prioridade === "alta"
+                      ? "danger"
+                      : "neutral"
+                  }
+                >
+                  {chat.prioridade}
+                </Badge>
+              </div>
+            ))}
+            {(!dash?.recentes || dash.recentes.length === 0) && (
+              <p className="text-sm text-gray-400 text-center py-4">Nenhum chamado recente</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
