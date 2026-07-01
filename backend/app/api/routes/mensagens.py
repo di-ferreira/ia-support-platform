@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.api.websocket_manager import manager
 from app.core.database import get_session
 from app.models.atendente import Atendente
 from app.models.chat import Chat
@@ -54,5 +55,10 @@ async def enviar_mensagem(
                     status_code=status.HTTP_502_BAD_GATEWAY,
                     detail=f"Mensagem salva, mas erro ao enviar via WhatsApp: {e}",
                 )
+
+    await manager.send_event(
+        chat_id, "nova_mensagem",
+        {"chat_id": chat_id, "mensagem_id": mensagem.id},
+    )
 
     return mensagem

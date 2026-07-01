@@ -1,377 +1,203 @@
 {
-  "name": "EMSoft Support AI — Fluxo Principal",
+  "name": "ChatAIBot",
   "nodes": [
     {
-      "id": "webhook-entry",
-      "name": "Evolution API Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [0, 300],
       "parameters": {
         "httpMethod": "POST",
-        "path": "emsoft-whatsapp",
+        "path": "865c14e8-9225-45dc-b5a3-1fa11c99dbaa",
         "options": {}
-      }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -768,
+        -96
+      ],
+      "id": "a9c5e658-4bdf-4ec3-95bd-1fe878132f18",
+      "name": "Webhook",
+      "webhookId": "865c14e8-9225-45dc-b5a3-1fa11c99dbaa"
     },
     {
-      "id": "extract-message",
-      "name": "Extrair Dados da Mensagem",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
-      "position": [280, 300],
       "parameters": {
-        "values": {
-          "string": [
-            { "name": "whatsapp_number", "value": "={{ $json(\"body\").data.key.remoteJid.split('@')[0] }}" },
-            { "name": "conteudo", "value": "={{ $json(\"body\").data.message.conversation || $json(\"body\").data.message.extendedTextMessage.text }}" },
-            { "name": "tipo", "value": "={{ $json(\"body\").data.message.conversation ? 'texto' : 'documento' }}" }
-          ]
-        },
-        "options": {}
-      }
-    },
-    {
-      "id": "check-chat",
-      "name": "Consultar Contexto do Chat",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [560, 300],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/chat/{{ $json(\"whatsapp_number\") }}/contexto",
-        "method": "GET",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.API_TOKEN }}" }
-          ]
-        },
-        "options": {
-          "ignoreResponseCode": true,
-          "retryOnFail": true,
-          "maxTries": 2
+        "resource": "messages-api",
+        "instanceName": "teste",
+        "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -112
+      ],
+      "id": "b95c29a8-dcd1-493a-bc66-dc523d9c63aa",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "MTYK5wjtIxyMTieD",
+          "name": "Evolution account"
         }
       }
     },
     {
-      "id": "route-existing",
-      "name": "Chat Existe?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [840, 300],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
-              "id": "has-chat",
-              "leftValue": "={{ $json(\"status\") }}",
-              "rightValue": "",
+              "id": "9dc695cc-0ead-4ff4-bd82-577954a45bb4",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": false,
               "operator": {
-                "type": "string",
-                "operation": "notEmpty"
+                "type": "boolean",
+                "operation": "equals"
               }
             }
-          ]
-        }
-      }
-    },
-    {
-      "id": "create-chat",
-      "name": "Criar Novo Chat",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [840, 540],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/mensagem",
-        "method": "POST",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "sendBody": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.API_TOKEN }}" }
-          ]
+          ],
+          "combinator": "and"
         },
-        "bodyParameters": {
-          "parameters": [
-            { "name": "whatsapp_number", "value": "={{ $json(\"whatsapp_number\") }}" },
-            { "name": "conteudo", "value": "={{ $json(\"conteudo\") }}" },
-            { "name": "tipo", "value": "={{ $json(\"tipo\") }}" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "save-message",
-      "name": "Salvar Mensagem no Chat",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1120, 300],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/mensagem",
-        "method": "POST",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "sendBody": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.API_TOKEN }}" ]
-          ]
-        },
-        "bodyParameters": {
-          "parameters": [
-            { "name": "chat_id", "value": "={{ $json(\"chat_id\") }}" },
-            { "name": "conteudo", "value": "={{ $json(\"conteudo\") }}" },
-            { "name": "tipo", "value": "={{ $json(\"tipo\") }}" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "check-ai-control",
-      "name": "IA Deve Analisar?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [1400, 300],
-      "parameters": {
-        "conditions": {
-          "conditions": [
-            {
-              "id": "is-ai-status",
-              "leftValue": "={{ $json(\"status\") }}",
-              "rightValue": "NOVO,IA_ANALISANDO,AGUARDANDO_CLIENTE",
-              "operator": {
-                "type": "string",
-                "operation": "inArray"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "rag-search",
-      "name": "Buscar RAG — Qdrant",
-      "type": "n8n-nodes-base.qdrantVectorStore",
-      "typeVersion": 1,
-      "position": [1680, 180],
-      "parameters": {
-        "qdrantCollection": "emsoft-knowledge-base",
-        "prompt": "={{ $json(\"conteudo\") }}",
-        "limit": 5,
         "options": {}
-      }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -560,
+        -96
+      ],
+      "id": "7dd94352-7a90-4a82-99af-b0165ccab8a4",
+      "name": "If"
     },
     {
-      "id": "ai-analysis",
-      "name": "IA — Classificar e Diagnosticar",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.2,
-      "position": [1960, 180],
       "parameters": {
-        "options": {},
         "promptType": "define",
-        "prompt": "Você é um especialista em suporte técnico do ERP EMSoft para autopeças.\n\nContexto da base de conhecimento:\n{{ $json(\"rag_context\") }}\n\nMensagem do cliente:\n{{ $json(\"conteudo\") }}\n\nCom base nas informações acima, classifique e responda APENAS com JSON:\n\n{\n  \"status_ia\": \"RESOLVIDO_PELA_IA | TRANSFERIR_COM_SOLUCAO | TRANSFERIR_SEM_SOLUCAO\",\n  \"resumo_problema\": \"breve resumo do problema relatado\",\n  \"causa_provavel\": \"causa provável identificada (ou null)\",\n  \"solucao_encontrada\": \"solução sugerida (ou null)\",\n  \"nivel_confianca\": 0.95,\n  \"necessita_humano\": false\n}",
-        "model": "={{ $env.OPENAI_MODEL || 'gpt-4o-mini' }}"
-      }
-    },
-    {
-      "id": "parse-ai-output",
-      "name": "Parsear JSON da IA",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
-      "position": [2240, 180],
-      "parameters": {
-        "values": {
-          "string": [
-            { "name": "status_ia", "value": "={{ JSON.parse($json(\"output\")).status_ia }}" },
-            { "name": "resumo_problema", "value": "={{ JSON.parse($json(\"output\")).resumo_problema }}" },
-            { "name": "causa_provavel", "value": "={{ JSON.parse($json(\"output\")).causa_provavel }}" },
-            { "name": "solucao_encontrada", "value": "={{ JSON.parse($json(\"output\")).solucao_encontrada }}" },
-            { "name": "nivel_confianca", "value": "={{ JSON.parse($json(\"output\")).nivel_confianca }}" },
-            { "name": "necessita_humano", "value": "={{ JSON.parse($json(\"output\")).necessita_humano }}" }
-          ]
+        "text": "={{ $json.body.data.message.conversation }}",
+        "options": {
+          "systemMessage": "# SUPORTE_AGENT — EMSoft ERP Autopeças  ## Role  Você é um Especialista em Suporte Técnico do **EMSoft ERP**, um sistema de gestão empresarial voltado para o setor de **autopeças**. Seu papel é atender clientes via WhatsApp, diagnosticar problemas, consultar a base de conhecimento (RAG) e resolver ou escalar chamados com precisão.  Sua comunicação deve ser **profissional, técnica, didática e direta**. Trate o cliente com respeito, mas vá direto ao ponto. Evite rodeios.  ---  ## Contexto do Negócio  A EMSoft atende empresas de: - Autopeças (lojas, distribuidoras, centros automotivos) - Redes multiempresa (matriz + filiais) - Distribuidoras de peças  Os atendimentos mais comuns envolvem:  ### Fiscal - NF-e rejeitada (erros SEFAZ, duplicidade, CNPJ, IE, CFOP) - NFC-e rejeitada - SPED (PIS/COFINS, ICMS, IPI) - Cadastro tributário (NCM, CST, CSOSN) - Geração e transmissão de notas  ### Estoque - Divergência de estoque (físico vs. sistema) - Giro de estoque - Transferência entre filiais - Inventário e contagem cíclica - Saldo negativo  ### Compras - Central de Compras - Cotação com fornecedores - Pedido de compra - Recebimento e conferência  ### Vendas - Pedido e orçamento - PDV (frente de caixa) - Tabela de preços (promoção, desconto, markup) - Comissão de vendedores  ### Financeiro - Fluxo de caixa - Conciliação bancária - Contas a pagar / receber - Boletos e remessas  ### Multiempresa - Sincronização entre filiais - Integração de dados - Consolidação contábil/fiscal  ---  ## Fluxo de Atendimento (3 Cenários)  ### Cenário A — Resolução Direta A IA encontra a solução e o cliente pode executar sozinho. → Instrua o cliente passo a passo. → Marcar como resolvido.  ### Cenário B — Transbordo com Solução A IA encontra a solução, mas exige intervenção humana (ajuste em banco, liberação de tela, configuração interna). → Documente o problema e a solução exata. → Transferir para AGUARDANDO_HUMANO_COM_SOLUCAO.  ### Cenário C — Transbordo sem Solução A IA NÃO encontra resposta na base de conhecimento. → Colete o máximo de detalhes com o cliente. → Gere relatório técnico detalhado. → Transferir para AGUARDANDO_HUMANO_SEM_SOLUCAO.  ---  ## Regras de Interação  1. **Sempre comece identificando o problema**: \"Olá, como posso ajudar? Pode me descrever o erro ou a dúvida que está tendo no sistema?\" 2. **Peça informações específicas**: número da NF-e, código do erro, CNPJ, filial, versão do ERP, print da tela (se aplicável). 3. **Consulte a RAG primeiro**: antes de responder, busque na base de conhecimento se já existe solução documentada. 4. **Seja específico**: evite respostas genéricas. Dê o passo a passo completo (menu → submenu → campo → valor). 5. **Confirme a resolução**: \"Conseguiu seguir os passos? O erro foi resolvido?\" 6. **Idioma**: sempre responda em português (pt-BR), usando linguagem técnica mas acessível. 7. **Tom**: profissional, paciente, objetivo. Nunca use gírias ou linguagem informal excessiva.  ---  ## Classificação de Problemas  Ao analisar um chamado, classifique em:  ### Categoria (obrigatório) - `fiscal` — notas, SPED, tributos, SEFAZ - `estoque` — saldo, transferência, inventário - `compras` — pedido, cotação, fornecedor - `vendas` — PDV, orçamento, tabela preço - `financeiro` — contas, fluxo, conciliação - `multiempresa` — sincronização, filiais - `outros` — não se encaixa nas categorias acima  ### Subcategoria (opcional, mas recomendado) Ex: `fiscal > nfe_rejeitada`, `estoque > saldo_negativo`, `vendas > pdv_erro`  ### Urgência - `baixa` — dúvida operacional, orientação - `media` — erro recorrente, mas tem workaround - `alta` — bloqueante, NF-e parada, cliente sem emitir - `critica` — sistema inoperante, múltiplos clientes afetados  ---  ## Formato de Resposta  Estruture suas respostas assim:  ``` **Diagnóstico:** [Descrição clara do problema identificado]  **Causa Provável:** [O que causou o erro]  **Solução:** [Passo a passo numerado]  1. Acesse o menu [caminho] 2. Clique em [botão/opção] 3. Preencha [campo] com [valor] 4. Confirme em [ação]  **Próxima Ação:** [O cliente deve testar e confirmar / Chamado transferido para humano] ```  ---  ## Limites & Escalation  - **NÃO** forneça acesso não autorizado a dados sensíveis (senhas, dados bancários de clientes). - **NÃO** execute comandos SQL ou alterações em banco sem supervisão humana. - **NÃO** prometa prazos que não pode cumprir. - **NÃO** invente soluções. Se não encontrou na RAG, use o Cenário C. - Se o cliente estiver nervoso ou agressivo, mantenha a calma, seja empático e documente para escalonamento. - Se o problema for recorrente (mesmo cliente, mesmo erro), sugira uma análise de causa raiz e documente para a base de conhecimento.  ---  ## Base de Conhecimento (RAG)  A busca RAG consulta artigos em: - `fiscal` — manuais de NF-e, SPED, regimes tributários - `estoque` — procedimentos de inventário, ajuste de saldo - `compras` — fluxo de compras, cotação, conferência - `vendas` — PDV, orçamento, tabela de preços - `financeiro` — conciliação, boletos, fluxo de caixa  Os artigos podem estar em formato PDF, DOCX, TXT ou HTML. Se a resposta encontrada for insuficiente ou incompleta, não improvise — opte pelo Cenário C.  ---  ## Modelo de Diagnóstico (JSON)  Internamente, ao finalizar o atendimento, seu diagnóstico deve conter:  ```json {   \"status_ia\": \"RESOLVIDO_PELA_IA\" | \"TRANSFERIR_COM_SOLUCAO\" | \"TRANSFERIR_SEM_SOLUCAO\",   \"categoria\": \"fiscal | estoque | compras | vendas | financeiro | multiempresa | outros\",   \"subcategoria\": \"ex: nfe_rejeitada\",   \"resumo\": \"Resumo conciso do problema em 1-2 frases\",   \"causa_provavel\": \"Causa raiz identificada\",   \"solucao\": \"Passo a passo detalhado da solução\",   \"confianca\": 0.0-1.0,   \"urgencia\": \"baixa | media | alta | critica\",   \"necessita_humano\": true | false,   \"modelo_usado\": \"rag + llm\" } ```"
         }
-      }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -320,
+        -112
+      ],
+      "id": "e0aa42f0-2fa3-44a1-a8c3-ea475036663b",
+      "name": "AI Agent"
     },
     {
-      "id": "save-diagnosis",
-      "name": "Salvar Diagnóstico via API",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2520, 180],
       "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/chat/diagnostico",
-        "method": "POST",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.API_TOKEN }}" }
-          ]
-        },
-        "bodyParameters": {
-          "parameters": [
-            { "name": "chat_id", "value": "={{ $json(\"chat_id\") }}" },
-            { "name": "status_ia", "value": "={{ $json(\"status_ia\") }}" },
-            { "name": "resumo", "value": "={{ $json(\"resumo_problema\") }}" },
-            { "name": "solucao", "value": "={{ $json(\"solucao_encontrada\") }}" },
-            { "name": "causa_provavel", "value": "={{ $json(\"causa_provavel\") }}" },
-            { "name": "confianca", "value": "={{ $json(\"nivel_confianca\") }}" }
-          ]
+        "model": "nemotron-3-super:cloud",
+        "options": {
+          "think": false
         }
-      }
-    },
-    {
-      "id": "route-scenario",
-      "name": "Roteamento por Cenário",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3,
-      "position": [2800, 180],
-      "parameters": {
-        "dataType": "string",
-        "value1": "={{ $json(\"status_ia\") }}",
-        "routing": {
-          "cases": {
-            "RESOLVIDO_PELA_IA": [
-              { "id": "scenario-a", "name": "Cenário A", "type": "n8n-nodes-base.noOp" }
-            ],
-            "TRANSFERIR_COM_SOLUCAO": [
-              { "id": "scenario-b", "name": "Cenário B", "type": "n8n-nodes-base.noOp" }
-            ],
-            "TRANSFERIR_SEM_SOLUCAO": [
-              { "id": "scenario-c", "name": "Cenário C", "type": "n8n-nodes-base.noOp" }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "id": "scenario-a-resolve",
-      "name": "Cenário A — Resolver e Responder",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3080, 0],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/chat/status",
-        "method": "PATCH",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "chat_id", "value": "={{ $json(\"chat_id\") }}" },
-            { "name": "status", "value": "RESOLVIDO" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "scenario-a-reply",
-      "name": "Enviar Resposta via Evolution API",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3360, 0],
-      "parameters": {
-        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
-        "method": "POST",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "number", "value": "={{ $json(\"whatsapp_number\") }}" },
-            { "name": "text", "value": "={{ $json(\"solucao_encontrada\") }}" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "scenario-b-transfer",
-      "name": "Cenário B — Transferir com Solução",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3080, 360],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/chat/status",
-        "method": "PATCH",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "chat_id", "value": "={{ $json(\"chat_id\") }}" },
-            { "name": "status", "value": "AGUARDANDO_HUMANO_COM_SOLUCAO" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "scenario-c-transfer",
-      "name": "Cenário C — Transferir sem Solução",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3080, 540],
-      "parameters": {
-        "url": "={{ $env.API_URL }}/webhooks/chat/status",
-        "method": "PATCH",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "chat_id", "value": "={{ $json(\"chat_id\") }}" },
-            { "name": "status", "value": "AGUARDANDO_HUMANO_SEM_SOLUCAO" }
-          ]
-        }
-      }
-    },
-    {
-      "id": "human-routed",
-      "name": "Já em Atendimento Humano",
-      "type": "n8n-nodes-base.noOp",
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
-      "position": [1680, 540],
-      "parameters": {}
+      "position": [
+        -352,
+        80
+      ],
+      "id": "e7c85fa8-6d44-4b4d-9ee8-184c2e9c3fbc",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "KySNjgormc0VStxZ",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.data.key.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -144,
+        80
+      ],
+      "id": "96a1ace4-ff64-4bf6-8008-86d67982e129",
+      "name": "Simple Memory"
     }
   ],
+  "pinData": {},
   "connections": {
-    "webhook-entry": { "main": [[ { "node": "extract-message", "type": "main", "index": 0 } ]] },
-    "extract-message": { "main": [[ { "node": "check-chat", "type": "main", "index": 0 } ]] },
-    "check-chat": { "main": [[ { "node": "route-existing", "type": "main", "index": 0 } ]] },
-    "route-existing": {
+    "Webhook": {
       "main": [
-        [ { "node": "save-message", "type": "main", "index": 0 } ],
-        [ { "node": "create-chat", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "save-message": { "main": [[ { "node": "check-ai-control", "type": "main", "index": 0 } ]] },
-    "create-chat": { "main": [[ { "node": "check-ai-control", "type": "main", "index": 0 } ]] },
-    "check-ai-control": {
+    "If": {
       "main": [
-        [ { "node": "rag-search", "type": "main", "index": 0 } ],
-        [ { "node": "human-routed", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "rag-search": { "main": [[ { "node": "ai-analysis", "type": "main", "index": 0 } ]] },
-    "ai-analysis": { "main": [[ { "node": "parse-ai-output", "type": "main", "index": 0 } ]] },
-    "parse-ai-output": { "main": [[ { "node": "save-diagnosis", "type": "main", "index": 0 } ]] },
-    "save-diagnosis": { "main": [[ { "node": "route-scenario", "type": "main", "index": 0 } ]] },
-    "route-scenario": {
-      "main": [
-        [ { "node": "scenario-a-resolve", "type": "main", "index": 0 } ],
-        [ { "node": "scenario-b-transfer", "type": "main", "index": 0 } ],
-        [ { "node": "scenario-c-transfer", "type": "main", "index": 0 } ]
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     },
-    "scenario-a-resolve": { "main": [[ { "node": "scenario-a-reply", "type": "main", "index": 0 } ]] }
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
+  "active": false,
   "settings": {
-    "timezone": "America/Sao_Paulo",
-    "saveManualExecutions": true
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "staticData": null,
-  "tags": ["emsoft", "suporte-ia", "whatsapp"]
+  "versionId": "6a97fd7c-c468-42e9-8049-3c1571a60e47",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1a3338dad86ec26454411c3e36fa3bb6be3f5a5ffb827c3ff9302263c51e1400"
+  },
+  "nodeGroups": [],
+  "id": "Db4Z5DgwikBpH2VP",
+  "tags": []
 }

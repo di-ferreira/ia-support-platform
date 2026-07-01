@@ -6,23 +6,26 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useChatSocket } from "@/hooks/use-chat-socket";
 
 export default function AtendimentoPage() {
   const queryClient = useQueryClient();
   const [chatAtivo, setChatAtivo] = useState<number | null>(null);
   const [novaMsg, setNovaMsg] = useState("");
 
+  useChatSocket(chatAtivo);
+
   const { data: chats } = useQuery({
     queryKey: ["chats"],
     queryFn: () => api.get<any[]>("/chats"),
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   const { data: mensagens } = useQuery({
     queryKey: ["mensagens", chatAtivo],
     queryFn: () => api.get<any[]>(`/chats/${chatAtivo}/mensagens`),
     enabled: !!chatAtivo,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const { data: chatDetail } = useQuery({

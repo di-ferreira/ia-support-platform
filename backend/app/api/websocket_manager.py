@@ -31,5 +31,8 @@ class ConnectionManager:
                 except Exception:
                     pass
 
+    async def send_event(self, chat_id: int, event: str, data: dict | None = None):
+        await self.broadcast(chat_id, {"event": event, "data": data or {}})
+
 
 manager = ConnectionManager()

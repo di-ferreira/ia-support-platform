@@ -78,39 +78,38 @@
         -d '{"vectors": {"size": 768, "distance": "Cosine"}}'
       ```
 
-#### Fase 2 — Backend (Evolution Integration Service)
+#### Fase 2 — Backend (Evolution Integration Service) ✅
 
-- [ ] **2.1** Criar `app/services/evolution_service.py`
+- [x] **2.1** Criar `app/services/evolution_service.py`
       - Métodos: `criar_instancia`, `obter_qrcode`, `configurar_webhook`, `enviar_texto`, `get_status`
       - Usar `httpx.AsyncClient` para chamar Evolution API
       - Ler config `evolution_api_url` + `evolution_api_key`
-- [ ] **2.2** Criar `app/schemas/evolution.py`
+- [x] **2.2** Criar `app/schemas/evolution.py`
       - Schemas: `InstanceCreate`, `InstanceResponse`, `QRCodeResponse`, `WebhookConfig`, `SendText`
-- [ ] **2.3** Criar `app/api/routes/evolution.py`
+- [x] **2.3** Criar `app/api/routes/evolution.py`
       - Endpoints:
         - `POST /evolution/instance` — criar instância
         - `GET /evolution/instance/qrcode` — obter QR code
         - `POST /evolution/instance/webhook` — configurar webhook
         - `GET /evolution/instance/status` — status da conexão
         - `POST /evolution/send-text` — enviar mensagem texto
-- [ ] **2.4** Registrar router no `main.py`
+- [x] **2.4** Registrar router no `main.py`
 
-#### Fase 3 — Resposta do Atendente via WhatsApp
+#### Fase 3 — Resposta do Atendente via WhatsApp ✅
 
-- [ ] **3.1** Alterar `POST /chats/{id}/mensagens` (app/api/routes/mensagens.py)
+- [x] **3.1** Alterar `POST /chats/{id}/mensagens` (app/api/routes/mensagens.py)
       - Quando `remetente=atendente`, após salvar a mensagem, chamar `EvolutionService.enviar_texto`
-      - Mapear `chat.cliente.whatsapp` para o número de destino
-- [ ] **3.2** Garantir que o modelo `Cliente` tenha campo `whatsapp` preenchido
-      - Verificar se clientes existentes têm whatsapp; se não, adicionar validação
+      - Mapear `chat.whatsapp_number` para o número de destino
 
-#### Fase 4 — Frontend (Tempo Real)
+#### Fase 4 — Frontend (Tempo Real) ✅
 
-- [ ] **4.1** Implementar Socket.IO no frontend
-      - Criar hook `useSocket` ou integrar no `atendimento/page.tsx`
-      - Substituir `refetchInterval` por eventos socket
-      - Conectar em `http://localhost:8001` com token JWT
-      - Eventos: `chat:mensagem`, `chat:status`, `chat:diagnostico`
-- [ ] **4.2** Remover polling (`refetchInterval`) dos queries de chats e mensagens
+- [x] **4.1** WebSocket real-time via hook `useChatSocket`
+      - Conecta WebSocket raw do backend (`/ws/chat/{id}`) com token JWT
+      - Invalida queries do React Query ao receber eventos (`nova_mensagem`, `status_update`, `diagnostico`)
+- [x] **4.2** Reduzir polling (`refetchInterval` de 10s/5s para 30s como fallback)
+- [x] **4.3** Backend: `ConnectionManager.send_event()` para push de eventos das rotas
+      - Webhooks (`mensagem`, `status`, `diagnostico`) agora broadcast via WS
+      - Rota de mensagens do atendente também broadcast
 
 #### Fase 5 — Frontend (Configuração WhatsApp)
 
