@@ -12,7 +12,9 @@ from app.api.routes import (
     kanban_router,
     knowledge_base_router,
     mensagens_router,
+    usuarios_router,
     webhooks_router,
+    whatsapp_router,
 )
 from app.api.websocket_manager import manager
 from app.core.config import settings
@@ -46,6 +48,8 @@ app.include_router(knowledge_base_router)
 app.include_router(evolution_router)
 app.include_router(webhooks_router)
 app.include_router(ai_router)
+app.include_router(usuarios_router)
+app.include_router(whatsapp_router)
 
 
 @app.websocket("/ws/chat/{chat_id}")

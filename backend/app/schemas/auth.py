@@ -32,3 +32,28 @@ class AtendenteResponse(BaseModel):
 class AlterarSenhaRequest(BaseModel):
     senha_atual: str
     nova_senha: str
+
+
+class UsuarioCreate(BaseModel):
+    nome: str
+    email: str
+    senha: str
+    perfil: str = "atendente"
+
+
+class UsuarioUpdate(BaseModel):
+    nome: str | None = None
+    email: str | None = None
+    perfil: str | None = None
+    ativo: bool | None = None
+
+
+class UsuarioListResponse(BaseModel):
+    id: int
+    nome: str
+    email: str
+    perfil: str
+    ativo: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

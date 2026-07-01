@@ -14,10 +14,20 @@ class MensagemCreate(BaseModel):
 class MensagemResponse(BaseModel):
     id: int
     chat_id: int
-    remetente: RemetenteMensagem
-    tipo: TipoMensagem
-    conteudo: str | None = None
-    url_arquivo: str | None = None
+    remetente: str
+    tipo: str
+    conteudo: str | None
+    url_arquivo: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class EnviarWhatsAppRequest(BaseModel):
+    numero: str
+    conteudo: str
+
+
+class EnviarWhatsAppResponse(BaseModel):
+    chat_id: int
+    mensagem_id: int
