@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.api.deps import require_perfil
 from app.core.config import settings
 from app.schemas.evolution import (
     InstanceCreate,
@@ -8,7 +9,11 @@ from app.schemas.evolution import (
 )
 from app.services.evolution_service import EvolutionService
 
-router = APIRouter(prefix="/evolution", tags=["Evolution API"])
+router = APIRouter(
+    prefix="/evolution",
+    tags=["Evolution API"],
+    dependencies=[Depends(require_perfil("admin"))],
+)
 
 
 def get_evolution_service() -> EvolutionService:

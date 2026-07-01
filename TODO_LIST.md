@@ -71,7 +71,21 @@
           "events": ["messages.upsert"]
         }'
       ```
-- [ ] **1.7** Criar collection Qdrant
+- [x] **1.1** Importar workflow no n8n
+      ```
+      Acessar http://localhost:5678
+      Workflows → Add Workflow → Import from File
+      Selecionar infra/n8n/workflow-support-ai.json
+      ```
+- [x] **1.2** Configurar credenciais no n8n
+- [x] **1.3** Adicionar env vars no n8n
+- [x] **1.4** Criar instância na Evolution API
+      (via página /configuracoes na plataforma — admin only)
+- [x] **1.5** Obter QR code e escanear no WhatsApp
+      (via página /configuracoes — imagem base64 inline)
+- [x] **1.6** Configurar webhook da Evolution → n8n
+      (via página /configuracoes — botão "Configurar Webhook")
+- [x] **1.7** Criar collection Qdrant
       ```bash
       curl -X PUT http://localhost:6333/collections/emsoft-knowledge-base \
         -H "Content-Type: application/json" \

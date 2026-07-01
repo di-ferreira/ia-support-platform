@@ -37,20 +37,21 @@ export function Header() {
         )}
       </button>
       <div className="flex items-center gap-4">
-        {/* WhatsApp Status */}
-        <div
-          className="flex items-center gap-1.5 text-xs"
-          title={whatsappConnected ? "WhatsApp Conectado" : "WhatsApp Desconectado"}
-        >
-          <span
-            className={`h-2 w-2 rounded-full ${
-              whatsappConnected ? "bg-green-500" : "bg-red-400"
-            }`}
-          />
-          <span className="text-gray-400 hidden sm:inline">
-            {whatsappConnected ? "WhatsApp" : "Desconectado"}
-          </span>
-        </div>
+        {user?.perfil === "admin" && (
+          <div
+            className="flex items-center gap-1.5 text-xs"
+            title={whatsappConnected ? "WhatsApp Conectado" : "WhatsApp Desconectado"}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                whatsappConnected ? "bg-green-500" : "bg-red-400"
+              }`}
+            />
+            <span className="text-gray-400 hidden sm:inline">
+              {whatsappConnected ? "WhatsApp" : "Desconectado"}
+            </span>
+          </div>
+        )}
         <button className="relative rounded-full p-2 hover:bg-gray-100">
           <Bell className="h-5 w-5 text-gray-600" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent-500" />
