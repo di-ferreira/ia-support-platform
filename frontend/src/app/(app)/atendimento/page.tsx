@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User, Phone, Loader2, X } from "lucide-react";
+import { Send, Bot, User, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 
@@ -43,21 +43,7 @@ export default function AtendimentoPage() {
     enabled: !!chatAtivo,
   });
 
-  const [novaConversaOpen, setNovaConversaOpen] = useState(false);
-  const [novoNumero, setNovoNumero] = useState("");
-  const [novoConteudo, setNovoConteudo] = useState("");
-
-  const enviarWhatsApp = useMutation({
-    mutationFn: (data: { numero: string; conteudo: string }) =>
-      api.post("/chats/enviar-whatsapp", data),
-    onSuccess: (resp: any) => {
-      setChatAtivo(resp.chat_id);
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
-      setNovaConversaOpen(false);
-      setNovoNumero("");
-      setNovoConteudo("");
-    },
-  });
+  const [erroMsg, setErroMsg] = useState("");
 
   const sendMsg = useMutation({
     mutationFn: (conteudo: string) =>
@@ -69,6 +55,10 @@ export default function AtendimentoPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mensagens", chatAtivo] });
       setNovaMsg("");
+      setErroMsg("");
+    },
+    onError: (err: any) => {
+      setErroMsg(err?.message || "Erro ao enviar mensagem");
     },
   });
 
@@ -87,11 +77,8 @@ export default function AtendimentoPage() {
     <div className="flex h-[calc(100vh-8rem)] gap-4">
       {/* Inbox */}
       <div className="w-80 flex flex-col rounded-lg border bg-white">
-        <div className="border-b p-4 space-y-2">
+        <div className="border-b p-4">
           <h2 className="font-semibold text-gray-900">Conversas</h2>
-          <Button size="sm" className="w-full" onClick={() => setNovaConversaOpen(true)}>
-            <Phone className="h-4 w-4 mr-2" /> Nova Conversa
-          </Button>
         </div>
         <div className="flex-1 overflow-auto">
           {chats?.map((chat: any) => (
@@ -204,6 +191,13 @@ export default function AtendimentoPage() {
         )}
       </div>
 
+      {/* Error feedback */}
+      {erroMsg && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-red-500 text-white px-4 py-2 text-sm shadow-lg">
+          {erroMsg}
+        </div>
+      )}
+
       {/* IA Summary Panel */}
       {chatDetail && (
         <div className="w-72 flex flex-col rounded-lg border bg-white">
@@ -253,54 +247,6 @@ export default function AtendimentoPage() {
         </div>
       )}
 
-      {/* Nova Conversa Modal */}
-      {novaConversaOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setNovaConversaOpen(false)}>
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Nova Conversa WhatsApp</h3>
-              <button onClick={() => setNovaConversaOpen(false)}><X className="h-5 w-5 text-gray-400" /></button>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (novoNumero.trim() && novoConteudo.trim())
-                  enviarWhatsApp.mutate({ numero: novoNumero, conteudo: novoConteudo });
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Número WhatsApp</label>
-                <input
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="5511999999999"
-                  value={novoNumero}
-                  onChange={(e) => setNovoNumero(e.target.value.replace(/\D/g, ""))}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
-                <textarea
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  rows={4}
-                  placeholder="Digite a mensagem..."
-                  value={novoConteudo}
-                  onChange={(e) => setNovoConteudo(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="ghost" onClick={() => setNovaConversaOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={enviarWhatsApp.isPending}>
-                  {enviarWhatsApp.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Enviar
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
