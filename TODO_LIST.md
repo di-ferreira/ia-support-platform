@@ -88,6 +88,18 @@
 - [x] Frontend `/usuarios` — tabela + modal criar/editar
 - [x] Sidebar: link Usuários visível para admin e supervisor
 
+## Fase 10 — Kanban + Fluxo Completo de Atendimento ✅
+
+- [x] Migration: `setor` em `Atendente`, `setor_alvo` em `Chat`
+- [x] `PATCH /chats/{id}/pegar` — auto-atribuição (qualquer atendente)
+- [x] `PATCH /chats/{id}/transferir` — transferir para outro atendente
+- [x] `PATCH /chats/{id}/transferir-grupo` — transferir para grupo/setor
+- [x] `GET /atendentes/ativos` — listar atendentes disponíveis
+- [x] Visibilidade: atendentes veem chats não-atribuídos + do seu setor
+- [x] Kanban: botão "Pegar" + "Transferir" + badge de setor
+- [x] Atendimento: botão "Pegar" na inbox + "Transferir" no header
+- [x] Modal de transferência (aba atendente + aba grupo)
+
 ## Próximas Melhorias (backlog)
 
 ### WebSocket — Reconexão Automática
@@ -96,7 +108,6 @@
 - [ ] Verificar se todas as rotas que alteram chat chamam `send_event()`
 
 ### Dashboard
-- [ ] Substituir KPIs estáticos por gráficos recharts (já instalado)
 - [ ] Métricas de tempo médio de resposta
 - [ ] Indicador de satisfação / NPS
 

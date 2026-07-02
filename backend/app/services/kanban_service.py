@@ -26,7 +26,10 @@ class KanbanService:
             status_enum = StatusChat(status_key)
             stmt = select(Chat).where(Chat.status == status_enum)
             if user and user.perfil.value == "atendente":
-                stmt = stmt.where(Chat.atendente_id == user.id)
+                unassigned = Chat.atendente_id == None
+                no_setor = Chat.setor_alvo == None
+                meu_setor = Chat.setor_alvo == user.setor
+                stmt = stmt.where((Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor)))
             stmt = stmt.options(selectinload(Chat.cliente), selectinload(Chat.atendente))
             stmt = stmt.order_by(Chat.prioridade.desc(), Chat.created_at.asc())
             rows = (await self.session.execute(stmt)).scalars().all()
@@ -37,11 +40,13 @@ class KanbanService:
                         "id": chat.id,
                         "cliente_nome": chat.cliente.nome if chat.cliente else "—",
                         "cliente_id": chat.cliente_id,
+                        "setor_alvo": chat.setor_alvo,
                         "resumo_problema": chat.resumo_problema,
                         "prioridade": chat.prioridade.value,
                         "status": chat.status.value,
                         "nivel_confianca_ia": chat.nivel_confianca_ia,
                         "necessita_humano": chat.necessita_humano,
+                        "atendente_id": chat.atendente_id,
                         "atendente_nome": chat.atendente.nome if chat.atendente else None,
                         "ultima_mensagem_em": (
                             chat.ultima_mensagem_em.isoformat()

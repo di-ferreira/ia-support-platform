@@ -46,6 +46,7 @@ class Chat(Base):
     nivel_confianca_ia: Mapped[float | None] = mapped_column(Float)
     necessita_humano: Mapped[bool | None] = mapped_column(Boolean)
 
+    setor_alvo: Mapped[str | None] = mapped_column(String(50), nullable=True)
     whatsapp_number: Mapped[str | None] = mapped_column(String(20))
     ultima_mensagem_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 

@@ -47,12 +47,16 @@ class ChatService:
         prioridade: PrioridadeChat | None = None,
         user: Atendente | None = None,
     ) -> tuple[list[Chat], int]:
-        query = select(Chat).order_by(Chat.created_at.desc())
+        query = select(Chat).order_by(Chat.ultima_mensagem_em.desc().nullslast())
         count_query = select(Chat.id)
 
         if user and user.perfil.value == "atendente":
-            query = query.where(Chat.atendente_id == user.id)
-            count_query = count_query.where(Chat.atendente_id == user.id)
+            unassigned = Chat.atendente_id == None
+            no_setor = Chat.setor_alvo == None
+            meu_setor = Chat.setor_alvo == user.setor
+            condition = (Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor))
+            query = query.where(condition)
+            count_query = count_query.where(condition)
         if status:
             query = query.where(Chat.status == status)
             count_query = count_query.where(Chat.status == status)
@@ -129,6 +133,58 @@ class ChatService:
     ) -> Chat:
         chat = await self.obter(chat_id)
         chat.prioridade = prioridade
+        await self.session.commit()
+        await self.session.refresh(chat)
+        return chat
+
+    async def pegar(self, chat_id: int, atendente_id: int) -> Chat:
+        chat = await self.obter(chat_id)
+        if chat.atendente_id is not None and chat.atendente_id != atendente_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Este chamado já está com outro atendente",
+            )
+        chat.atendente_id = atendente_id
+        chat.setor_alvo = None
+        if chat.status == StatusChat.novo:
+            chat.status = StatusChat.em_atendimento
+        await self.session.commit()
+        await self.session.refresh(chat)
+        return chat
+
+    async def transferir(self, chat_id: int, novo_atendente_id: int, user: Atendente) -> Chat:
+        chat = await self.obter(chat_id)
+        if user.perfil.value == "atendente" and chat.atendente_id != user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você só pode transferir chamados seus",
+            )
+        result = await self.session.execute(
+            select(Atendente).where(Atendente.id == novo_atendente_id)
+        )
+        if not result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Atendente não encontrado"
+            )
+        chat.atendente_id = novo_atendente_id
+        chat.setor_alvo = None
+        if chat.status in (StatusChat.aguardando_humano_com_solucao, StatusChat.aguardando_humano_sem_solucao, StatusChat.novo):
+            chat.status = StatusChat.em_atendimento
+        await self.session.commit()
+        await self.session.refresh(chat)
+        return chat
+
+    async def transferir_grupo(self, chat_id: int, setor: str, user: Atendente) -> Chat:
+        chat = await self.obter(chat_id)
+        if user.perfil.value == "atendente" and chat.atendente_id != user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você só pode transferir chamados seus",
+            )
+        chat.atendente_id = None
+        chat.setor_alvo = setor
+        if chat.status == StatusChat.em_atendimento:
+            chat.status = StatusChat.novo
         await self.session.commit()
         await self.session.refresh(chat)
         return chat

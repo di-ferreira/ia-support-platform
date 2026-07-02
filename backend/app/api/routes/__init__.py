@@ -1,4 +1,5 @@
 from app.api.routes.auth import router as auth_router
+from app.api.routes.atendentes import router as atendentes_router
 from app.api.routes.chats import router as chats_router
 from app.api.routes.clientes import router as clientes_router
 from app.api.routes.dashboard import router as dashboard_router

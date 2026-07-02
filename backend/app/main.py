@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.ai.router import router as ai_router
 from app.api.routes import (
+    atendentes_router,
     auth_router,
     chats_router,
     clientes_router,
@@ -41,6 +42,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(atendentes_router)
 app.include_router(clientes_router)
 app.include_router(chats_router)
 app.include_router(mensagens_router)

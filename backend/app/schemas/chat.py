@@ -23,6 +23,14 @@ class ChatPrioridade(BaseModel):
     prioridade: PrioridadeChat
 
 
+class ChatTransferir(BaseModel):
+    atendente_id: int
+
+
+class ChatTransferirGrupo(BaseModel):
+    setor: str
+
+
 class ChatListResponse(BaseModel):
     id: int
     cliente_id: int
@@ -34,7 +42,9 @@ class ChatListResponse(BaseModel):
     nivel_confianca_ia: float | None = None
     necessita_humano: bool | None = None
     atendente_id: int | None = None
+    setor_alvo: str | None = None
     ultima_mensagem_em: datetime | None = None
+    ultima_mensagem: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -45,6 +55,7 @@ class ChatDetailResponse(BaseModel):
     cliente_id: int
     loja_id: int | None = None
     atendente_id: int | None = None
+    setor_alvo: str | None = None
     status: StatusChat
     prioridade: PrioridadeChat
     resumo_problema: str | None = None

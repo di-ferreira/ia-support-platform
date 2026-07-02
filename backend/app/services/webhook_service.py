@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,33 +22,37 @@ class WebhookService:
         if whatsapp and "@" in whatsapp:
             whatsapp = whatsapp.split("@")[0]
 
-        if not chat_id:
+        if chat_id:
+            result = await self.session.execute(select(Chat).where(Chat.id == chat_id))
+            chat = result.scalar_one_or_none()
+        else:
             result = await self.session.execute(
                 select(Chat).where(Chat.whatsapp_number == whatsapp)
             )
             chat = result.scalar_one_or_none()
-            if not chat:
-                result = await self.session.execute(
-                    select(Cliente).where(Cliente.telefone == whatsapp)
-                )
-                cliente = result.scalar_one_or_none()
-                if not cliente:
-                    cliente = Cliente(
-                        nome=f"Novo {whatsapp[-8:]}",
-                        documento=whatsapp,
-                        telefone=whatsapp,
-                    )
-                    self.session.add(cliente)
-                    await self.session.flush()
-                chat = Chat(
-                    cliente_id=cliente.id,
-                    whatsapp_number=whatsapp,
-                    status=StatusChat.novo,
-                )
-                self.session.add(chat)
-                await self.session.flush()
-            chat_id = chat.id
 
+        if not chat:
+            result = await self.session.execute(
+                select(Cliente).where(Cliente.telefone == whatsapp)
+            )
+            cliente = result.scalar_one_or_none()
+            if not cliente:
+                cliente = Cliente(
+                    nome=f"Novo {whatsapp[-8:]}",
+                    documento=whatsapp,
+                    telefone=whatsapp,
+                )
+                self.session.add(cliente)
+                await self.session.flush()
+            chat = Chat(
+                cliente_id=cliente.id,
+                whatsapp_number=whatsapp,
+                status=StatusChat.novo,
+            )
+            self.session.add(chat)
+            await self.session.flush()
+
+        chat_id = chat.id
         remetente_str = data.get("remetente", "cliente")
         remetente = (
             RemetenteMensagem(remetente_str)
@@ -62,6 +68,8 @@ class WebhookService:
             url_arquivo=data.get("url_arquivo"),
         )
         self.session.add(mensagem)
+        if chat:
+            chat.ultima_mensagem_em = datetime.now(timezone.utc)
         await self.session.commit()
         await self.session.refresh(mensagem)
         return mensagem

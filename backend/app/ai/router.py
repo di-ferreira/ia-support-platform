@@ -16,7 +16,7 @@ from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_session
 from app.models.atendente import Atendente
-from app.models.chat import Chat
+from app.models.chat import Chat, StatusChat
 from app.models.mensagem import Mensagem
 from app.services.qdrant_service import search_similar
 
@@ -131,4 +131,26 @@ async def solucionar(
         mensagem_cliente=mensagem_cliente,
         historico=historico,
     )
-    return await llm.chat_json(messages)
+    result = await llm.chat_json(messages)
+
+    # Atualizar status do chat conforme resposta da IA
+    try:
+        precisa_humano = result.get("precisa_humano", True)
+        solucao = result.get("solucao")
+
+        if chat.status in (StatusChat.novo, StatusChat.aguardando_cliente):
+            chat.status = StatusChat.ia_analisando
+
+        chat.solucao_sugerida_ia = solucao
+        chat.necessita_humano = precisa_humano
+
+        if precisa_humano:
+            chat.status = StatusChat.aguardando_humano_com_solucao if solucao else StatusChat.aguardando_humano_sem_solucao
+        else:
+            chat.status = StatusChat.aguardando_cliente
+
+        await session.commit()
+    except Exception:
+        pass
+
+    return result

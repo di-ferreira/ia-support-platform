@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 
@@ -45,6 +45,39 @@ export default function AtendimentoPage() {
 
   const [erroMsg, setErroMsg] = useState("");
 
+  const prioridadeLabels: Record<string, string> = {
+    baixa: "Baixa",
+    media: "Média",
+    alta: "Alta",
+    urgente: "Urgente",
+  };
+
+  const updatePrioridade = useMutation({
+    mutationFn: (prioridade: string) =>
+      api.patch(`/chats/${chatAtivo}/prioridade`, { prioridade }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      setErroMsg("");
+    },
+    onError: (err: any) => {
+      setErroMsg(err?.message || "Erro ao alterar prioridade");
+    },
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: (status: string) =>
+      api.patch(`/chats/${chatAtivo}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      setErroMsg("");
+    },
+    onError: (err: any) => {
+      setErroMsg(err?.message || "Erro ao alterar status");
+    },
+  });
+
   const sendMsg = useMutation({
     mutationFn: (conteudo: string) =>
       api.post(`/chats/${chatAtivo}/mensagens`, {
@@ -61,6 +94,53 @@ export default function AtendimentoPage() {
       setErroMsg(err?.message || "Erro ao enviar mensagem");
     },
   });
+
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [transferTab, setTransferTab] = useState<"atendente" | "grupo">("atendente");
+  const [transferAtendenteId, setTransferAtendenteId] = useState<number | null>(null);
+  const [transferSetor, setTransferSetor] = useState("");
+
+  const { data: atendentes } = useQuery({
+    queryKey: ["atendentes"],
+    queryFn: () => api.get<any[]>("/atendentes/ativos"),
+    enabled: transferModalOpen,
+  });
+
+  const pegarChat = useMutation({
+    mutationFn: () => api.patch(`/chats/${chatAtivo}/pegar`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      setErroMsg("");
+    },
+    onError: (err: any) => setErroMsg(err?.message || "Erro ao pegar chamado"),
+  });
+
+  const transferirChat = useMutation({
+    mutationFn: (atendente_id: number) =>
+      api.patch(`/chats/${chatAtivo}/transferir`, { atendente_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      setTransferModalOpen(false);
+      setErroMsg("");
+    },
+    onError: (err: any) => setErroMsg(err?.message || "Erro ao transferir"),
+  });
+
+  const transferirGrupo = useMutation({
+    mutationFn: (setor: string) =>
+      api.patch(`/chats/${chatAtivo}/transferir-grupo`, { setor }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      setTransferModalOpen(false);
+      setErroMsg("");
+    },
+    onError: (err: any) => setErroMsg(err?.message || "Erro ao transferir para grupo"),
+  });
+
+  const setoresDisponiveis = ["atendimento", "supervisao", "programadores"];
 
   const statusLabels: Record<string, string> = {
     NOVO: "Novo",
@@ -106,6 +186,26 @@ export default function AtendimentoPage() {
                 <span className="text-xs text-gray-500">{statusLabels[chat.status] || chat.status}</span>
                 {chat.solucao_sugerida_ia && <Bot className="h-3 w-3 text-green-500" />}
               </div>
+              {chat.ultima_mensagem && (
+                <p className="mt-1 truncate text-xs text-gray-400">{chat.ultima_mensagem}</p>
+              )}
+              {!chat.atendente_id && (
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 text-xs gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChatAtivo(chat.id);
+                      pegarChat.mutate();
+                    }}
+                    disabled={pegarChat.isPending}
+                  >
+                    <UserPlus className="h-3 w-3" /> Pegar
+                  </Button>
+                </div>
+              )}
             </button>
           ))}
           {(!chats || chats.length === 0) && (
@@ -118,11 +218,47 @@ export default function AtendimentoPage() {
       <div className="flex flex-1 flex-col rounded-lg border bg-white">
         {chatAtivo ? (
           <>
-            <div className="border-b p-4">
+            <div className="border-b p-4 space-y-2">
               <h3 className="font-semibold text-gray-900">
                 {chatDetail?.cliente_nome || `Cliente #${chatDetail?.cliente_id}`}
               </h3>
-              <Badge>{statusLabels[chatDetail?.status] || chatDetail?.status}</Badge>
+              <div className="flex items-center gap-2">
+                <select
+                  value={chatDetail?.status || ""}
+                  onChange={(e) => updateStatus.mutate(e.target.value)}
+                  className="text-xs rounded border border-gray-300 bg-white px-2 py-1 text-gray-700"
+                >
+                  {Object.entries(statusLabels).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <select
+                  value={chatDetail?.prioridade || "media"}
+                  onChange={(e) => updatePrioridade.mutate(e.target.value)}
+                  className={`text-xs rounded border bg-white px-2 py-1 ${
+                    chatDetail?.prioridade === "urgente" || chatDetail?.prioridade === "alta"
+                      ? "border-red-300 text-red-700"
+                      : "border-gray-300 text-gray-700"
+                  }`}
+                >
+                  {Object.entries(prioridadeLabels).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 text-xs"
+                  onClick={() => setTransferModalOpen(true)}
+                >
+                  Transferir
+                </Button>
+                {chatDetail?.setor_alvo && (
+                  <Badge variant="warning" className="text-[10px]">
+                    📋 {chatDetail.setor_alvo}
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="flex-1 overflow-auto space-y-3 p-4">
               {mensagens?.map((msg: any) => (
@@ -242,6 +378,78 @@ export default function AtendimentoPage() {
               </>
             ) : (
               <p className="text-sm text-gray-400 text-center py-8">IA ainda não analisou este chamado</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Modal */}
+      {transferModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="w-96 rounded-lg bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Transferir Chamado</h3>
+              <button onClick={() => setTransferModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setTransferTab("atendente")}
+                className={`px-3 py-1 text-sm rounded ${
+                  transferTab === "atendente" ? "bg-primary-100 text-primary-700" : "text-gray-500"
+                }`}
+              >
+                Para Atendente
+              </button>
+              <button
+                onClick={() => setTransferTab("grupo")}
+                className={`px-3 py-1 text-sm rounded ${
+                  transferTab === "grupo" ? "bg-primary-100 text-primary-700" : "text-gray-500"
+                }`}
+              >
+                Para Grupo
+              </button>
+            </div>
+
+            {transferTab === "atendente" ? (
+              <div className="space-y-2 max-h-60 overflow-auto">
+                {atendentes
+                  ?.filter((a: any) => a.id !== user?.id)
+                  .map((a: any) => (
+                    <button
+                      key={a.id}
+                      onClick={() => {
+                        setTransferAtendenteId(a.id);
+                        transferirChat.mutate(a.id);
+                      }}
+                      disabled={transferirChat.isPending}
+                      className="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
+                    >
+                      <p className="text-sm font-medium text-gray-900">{a.nome}</p>
+                      <p className="text-xs text-gray-500">{a.perfil}{a.setor ? ` · ${a.setor}` : ""}</p>
+                    </button>
+                  ))}
+                {(!atendentes || atendentes.length === 0) && (
+                  <p className="text-sm text-gray-400 text-center py-4">Nenhum atendente disponível</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {setoresDisponiveis.map((setor) => (
+                  <button
+                    key={setor}
+                    onClick={() => transferirGrupo.mutate(setor)}
+                    disabled={transferirGrupo.isPending}
+                    className="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
+                  >
+                    <p className="text-sm font-medium text-gray-900 capitalize">{setor}</p>
+                    <p className="text-xs text-gray-500">Transferir para grupo {setor}</p>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </div>

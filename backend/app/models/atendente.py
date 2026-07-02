@@ -23,5 +23,6 @@ class Atendente(Base):
     perfil: Mapped[PerfilAtendente] = mapped_column(
         Enum(PerfilAtendente), default=PerfilAtendente.atendente
     )
+    setor: Mapped[str | None] = mapped_column(String(50), nullable=True)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
