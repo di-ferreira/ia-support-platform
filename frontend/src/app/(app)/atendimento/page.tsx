@@ -107,10 +107,10 @@ export default function AtendimentoPage() {
   });
 
   const pegarChat = useMutation({
-    mutationFn: () => api.patch(`/chats/${chatAtivo}/pegar`),
-    onSuccess: () => {
+    mutationFn: (chatId: number) => api.patch(`/chats/${chatId}/pegar`),
+    onSuccess: (_data, chatId) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
-      queryClient.invalidateQueries({ queryKey: ["chat", chatAtivo] });
+      queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
       setErroMsg("");
     },
     onError: (err: any) => setErroMsg(err?.message || "Erro ao pegar chamado"),
@@ -198,7 +198,7 @@ export default function AtendimentoPage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setChatAtivo(chat.id);
-                      pegarChat.mutate();
+                      pegarChat.mutate(chat.id);
                     }}
                     disabled={pegarChat.isPending}
                   >
