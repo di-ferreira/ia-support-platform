@@ -144,6 +144,13 @@
             }
           ]
         },
+        "sendHeaders": true,
+        "headerParameters": [
+          {
+            "name": "X-Webhook-Secret",
+            "value": "={{ $env.WEBHOOK_SECRET }}"
+          }
+        ],
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -180,6 +187,13 @@
             }
           ]
         },
+        "sendHeaders": true,
+        "headerParameters": [
+          {
+            "name": "X-Webhook-Secret",
+            "value": "={{ $env.WEBHOOK_SECRET }}"
+          }
+        ],
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

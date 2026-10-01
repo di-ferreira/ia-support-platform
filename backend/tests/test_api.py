@@ -148,14 +148,22 @@ async def test_kanban(client, admin_token):
 
 @pytest.mark.asyncio
 async def test_webhook_message(client, session):
+    from app.core.config import settings
     from app.models.cliente import Cliente
 
-    session.add(Cliente(nome="Cliente Teste", documento="5511999999999", telefone="5511999999999"))
+    session.add(
+        Cliente(nome="Cliente Teste", documento="5511999999999", telefone="5511999999999")
+    )
     await session.commit()
 
+    headers = {
+        "content-type": "application/json",
+        "X-Webhook-Secret": settings.webhook_secret,
+    }
     resp = await client.post(
         "/webhooks/mensagem",
         json={"whatsapp_number": "5511999999999", "conteudo": "Teste webhook"},
+        headers=headers,
     )
     assert resp.status_code == 201
 

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     database_url_prod: str | None = None
 
     secret_key: str = _INSECURE_DEFAULT_SECRET
+    webhook_secret: str | None = None
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7

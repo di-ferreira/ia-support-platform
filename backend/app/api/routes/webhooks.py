@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, Request
+import hmac
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.websocket_manager import manager
+from app.core.config import settings
 from app.core.database import get_session
 from app.schemas.webhook import (
     WebhookClienteUpdate,
@@ -13,6 +16,21 @@ from app.schemas.webhook import (
 from app.services.webhook_service import WebhookService
 
 router = APIRouter(prefix="/webhooks", tags=["Webhooks (n8n)"])
+
+
+async def verify_webhook(request: Request) -> None:
+    secret = settings.webhook_secret
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Webhook não configurado",
+        )
+    provided = request.headers.get("X-Webhook-Secret")
+    if not provided or not hmac.compare_digest(provided, secret):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Assinatura inválida",
+        )
 
 
 def _normalizar_payload(body: dict) -> dict:
@@ -51,6 +69,7 @@ def _normalizar_payload(body: dict) -> dict:
 async def webhook_mensagem(
     request: Request,
     session: AsyncSession = Depends(get_session),
+    webhook_auth: None = Depends(verify_webhook),
 ):
     body = await request.json()
     payload = _normalizar_payload(body)
@@ -68,6 +87,7 @@ async def webhook_mensagem(
 async def webhook_status(
     body: WebhookStatusUpdate,
     session: AsyncSession = Depends(get_session),
+    webhook_auth: None = Depends(verify_webhook),
 ):
     service = WebhookService(session)
     chat = await service.atualizar_status(body.chat_id, body.status)
@@ -82,6 +102,7 @@ async def webhook_status(
 async def webhook_diagnostico(
     body: WebhookDiagnostico,
     session: AsyncSession = Depends(get_session),
+    webhook_auth: None = Depends(verify_webhook),
 ):
     service = WebhookService(session)
     diagnostico = await service.salvar_diagnostico(body.model_dump())
@@ -97,6 +118,7 @@ async def webhook_atualizar_cliente(
     chat_id: int,
     body: WebhookClienteUpdate,
     session: AsyncSession = Depends(get_session),
+    webhook_auth: None = Depends(verify_webhook),
 ):
     service = WebhookService(session)
     return await service.atualizar_cliente(chat_id, body.model_dump(exclude_none=True))
@@ -106,6 +128,7 @@ async def webhook_atualizar_cliente(
 async def webhook_contexto(
     chat_id: int,
     session: AsyncSession = Depends(get_session),
+    webhook_auth: None = Depends(verify_webhook),
 ):
     service = WebhookService(session)
     contexto = await service.obter_contexto(chat_id)

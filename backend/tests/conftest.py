@@ -1,9 +1,11 @@
 from collections.abc import AsyncGenerator
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.core.config import settings
 from app.core.database import Base, get_session
 from app.core.security import hash_password
 from app.main import app
@@ -12,6 +14,13 @@ TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 
 engine = create_async_engine(TEST_DB_URL, echo=False)
 TestSession = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
+@pytest.fixture(autouse=True)
+def webhook_secret():
+    settings.webhook_secret = "test-webhook-secret"
+    yield
+    settings.webhook_secret = None
 
 
 @pytest_asyncio.fixture(autouse=True)
