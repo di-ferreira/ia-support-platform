@@ -212,14 +212,14 @@
             "instance": "emsoft-support",
             "data": {
               "key": {
-                "remoteJid": "5522981136574@s.whatsapp.net",
-                "remoteJidAlt": "5522981136574@s.whatsapp.net",
+                "remoteJid": "55000000000000@s.whatsapp.net",
+                "remoteJidAlt": "55000000000000@s.whatsapp.net",
                 "fromMe": true,
                 "id": "3EB0898033833D8FE13165",
                 "participant": "",
                 "addressingMode": "lid"
               },
-              "pushName": "Diego da Priscila",
+              "pushName": "Cliente Teste",
               "status": "SERVER_ACK",
               "message": {
                 "conversation": "olá"
@@ -231,9 +231,9 @@
             },
             "destination": "http://n8n:5678/webhook-test/865c14e8-9225-45dc-b5a3-1fa11c99dbaa",
             "date_time": "2026-07-01T13:41:54.999Z",
-            "sender": "5522981136574@s.whatsapp.net",
+            "sender": "55000000000000@s.whatsapp.net",
             "server_url": "http://localhost:8080",
-            "apikey": "4DD2D37F-12C7-4D1C-8EB4-23FBE691003C"
+            "apikey": "REDACTED_EVOLUTION_API_KEY"
           },
           "webhookUrl": "http://localhost:5678/webhook-test/865c14e8-9225-45dc-b5a3-1fa11c99dbaa",
           "executionMode": "test"
