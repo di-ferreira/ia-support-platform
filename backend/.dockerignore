@@ -1,0 +1,34 @@
+# Segredos / ambiente local
+.env
+.env.*
+
+# Virtualenvs do host
+.venv
+venv
+
+# Banco de dados de dev
+*.db
+dev.db
+
+# Caches e artefatos Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Testes (não necessários em runtime)
+tests/
+
+# Lock do uv (o build usa pip + requirements.txt)
+uv.lock
+uv.toml
+
+# Versionamento / IDE / SO
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
