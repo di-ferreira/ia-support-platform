@@ -20,7 +20,7 @@ async def _get_user_from_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token obrigatório"
         )
     payload = decode_token(credentials.credentials)
-    if payload is None:
+    if payload is None or payload.get("typ") != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
         )

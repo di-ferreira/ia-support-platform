@@ -9,7 +9,7 @@ class ConnectionManager:
 
     async def connect(self, chat_id: int, websocket: WebSocket, token: str | None = None):
         payload = decode_token(token or "")
-        if payload is None:
+        if payload is None or payload.get("typ") != "access":
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
         await websocket.accept()

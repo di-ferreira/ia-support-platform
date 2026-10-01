@@ -34,7 +34,7 @@ class AuthService:
 
     async def refresh(self, refresh_token: str) -> dict:
         payload = decode_token(refresh_token)
-        if payload is None:
+        if payload is None or payload.get("typ") != "refresh":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
             )

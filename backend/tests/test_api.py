@@ -13,7 +13,15 @@ async def test_login_success(client, session):
     from app.core.security import hash_password
     from app.models.atendente import Atendente
 
-    session.add(Atendente(nome="Admin", email="admin@test.com", hash_senha=hash_password("admin123"), perfil="admin", ativo=True))
+    session.add(
+        Atendente(
+            nome="Admin",
+            email="admin@test.com",
+            hash_senha=hash_password("admin123"),
+            perfil="admin",
+            ativo=True,
+        )
+    )
     await session.commit()
 
     resp = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
@@ -34,6 +42,52 @@ async def test_me(client, admin_token):
     resp = await client.get("/auth/me", headers={"Authorization": f"Bearer {admin_token}"})
     assert resp.status_code == 200
     assert resp.json()["email"] == "admin@test.com"
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_rejected_as_access(client, session):
+    from app.core.security import hash_password
+    from app.models.atendente import Atendente
+
+    session.add(
+        Atendente(
+            nome="Admin",
+            email="admin@test.com",
+            hash_senha=hash_password("admin123"),
+            perfil="admin",
+            ativo=True,
+        )
+    )
+    await session.commit()
+
+    login = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
+    refresh_token = login.json()["refresh_token"]
+
+    resp = await client.get("/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_access_token_rejected_at_refresh(client, session):
+    from app.core.security import hash_password
+    from app.models.atendente import Atendente
+
+    session.add(
+        Atendente(
+            nome="Admin",
+            email="admin@test.com",
+            hash_senha=hash_password("admin123"),
+            perfil="admin",
+            ativo=True,
+        )
+    )
+    await session.commit()
+
+    login = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
+    access_token = login.json()["access_token"]
+
+    resp = await client.post("/auth/refresh", json={"refresh_token": access_token})
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
