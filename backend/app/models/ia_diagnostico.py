@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
-class StatusIA(str, enum.Enum):
+class StatusIA(enum.StrEnum):
     resolvido_pela_ia = "RESOLVIDO_PELA_IA"
     transferir_com_solucao = "TRANSFERIR_COM_SOLUCAO"
     transferir_sem_solucao = "TRANSFERIR_SEM_SOLUCAO"
@@ -27,4 +27,4 @@ class IADiagnostico(Base):
     tokens_usados: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    chat: Mapped["Chat"] = relationship(back_populates="diagnosticos")
+    chat: Mapped["Chat"] = relationship(back_populates="diagnosticos")  # noqa: F821

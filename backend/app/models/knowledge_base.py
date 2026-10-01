@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
 
-class CategoriaConhecimento(str, enum.Enum):
+class CategoriaConhecimento(enum.StrEnum):
     fiscal = "fiscal"
     estoque = "estoque"
     compras = "compras"

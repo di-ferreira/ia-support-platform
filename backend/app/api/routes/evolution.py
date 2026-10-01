@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import require_perfil
-from app.core.config import settings
 from app.schemas.evolution import (
     InstanceCreate,
     SendTextRequest,

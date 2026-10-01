@@ -26,10 +26,12 @@ class KanbanService:
             status_enum = StatusChat(status_key)
             stmt = select(Chat).where(Chat.status == status_enum)
             if user and user.perfil.value == "atendente":
-                unassigned = Chat.atendente_id == None
-                no_setor = Chat.setor_alvo == None
+                unassigned = Chat.atendente_id.is_(None)
+                no_setor = Chat.setor_alvo.is_(None)
                 meu_setor = Chat.setor_alvo == user.setor
-                stmt = stmt.where((Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor)))
+                stmt = stmt.where(
+                    (Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor))
+                )
             stmt = stmt.options(selectinload(Chat.cliente), selectinload(Chat.atendente))
             stmt = stmt.order_by(Chat.prioridade.desc(), Chat.created_at.asc())
             rows = (await self.session.execute(stmt)).scalars().all()

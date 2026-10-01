@@ -9,7 +9,12 @@ from app.models.atendente import Atendente
 from app.models.chat import Chat, StatusChat
 from app.models.cliente import Cliente
 from app.models.mensagem import RemetenteMensagem
-from app.schemas.mensagem import EnviarWhatsAppRequest, EnviarWhatsAppResponse, MensagemCreate, MensagemResponse
+from app.schemas.mensagem import (
+    EnviarWhatsAppRequest,
+    EnviarWhatsAppResponse,
+    MensagemCreate,
+    MensagemResponse,
+)
 from app.services.evolution_service import EvolutionService
 from app.services.mensagem_service import MensagemService
 

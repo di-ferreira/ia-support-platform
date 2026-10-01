@@ -21,8 +21,10 @@ class Cliente(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    lojas: Mapped[list["Loja"]] = relationship(back_populates="cliente", cascade="all, delete-orphan")
-    chats: Mapped[list["Chat"]] = relationship(back_populates="cliente")
+    lojas: Mapped[list["Loja"]] = relationship(
+        back_populates="cliente", cascade="all, delete-orphan"
+    )
+    chats: Mapped[list["Chat"]] = relationship(back_populates="cliente")  # noqa: F821
 
 
 class Loja(Base):

@@ -15,7 +15,7 @@ async def listar_atendentes_ativos(
     user: Atendente = Depends(get_current_user),
 ):
     result = await session.execute(
-        select(Atendente).where(Atendente.ativo == True).order_by(Atendente.nome)
+        select(Atendente).where(Atendente.ativo.is_(True)).order_by(Atendente.nome)
     )
     return [
         {

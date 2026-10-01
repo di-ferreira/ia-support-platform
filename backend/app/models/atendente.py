@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
 
-class PerfilAtendente(str, enum.Enum):
+class PerfilAtendente(enum.StrEnum):
     admin = "admin"
     supervisor = "supervisor"
     atendente = "atendente"

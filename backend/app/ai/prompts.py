@@ -2,7 +2,8 @@
 
 from app.ai.openai_service import Message
 
-CLASSIFY_SYSTEM = """Você é um especialista em suporte técnico do ERP EMSoft, um sistema para empresas de autopeças.
+CLASSIFY_SYSTEM = """Você é um especialista em suporte técnico do ERP EMSoft, um sistema para
+empresas de autopeças.
 
 Sua função é CLASSIFICAR o problema relatado pelo cliente em um dos módulos do ERP.
 
@@ -27,12 +28,14 @@ Resuma a conversa abaixo de forma clara e objetiva, destacando:
 3. A situação atual
 
 Responda APENAS com um JSON:
-{"resumo": "resumo da conversa", "problema_principal": "descrição", "ja_tentado": "o que foi tentado", "situacao_atual": "status atual"}
+{"resumo": "resumo da conversa", "problema_principal": "descrição",
+"ja_tentado": "o que foi tentado", "situacao_atual": "status atual"}
 """
 
 SOLUTION_SYSTEM = """Você é um especialista em suporte técnico do ERP EMSoft para autopeças.
 
-Com base no contexto da base de conhecimento e no histórico da conversa, gere uma solução para o problema do cliente.
+Com base no contexto da base de conhecimento e no histórico da conversa, gere
+uma solução para o problema do cliente.
 
 Contexto RAG:
 {rag_context}
@@ -43,10 +46,13 @@ Histórico da conversa:
 Mensagem do cliente: {mensagem_cliente}
 
 Responda APENAS com um JSON:
-{"solucao": "passo a passo da solução", "instrucoes_cliente": "o que o cliente pode fazer (ou null)", "precisa_humano": false, "referencia": "título do artigo consultado (ou null)"}
+{"solucao": "passo a passo da solução", "instrucoes_cliente": "o que o cliente
+pode fazer (ou null)", "precisa_humano": false,
+"referencia": "título do artigo consultado (ou null)"}
 """
 
-DIAGNOSE_SYSTEM = """Você é um analista técnico sênior do ERP EMSoft especializado em diagnóstico de problemas.
+DIAGNOSE_SYSTEM = """Você é um analista técnico sênior do ERP EMSoft especializado em diagnóstico
+de problemas.
 
 Com base no histórico da conversa, gere um diagnóstico técnico completo.
 

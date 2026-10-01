@@ -7,14 +7,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
-class TipoMensagem(str, enum.Enum):
+class TipoMensagem(enum.StrEnum):
     texto = "texto"
     audio = "audio"
     documento = "documento"
     imagem = "imagem"
 
 
-class RemetenteMensagem(str, enum.Enum):
+class RemetenteMensagem(enum.StrEnum):
     cliente = "cliente"
     ia = "ia"
     atendente = "atendente"
@@ -38,4 +38,4 @@ class Mensagem(Base):
         DateTime(timezone=True), server_default=func.now(), index=True
     )
 
-    chat: Mapped["Chat"] = relationship(back_populates="mensagens")
+    chat: Mapped["Chat"] = relationship(back_populates="mensagens")  # noqa: F821

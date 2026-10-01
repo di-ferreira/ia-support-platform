@@ -1,12 +1,10 @@
-from datetime import datetime, timezone, timedelta
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.chat import Chat, StatusChat, PrioridadeChat
+from app.models.chat import Chat, PrioridadeChat, StatusChat
 from app.models.mensagem import Mensagem, RemetenteMensagem
-from app.models.atendente import Atendente
 
 COLUNAS = [
     ("NOVO", "Novos"),
@@ -49,7 +47,6 @@ class DashboardService:
             .order_by(Mensagem.created_at.desc())
             .limit(100)
         )
-        tempos = []
         rows = result.scalars().all()
         if len(rows) > 1:
             gaps = []

@@ -123,7 +123,11 @@ async def test_create_chat(client, admin_token):
 @pytest.mark.asyncio
 async def test_create_message(client, admin_token):
     await test_create_cliente(client, admin_token)
-    await client.post("/chats", json={"cliente_id": 1}, headers={"Authorization": f"Bearer {admin_token}"})
+    await client.post(
+        "/chats",
+        json={"cliente_id": 1},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
     resp = await client.post(
         "/chats/1/mensagens",
         json={"remetente": "cliente", "tipo": "texto", "conteudo": "NF-e rejeitada"},
@@ -136,7 +140,11 @@ async def test_create_message(client, admin_token):
 @pytest.mark.asyncio
 async def test_kanban(client, admin_token):
     await test_create_cliente(client, admin_token)
-    await client.post("/chats", json={"cliente_id": 1}, headers={"Authorization": f"Bearer {admin_token}"})
+    await client.post(
+        "/chats",
+        json={"cliente_id": 1},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
     resp = await client.get("/kanban", headers={"Authorization": f"Bearer {admin_token}"})
     assert resp.status_code == 200
     data = resp.json()
@@ -184,7 +192,11 @@ async def test_atendente_cannot_set_prioridade(client, atendente_token, session)
 
     session.add(Cliente(nome="Teste", documento="11222333000181"))
     await session.commit()
-    await client.post("/chats", json={"cliente_id": 1}, headers={"Authorization": f"Bearer {atendente_token}"})
+    await client.post(
+        "/chats",
+        json={"cliente_id": 1},
+        headers={"Authorization": f"Bearer {atendente_token}"},
+    )
     resp = await client.patch(
         "/chats/1/prioridade",
         json={"prioridade": "alta"},
@@ -219,7 +231,11 @@ async def test_atendente_cannot_assinar_chat(client, atendente_token, session):
 
     session.add(Cliente(nome="Teste", documento="11222333000181"))
     await session.commit()
-    await client.post("/chats", json={"cliente_id": 1}, headers={"Authorization": f"Bearer {atendente_token}"})
+    await client.post(
+        "/chats",
+        json={"cliente_id": 1},
+        headers={"Authorization": f"Bearer {atendente_token}"},
+    )
     resp = await client.patch(
         "/chats/1/assinar",
         json={"atendente_id": 1},
@@ -248,12 +264,18 @@ async def test_knowledge_base_crud(client, admin_token):
     assert create.status_code == 201
     artigo_id = create.json()["id"]
 
-    get = await client.get(f"/knowledge-base/{artigo_id}", headers={"Authorization": f"Bearer {admin_token}"})
+    get = await client.get(
+        f"/knowledge-base/{artigo_id}", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     assert get.status_code == 200
 
-    list_resp = await client.get("/knowledge-base", headers={"Authorization": f"Bearer {admin_token}"})
+    list_resp = await client.get(
+        "/knowledge-base", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     assert list_resp.status_code == 200
     assert len(list_resp.json()) >= 1
 
-    delete = await client.delete(f"/knowledge-base/{artigo_id}", headers={"Authorization": f"Bearer {admin_token}"})
+    delete = await client.delete(
+        f"/knowledge-base/{artigo_id}", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     assert delete.status_code == 204

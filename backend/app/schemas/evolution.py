@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class InstanceCreate(BaseModel):
-    instanceName: str = "emsoft-support"
+    instanceName: str = "emsoft-support"  # noqa: N815
 
 
 class InstanceResponse(BaseModel):
@@ -27,7 +27,7 @@ class InstanceStatusResponse(BaseModel):
 
 
 class WebhookConfig(BaseModel):
-    webhookUrl: str
+    webhookUrl: str  # noqa: N815
     events: list[str] = ["MESSAGES_UPSERT"]
 
 

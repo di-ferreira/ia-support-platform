@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -69,7 +69,7 @@ class WebhookService:
         )
         self.session.add(mensagem)
         if chat:
-            chat.ultima_mensagem_em = datetime.now(timezone.utc)
+            chat.ultima_mensagem_em = datetime.now(UTC)
         await self.session.commit()
         await self.session.refresh(mensagem)
         return mensagem

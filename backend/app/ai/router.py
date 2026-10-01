@@ -145,7 +145,11 @@ async def solucionar(
         chat.necessita_humano = precisa_humano
 
         if precisa_humano:
-            chat.status = StatusChat.aguardando_humano_com_solucao if solucao else StatusChat.aguardando_humano_sem_solucao
+            chat.status = (
+                StatusChat.aguardando_humano_com_solucao
+                if solucao
+                else StatusChat.aguardando_humano_sem_solucao
+            )
         else:
             chat.status = StatusChat.aguardando_cliente
 

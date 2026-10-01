@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
-class StatusChat(str, enum.Enum):
+class StatusChat(enum.StrEnum):
     novo = "NOVO"
     ia_analisando = "IA_ANALISANDO"
     aguardando_cliente = "AGUARDANDO_CLIENTE"
@@ -18,7 +18,7 @@ class StatusChat(str, enum.Enum):
     encerrado = "ENCERRADO"
 
 
-class PrioridadeChat(str, enum.Enum):
+class PrioridadeChat(enum.StrEnum):
     baixa = "baixa"
     media = "media"
     alta = "alta"
@@ -55,14 +55,14 @@ class Chat(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    cliente: Mapped["Cliente"] = relationship(back_populates="chats")
-    atendente: Mapped["Atendente"] = relationship()
-    mensagens: Mapped[list["Mensagem"]] = relationship(
+    cliente: Mapped["Cliente"] = relationship(back_populates="chats")  # noqa: F821
+    atendente: Mapped["Atendente"] = relationship()  # noqa: F821
+    mensagens: Mapped[list["Mensagem"]] = relationship(  # noqa: F821
         back_populates="chat", cascade="all, delete-orphan"
     )
-    diagnosticos: Mapped[list["IADiagnostico"]] = relationship(
+    diagnosticos: Mapped[list["IADiagnostico"]] = relationship(  # noqa: F821
         back_populates="chat", cascade="all, delete-orphan"
     )
-    tags: Mapped[list["Tag"]] = relationship(
+    tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
         secondary="chat_tag", back_populates="chats"
     )

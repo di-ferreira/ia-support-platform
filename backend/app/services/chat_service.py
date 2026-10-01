@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -51,8 +51,8 @@ class ChatService:
         count_query = select(Chat.id)
 
         if user and user.perfil.value == "atendente":
-            unassigned = Chat.atendente_id == None
-            no_setor = Chat.setor_alvo == None
+            unassigned = Chat.atendente_id.is_(None)
+            no_setor = Chat.setor_alvo.is_(None)
             meu_setor = Chat.setor_alvo == user.setor
             condition = (Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor))
             query = query.where(condition)
@@ -114,7 +114,7 @@ class ChatService:
             )
         chat.status = novo_status
         if novo_status in (StatusChat.resolvido, StatusChat.encerrado):
-            chat.ultima_mensagem_em = datetime.now(timezone.utc)
+            chat.ultima_mensagem_em = datetime.now(UTC)
         await self.session.commit()
         await self.session.refresh(chat)
         return chat
@@ -168,7 +168,11 @@ class ChatService:
             )
         chat.atendente_id = novo_atendente_id
         chat.setor_alvo = None
-        if chat.status in (StatusChat.aguardando_humano_com_solucao, StatusChat.aguardando_humano_sem_solucao, StatusChat.novo):
+        if chat.status in (
+            StatusChat.aguardando_humano_com_solucao,
+            StatusChat.aguardando_humano_sem_solucao,
+            StatusChat.novo,
+        ):
             chat.status = StatusChat.em_atendimento
         await self.session.commit()
         await self.session.refresh(chat)

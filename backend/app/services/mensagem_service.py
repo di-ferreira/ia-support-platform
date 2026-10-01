@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -32,7 +32,7 @@ class MensagemService:
             )
         mensagem = Mensagem(**data)
         self.session.add(mensagem)
-        chat.ultima_mensagem_em = datetime.now(timezone.utc)
+        chat.ultima_mensagem_em = datetime.now(UTC)
         await self.session.commit()
         await self.session.refresh(mensagem)
         return mensagem
