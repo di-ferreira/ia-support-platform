@@ -24,6 +24,7 @@ from app.core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings.validate_production_secrets()
     yield
 
 

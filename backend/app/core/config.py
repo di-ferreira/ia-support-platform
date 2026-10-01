@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
 
+_INSECURE_DEFAULT_SECRET = "change-me-in-production"
+
 
 class Settings(BaseSettings):
     app_name: str = "EMSoft Support API"
@@ -8,7 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     database_url_prod: str | None = None
 
-    secret_key: str = "change-me-in-production"
+    secret_key: str = _INSECURE_DEFAULT_SECRET
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7
@@ -39,6 +41,15 @@ class Settings(BaseSettings):
         if self.environment == "production" and self.database_url_prod:
             return self.database_url_prod
         return self.database_url
+
+    def validate_production_secrets(self) -> None:
+        if self.environment != "production":
+            return
+        if not self.secret_key or self.secret_key == _INSECURE_DEFAULT_SECRET:
+            raise ValueError(
+                "SECRET_KEY ausente ou com valor padrão; "
+                "defina uma chave forte antes de subir para produção"
+            )
 
 
 settings = Settings()
