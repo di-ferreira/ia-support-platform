@@ -87,6 +87,7 @@ services:
       N8N_PROTOCOL: https
       N8N_HOST: n8n.emsoft.app
       EVOLUTION_API_URL: http://evolution-api:8080
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.rule=Host(`n8n.emsoft.app`)"
