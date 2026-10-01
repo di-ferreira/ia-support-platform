@@ -19,6 +19,7 @@ dependencies = [
     "python-multipart>=0.0.9",
     "asyncpg>=0.29.0",
     "redis>=5.0.0",
+    "qdrant-client>=1.18.0",
 ]
 
 [project.optional-dependencies]
