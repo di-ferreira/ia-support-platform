@@ -118,7 +118,7 @@ async def definir_prioridade(
     chat_id: int,
     body: ChatPrioridade,
     session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
+    user: Atendente = Depends(require_perfil("admin", "supervisor")),
 ):
     service = ChatService(session)
     return await service.definir_prioridade(chat_id, body.prioridade)

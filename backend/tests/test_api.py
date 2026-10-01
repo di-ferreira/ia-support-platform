@@ -194,6 +194,26 @@ async def test_atendente_cannot_set_prioridade(client, atendente_token, session)
 
 
 @pytest.mark.asyncio
+async def test_admin_can_set_prioridade(client, admin_token, session):
+    from app.models.cliente import Cliente
+
+    session.add(Cliente(nome="Teste", documento="11222333000181"))
+    await session.commit()
+    await client.post(
+        "/chats",
+        json={"cliente_id": 1},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    resp = await client.patch(
+        "/chats/1/prioridade",
+        json={"prioridade": "urgente"},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["prioridade"] == "urgente"
+
+
+@pytest.mark.asyncio
 async def test_atendente_cannot_assinar_chat(client, atendente_token, session):
     from app.models.cliente import Cliente
 
