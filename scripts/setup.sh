@@ -7,53 +7,30 @@ echo "============================================"
 echo "  EMSoft Support AI - Setup"
 echo "============================================"
 
-# ── Backend ──────────────────────────────────────
+# ── Appwrite (fonte de dados) ─────────────────────
 echo ""
-echo "[1/4] Configurando backend..."
+echo "[1/5] Subindo Appwrite (infra/appwrite)..."
+cd "$ROOT_DIR"
+docker compose -f "$ROOT_DIR/infra/appwrite/docker-compose.yml" up -d
+echo "  → Appwrite em http://localhost:8020"
 
+# ── Backend ────────────────────────────────────────
+echo ""
+echo "[2/5] Configurando backend..."
 cd "$ROOT_DIR/backend"
+uv sync --quiet
+echo "  → Dependências sincronizadas (uv sync)"
 
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-    echo "  → Virtual environment criado em backend/.venv"
-fi
-
-source .venv/bin/activate
-echo "  → Python: $(which python3) ($(python3 --version))"
-
-pip install -q -r requirements.txt
-echo "  → Dependências instaladas"
-
-alembic upgrade head
-echo "  → Migrations aplicadas"
-
-python3 -c "
-import asyncio
-from app.core.database import async_session, engine, Base
-from app.core.security import hash_password
-
-async def seed():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    async with async_session() as session:
-        from sqlalchemy import text
-        from app.models.atendente import Atendente
-        result = await session.execute(text('SELECT COUNT(*) FROM atendente'))
-        if result.scalar() == 0:
-            session.add(Atendente(nome='Admin', email='admin@emsoft.app', hash_senha=hash_password('admin123'), perfil='admin', ativo=True))
-            session.add(Atendente(nome='Suporte', email='suporte@emsoft.app', hash_senha=hash_password('suporte123'), perfil='atendente', ativo=True))
-            await session.commit()
-            print('  → Seed: admin + suporte criados')
-        else:
-            print('  → Seed ignorado — dados já existem')
-
-asyncio.run(seed())
-" 2>&1 | grep -v "^INFO\|^$"
-
-# ── Frontend ─────────────────────────────────────
+# ── Infra dev ─────────────────────────────────────
 echo ""
-echo "[2/4] Configurando frontend..."
+echo "[3/5] Subindo infra dev (redis, qdrant, n8n, evolution)..."
+cd "$ROOT_DIR"
+docker compose -f "$ROOT_DIR/infra/docker-compose.dev.yml" up -d
+echo "  → Containers dev prontos"
 
+# ── Frontend ───────────────────────────────────────
+echo ""
+echo "[4/5] Configurando frontend..."
 cd "$ROOT_DIR/frontend"
 
 if [ ! -d "node_modules" ]; then
@@ -70,20 +47,19 @@ else
     echo "  → .env.local já existe"
 fi
 
-# ── Infra ────────────────────────────────────────
+# ── Seed Appwrite ──────────────────────────────────
 echo ""
-echo "[3/4] Verificando infraestrutura..."
-
+echo "[5/5] Seed do Appwrite..."
 cd "$ROOT_DIR"
-
-if docker compose -f infra/docker-compose.dev.yml ps --status running 2>/dev/null | grep -q "redis"; then
-    echo "  → Containers já rodando"
+if bash "$ROOT_DIR/scripts/seed.sh"; then
+    echo "  → Seed aplicado"
 else
-    echo "  → Subindo containers (Redis, Qdrant, n8n, Postgres)..."
-    docker compose -f infra/docker-compose.dev.yml up -d
+    echo "  → Seed adiado: crie o project + API key no console (http://localhost:8020),"
+    echo "    preencha APPWRITE_PROJECT_ID / APPWRITE_API_KEY em backend/.env,"
+    echo "    e rode ./scripts/seed.sh quando o Appwrite estiver no ar."
 fi
 
-# ── Resumo ───────────────────────────────────────
+# ── Resumo ─────────────────────────────────────────
 echo ""
 echo "============================================"
 echo "  Setup concluído!"
@@ -91,15 +67,13 @@ echo "============================================"
 echo ""
 echo "  Para iniciar o desenvolvimento:"
 echo ""
-echo "    source backend/.venv/bin/activate"
-echo "    scripts/start-dev.sh"
+echo "    ./scripts/start-dev.sh"
 echo ""
 echo "  Acessos:"
 echo "    Frontend : http://localhost:3000"
 echo "    Backend  : http://localhost:8001/docs"
-echo "    Portainer: https://localhost:9443"
+echo "    Appwrite : http://localhost:8020"
 echo ""
-echo "  Credenciais:"
+echo "  Credenciais (seed):"
 echo "    admin@emsoft.app / admin123    (admin)"
-echo "    suporte@emsoft.app / suporte123 (atendente)"
 echo ""

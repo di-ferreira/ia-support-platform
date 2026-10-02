@@ -9,11 +9,9 @@ Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSo
 
 | Camada | Tecnologia |
 |---|---|
-| **Backend** | Python 3.11+, FastAPI, SQLAlchemy 2.0 (async) |
+| **Backend** | Python 3.11+, FastAPI |
 | **Frontend** | Next.js 15, Tailwind CSS 4, React Query, Zustand |
-| **Banco Dev** | PostgreSQL (Supabase local) |
-| **Banco Prod** | PostgreSQL (Supabase Cloud) |
-| **Migrations** | Alembic |
+| **Dados** | Appwrite (self-hosted) |
 | **Cache** | Redis |
 | **Vetores** | Qdrant |
 | **Orquestração** | n8n |
@@ -36,37 +34,38 @@ cp infra/.env.example infra/.env
 # Editar infra/.env com suas chaves (OpenAI, Evolution API, etc.)
 ```
 
-### 1. Infraestrutura (PostgreSQL, Redis, Qdrant, n8n, Evolution API, Studio)
+### 1. Appwrite (fonte de dados)
 
 ```bash
-docker compose -f infra/docker-compose.dev.yml up -d
+docker compose -f infra/appwrite/docker-compose.yml up -d
 ```
 
-Serviços incluídos:
-| Serviço | Porta |
-|---|---|
-| PostgreSQL (Supabase) | `5432` |
-| Redis | `6379` |
-| Qdrant | `6333` |
-| n8n | `5678` |
-| Evolution API | `8080` |
-| Supabase Studio (admin DB) | `54323` |
+- Console: http://localhost:8020
+- Crie um **project** e uma **API key** (papel *Database*) no console.
+- Copie `backend/.env.example` para `backend/.env` e preencha
+  `APPWRITE_PROJECT_ID` e `APPWRITE_API_KEY`.
 
 ### 2. Backend
 
 ```bash
 cd backend
-pip install -r requirements.txt
-cp .env.example .env   # configure if needed
-alembic upgrade head
-python3 -m app.scripts.seed
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+uv sync
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 # → http://localhost:8001/docs
 ```
 
 > A porta 8000 é usada pelo Portainer. O backend usa 8001 por padrão.
 
-### 3. Frontend
+### 3. Seed (primeiro atendente)
+
+```bash
+./scripts/seed.sh
+```
+
+Cria o schema Appwrite (idempotente) e o 1º atendente admin
+(`SEED_ATENDENTE_EMAIL` / `SEED_ATENDENTE_SENHA`, default `admin@emsoft.app` / `admin123`).
+
+### 4. Frontend
 
 ```bash
 cd frontend
@@ -91,10 +90,8 @@ npm run dev
 ./scripts/setup.sh
 ```
 
-Cria venv, instala dependências, aplica migrations, popula seed,
-configura frontend e verifica containers Docker.
-
----
+Sobe o Appwrite e a infra de dev, instala dependências com `uv sync`,
+prepara o frontend e roda o seed (best-effort).
 
 ---
 
@@ -107,28 +104,28 @@ configura frontend e verifica containers Docker.
 │   │   ├── api/
 │   │   │   ├── routes/      # Endpoints (auth, clientes, chats, etc.)
 │   │   │   └── websocket_manager.py
-│   │   ├── core/            # Config, database, security
-│   │   ├── models/          # SQLAlchemy models (9 tabelas)
+│   │   ├── appwrite/        # Fonte de dados (schema, bootstrap, repositórios)
+│   │   ├── core/            # Config, security
+│   │   ├── models/          # (legado) SQLAlchemy models
 │   │   ├── schemas/         # Pydantic schemas
 │   │   └── services/        # Business logic
-│   ├── alembic/             # Migrations
-│   ├── requirements.txt     # Dependências (fonte canônica)
-│   └── tests/               # Pytest (33 testes)
+│   ├── alembic/             # (legado) migrations
+│   ├── pyproject.toml       # Dependências (uv, fonte canônica)
+│   └── tests/               # Pytest
 ├── frontend/
 │   └── src/
-│       ├── app/             # Next.js pages (7 páginas)
+│       ├── app/             # Next.js pages
 │       ├── components/      # UI components
 │       ├── hooks/           # Custom hooks
 │       └── lib/             # API client, stores
 ├── infra/
 │   ├── .env.example             # Template de variáveis de ambiente
-│   ├── docker-compose.dev.yml   # Dev (Redis, Qdrant, n8n, Evolution, Supabase PG + Studio)
-│   ├── docker-compose.prod.yml  # Prod (+Traefik, PostgreSQL)
-│   ├── docker-compose.supabase.yml  # Prod (+ stack completo Supabase self-hosted)
-│   ├── supabase/kong.yml        # Config do Kong API Gateway
+│   ├── appwrite/              # Appwrite self-hosted (docker-compose.yml + .env)
+│   ├── docker-compose.dev.yml   # Dev (Redis, Qdrant, n8n, Evolution)
+│   ├── docker-compose.prod.yml  # Prod (+Traefik)
 │   ├── traefik/
 │   └── n8n/                     # Workflow export
-├── scripts/                 # setup, start-dev, start-prod, migrate, seed, backup
+├── scripts/                 # setup, start-dev, start-prod, seed, backup
 └── docs/                    # Documentation
 ```
 
@@ -203,38 +200,40 @@ python -m pytest tests/ -v
 
 ## Deploy
 
-### Produção (com Supabase self-hosted)
+### Produção
 
 ```bash
-# Subir stack completa (aplicação + Supabase)
-docker compose -f infra/docker-compose.prod.yml -f infra/docker-compose.supabase.yml up -d
+# Appwrite (fonte de dados)
+docker compose -f infra/appwrite/docker-compose.yml up -d
+
+# Aplicação
+docker compose -f infra/docker-compose.prod.yml up -d
 
 # Backup
 ./scripts/backup.sh
 ```
-
-> O `docker-compose.supabase.yml` adiciona o stack completo do Supabase:
-> Kong (API Gateway), Auth (GoTrue), PostgREST, Realtime, Storage API, Studio e Image Proxy.
-> Remove os serviços `postgres` e `minio` do `docker-compose.prod.yml` ao usar este stack.
 
 ## Infraestrutura Docker
 
 ### Dev (ambiente local)
 
 ```bash
-# Subir tudo
+# Appwrite (fonte de dados)
+docker compose -f infra/appwrite/docker-compose.yml up -d
+
+# Infra de apoio
 docker compose -f infra/docker-compose.dev.yml up -d
 
 # Serviços:
-#   PostgreSQL (Supabase) → localhost:5432
-#   Supabase Studio       → http://localhost:54323
-#   Redis                 → localhost:6379
-#   Qdrant                → localhost:6333
-#   n8n                   → localhost:5678
-#   Evolution             → localhost:8080
+#   Appwrite (core + console) → http://localhost:8020
+#   Redis                     → localhost:6379
+#   Qdrant                    → localhost:6333
+#   n8n                       → localhost:5678
+#   Evolution                 → localhost:8080
 
 # Parar tudo
 docker compose -f infra/docker-compose.dev.yml down
+docker compose -f infra/appwrite/docker-compose.yml down
 ```
 
 ### Prod (ambiente production)
