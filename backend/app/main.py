@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -19,14 +20,23 @@ from app.api.routes import (
     whatsapp_router,
 )
 from app.api.websocket_manager import manager
-from app.core.appwrite import build_appwrite_client
+from app.appwrite.bootstrap import ensure_appwrite_schema
+from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings.validate_production_secrets()
     app.state.appwrite = build_appwrite_client()
+    app.state.appwrite_databases = build_appwrite_databases(app.state.appwrite)
+    try:
+        ensure_appwrite_schema(app.state.appwrite_databases)
+    except Exception:
+        # Best-effort: a API sobe mesmo com Appwrite fora; o schema é criado no próximo boot.
+        logger.exception("Appwrite: falha ao garantir o schema (verifique o serviço)")
     yield
 
 
