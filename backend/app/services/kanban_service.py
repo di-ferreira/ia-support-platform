@@ -1,9 +1,5 @@
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
-from app.models.atendente import Atendente
-from app.models.chat import Chat, StatusChat
+from app.appwrite.repositories import Repositories
+from app.models.chat import PrioridadeChat
 
 COLUNAS = [
     ("NOVO", "Novos"),
@@ -17,45 +13,53 @@ COLUNAS = [
 
 
 class KanbanService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, repos: Repositories):
+        self.repos = repos
 
-    async def obter_kanban(self, user: Atendente | None = None) -> list[dict]:
+    @staticmethod
+    def _rank(prioridade: str) -> int:
+        valores = [m.value for m in PrioridadeChat]
+        return valores.index(prioridade) if prioridade in valores else 0
+
+    async def obter_kanban(self, user: dict | None = None) -> list[dict]:
+        todos = await self.repos.chats.list_all()
         result = []
         for status_key, label in COLUNAS:
-            status_enum = StatusChat(status_key)
-            stmt = select(Chat).where(Chat.status == status_enum)
-            if user and user.perfil.value == "atendente":
-                unassigned = Chat.atendente_id.is_(None)
-                no_setor = Chat.setor_alvo.is_(None)
-                meu_setor = Chat.setor_alvo == user.setor
-                stmt = stmt.where(
-                    (Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor))
-                )
-            stmt = stmt.options(selectinload(Chat.cliente), selectinload(Chat.atendente))
-            stmt = stmt.order_by(Chat.prioridade.desc(), Chat.created_at.asc())
-            rows = (await self.session.execute(stmt)).scalars().all()
+            coluna = [c for c in todos if c["status"] == status_key]
+            if user and user["perfil"] == "atendente":
+                coluna = [
+                    c
+                    for c in coluna
+                    if c["atendente_id"] == user["id"]
+                    or (
+                        c["atendente_id"] is None
+                        and (c["setor_alvo"] is None or c["setor_alvo"] == user["setor"])
+                    )
+                ]
+            coluna.sort(key=lambda c: (-self._rank(c["prioridade"]), c["created_at"] or ""))
             cards = []
-            for chat in rows:
+            for c in coluna:
+                cliente = await self.repos.clientes.get(c["cliente_id"])
+                atendente = (
+                    await self.repos.atendentes.get(c["atendente_id"])
+                    if c["atendente_id"]
+                    else None
+                )
                 cards.append(
                     {
-                        "id": chat.id,
-                        "cliente_nome": chat.cliente.nome if chat.cliente else "—",
-                        "cliente_id": chat.cliente_id,
-                        "setor_alvo": chat.setor_alvo,
-                        "resumo_problema": chat.resumo_problema,
-                        "prioridade": chat.prioridade.value,
-                        "status": chat.status.value,
-                        "nivel_confianca_ia": chat.nivel_confianca_ia,
-                        "necessita_humano": chat.necessita_humano,
-                        "atendente_id": chat.atendente_id,
-                        "atendente_nome": chat.atendente.nome if chat.atendente else None,
-                        "ultima_mensagem_em": (
-                            chat.ultima_mensagem_em.isoformat()
-                            if chat.ultima_mensagem_em
-                            else None
-                        ),
-                        "created_at": chat.created_at.isoformat(),
+                        "id": c["id"],
+                        "cliente_nome": cliente["nome"] if cliente else "—",
+                        "cliente_id": c["cliente_id"],
+                        "setor_alvo": c["setor_alvo"],
+                        "resumo_problema": c["resumo_problema"],
+                        "prioridade": c["prioridade"],
+                        "status": c["status"],
+                        "nivel_confianca_ia": c["nivel_confianca_ia"],
+                        "necessita_humano": c["necessita_humano"],
+                        "atendente_id": c["atendente_id"],
+                        "atendente_nome": atendente["nome"] if atendente else None,
+                        "ultima_mensagem_em": c["ultima_mensagem_em"],
+                        "created_at": c["created_at"],
                     }
                 )
             result.append({"status": status_key, "label": label, "cards": cards})

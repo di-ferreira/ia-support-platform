@@ -12,8 +12,8 @@ class MensagemCreate(BaseModel):
 
 
 class MensagemResponse(BaseModel):
-    id: int
-    chat_id: int
+    id: str
+    chat_id: str
     remetente: str
     tipo: str
     conteudo: str | None
@@ -29,5 +29,5 @@ class EnviarWhatsAppRequest(BaseModel):
 
 
 class EnviarWhatsAppResponse(BaseModel):
-    chat_id: int
-    mensagem_id: int
+    chat_id: str
+    mensagem_id: str

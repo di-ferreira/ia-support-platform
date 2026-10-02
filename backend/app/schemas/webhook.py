@@ -6,9 +6,9 @@ from app.models.mensagem import TipoMensagem
 
 
 class WebhookMensagem(BaseModel):
-    chat_id: int | None = None
+    chat_id: str | None = None
     whatsapp_number: str
-    cliente_id: int | None = None
+    cliente_id: str | None = None
     remetente: str | None = None
     conteudo: str | None = None
     tipo: TipoMensagem = TipoMensagem.texto
@@ -16,12 +16,12 @@ class WebhookMensagem(BaseModel):
 
 
 class WebhookStatusUpdate(BaseModel):
-    chat_id: int
+    chat_id: str
     status: StatusChat
 
 
 class WebhookDiagnostico(BaseModel):
-    chat_id: int
+    chat_id: str
     status_ia: StatusIA
     resumo: str | None = None
     solucao: str | None = None
@@ -41,9 +41,9 @@ class WebhookClienteUpdate(BaseModel):
 
 
 class WebhookContexto(BaseModel):
-    chat_id: int
+    chat_id: str
     status: StatusChat
-    cliente_id: int
+    cliente_id: str
     cliente_nome: str | None = None
     whatsapp_number: str | None = None
     ultima_mensagem: str | None = None

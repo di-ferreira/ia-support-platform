@@ -21,6 +21,7 @@ from app.api.routes import (
 )
 from app.api.websocket_manager import manager
 from app.appwrite.bootstrap import ensure_appwrite_schema
+from app.appwrite.repositories import Repositories
 from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
 
@@ -32,6 +33,7 @@ async def lifespan(app: FastAPI):
     settings.validate_production_secrets()
     app.state.appwrite = build_appwrite_client()
     app.state.appwrite_databases = build_appwrite_databases(app.state.appwrite)
+    app.state.repositories = Repositories(app.state.appwrite_databases)
     try:
         ensure_appwrite_schema(app.state.appwrite_databases)
     except Exception:
@@ -70,7 +72,7 @@ app.include_router(whatsapp_router)
 
 
 @app.websocket("/ws/chat/{chat_id}")
-async def websocket_chat(websocket: WebSocket, chat_id: int, token: str | None = None):
+async def websocket_chat(websocket: WebSocket, chat_id: str, token: str | None = None):
     await manager.connect(chat_id, websocket, token)
     try:
         while True:

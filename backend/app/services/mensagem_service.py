@@ -1,38 +1,37 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.chat import Chat
-from app.models.mensagem import Mensagem
+from app.appwrite.repositories import Repositories
 
 
 class MensagemService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, repos: Repositories):
+        self.repos = repos
 
-    async def listar(self, chat_id: int, skip: int = 0, limit: int = 100) -> list[Mensagem]:
-        result = await self.session.execute(
-            select(Mensagem)
-            .where(Mensagem.chat_id == chat_id)
-            .order_by(Mensagem.created_at.asc())
-            .offset(skip)
-            .limit(limit)
-        )
-        return list(result.scalars().all())
+    async def listar(self, chat_id: str, skip: int = 0, limit: int = 100) -> list[dict]:
+        msgs = await self.repos.mensagens.list_by_chat(chat_id)
+        msgs.sort(key=lambda m: m["created_at"] or "")
+        return msgs[skip : skip + limit]
 
-    async def enviar(self, data: dict) -> Mensagem:
-        chat_id = data.get("chat_id")
-        result = await self.session.execute(select(Chat).where(Chat.id == chat_id))
-        chat = result.scalar_one_or_none()
-        if not chat:
+    async def enviar(self, data: dict) -> dict:
+        chat_id = data["chat_id"]
+        if not await self.repos.chats.get(chat_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
             )
-        mensagem = Mensagem(**data)
-        self.session.add(mensagem)
-        chat.ultima_mensagem_em = datetime.now(UTC)
-        await self.session.commit()
-        await self.session.refresh(mensagem)
+        remetente = data["remetente"]
+        tipo = data["tipo"]
+        mensagem = await self.repos.mensagens.create(
+            {
+                "chat_id": chat_id,
+                "remetente": remetente.value if hasattr(remetente, "value") else remetente,
+                "tipo": tipo.value if hasattr(tipo, "value") else tipo,
+                "conteudo": data.get("conteudo"),
+                "url_arquivo": data.get("url_arquivo"),
+            }
+        )
+        await self.repos.chats.update(
+            chat_id, {"ultima_mensagem_em": datetime.now(UTC).isoformat()}
+        )
         return mensagem

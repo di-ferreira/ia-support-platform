@@ -6,8 +6,8 @@ from app.models.chat import PrioridadeChat, StatusChat
 
 
 class ChatCreate(BaseModel):
-    cliente_id: int
-    loja_id: int | None = None
+    cliente_id: str
+    loja_id: str | None = None
     whatsapp_number: str | None = None
 
 
@@ -16,7 +16,7 @@ class ChatUpdateStatus(BaseModel):
 
 
 class ChatAssign(BaseModel):
-    atendente_id: int
+    atendente_id: str
 
 
 class ChatPrioridade(BaseModel):
@@ -24,7 +24,7 @@ class ChatPrioridade(BaseModel):
 
 
 class ChatTransferir(BaseModel):
-    atendente_id: int
+    atendente_id: str
 
 
 class ChatTransferirGrupo(BaseModel):
@@ -32,8 +32,8 @@ class ChatTransferirGrupo(BaseModel):
 
 
 class ChatListResponse(BaseModel):
-    id: int
-    cliente_id: int
+    id: str
+    cliente_id: str
     cliente_nome: str | None = None
     status: StatusChat
     prioridade: PrioridadeChat
@@ -41,7 +41,7 @@ class ChatListResponse(BaseModel):
     solucao_sugerida_ia: str | None = None
     nivel_confianca_ia: float | None = None
     necessita_humano: bool | None = None
-    atendente_id: int | None = None
+    atendente_id: str | None = None
     setor_alvo: str | None = None
     ultima_mensagem_em: datetime | None = None
     ultima_mensagem: str | None = None
@@ -51,10 +51,10 @@ class ChatListResponse(BaseModel):
 
 
 class ChatDetailResponse(BaseModel):
-    id: int
-    cliente_id: int
-    loja_id: int | None = None
-    atendente_id: int | None = None
+    id: str
+    cliente_id: str
+    loja_id: str | None = None
+    atendente_id: str | None = None
     setor_alvo: str | None = None
     status: StatusChat
     prioridade: PrioridadeChat

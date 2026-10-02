@@ -34,7 +34,7 @@ def create_refresh_token(data: dict) -> str:
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
-def create_tokens(user_id: int, perfil: str) -> dict:
+def create_tokens(user_id: str, perfil: str) -> dict:
     payload = {"sub": str(user_id), "perfil": perfil}
     return {
         "access_token": create_access_token(payload),

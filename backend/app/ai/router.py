@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.ai.ai_cache import ai_cache
 from app.ai.ollama_service import OllamaService
@@ -12,12 +10,10 @@ from app.ai.prompts import (
     SUMMARIZE_SYSTEM,
     build_messages,
 )
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_repositories
+from app.appwrite.repositories import Repositories
 from app.core.config import settings
-from app.core.database import get_session
-from app.models.atendente import Atendente
-from app.models.chat import Chat, StatusChat
-from app.models.mensagem import Mensagem
+from app.models.chat import StatusChat
 from app.services.qdrant_service import search_similar
 
 router = APIRouter(prefix="/ai", tags=["IA"])
@@ -34,8 +30,7 @@ def _get_llm():
 @router.post("/classificar")
 async def classificar(
     mensagem: str,
-    session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
+    user: dict = Depends(get_current_user),
 ):
     llm = _get_llm()
     prompt = mensagem
@@ -51,31 +46,24 @@ async def classificar(
 
 @router.post("/analisar")
 async def analisar_chat(
-    chat_id: int,
+    chat_id: str,
     tipo: str = "diagnosticar",
-    session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
 ):
-    result = await session.execute(
-        select(Chat).where(Chat.id == chat_id)
-    )
-    chat = result.scalar_one_or_none()
+    chat = await repos.chats.get(chat_id)
     if not chat:
-        from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado")
 
-    from app.models.mensagem import Mensagem
-    msgs = await session.execute(
-        select(Mensagem)
-        .where(Mensagem.chat_id == chat_id)
-        .order_by(Mensagem.created_at.asc())
+    msgs = sorted(
+        await repos.mensagens.list_by_chat(chat_id),
+        key=lambda m: m["created_at"] or "",
     )
     historico = "\n".join(
-        f"[{m.remetente.value}] {m.conteudo or '(mídia)'}"
-        for m in msgs.scalars().all()
+        f"[{m['remetente']}] {m['conteudo'] or '(mídia)'}" for m in msgs
     )
 
-    system_prompt = SUMMARIZE_SYSTEM if tipo == "sumarizar" else DIAGNOSE_SYSTEM
+    system_prompt = SUMMARIZE_SYSTEM if tipo == "summarizar" else DIAGNOSE_SYSTEM
     llm = _get_llm()
     messages = build_messages(system_prompt, historico)
     return await llm.chat_json(messages)
@@ -83,29 +71,23 @@ async def analisar_chat(
 
 @router.post("/solucionar")
 async def solucionar(
-    chat_id: int,
-    session: AsyncSession = Depends(get_session),
-    user: Atendente = Depends(get_current_user),
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
 ):
-    result = await session.execute(
-        select(Chat).where(Chat.id == chat_id)
-    )
-    chat = result.scalar_one_or_none()
+    chat = await repos.chats.get(chat_id)
     if not chat:
-        from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado")
 
-    msgs = await session.execute(
-        select(Mensagem)
-        .where(Mensagem.chat_id == chat_id)
-        .order_by(Mensagem.created_at.asc())
+    todas = sorted(
+        await repos.mensagens.list_by_chat(chat_id),
+        key=lambda m: m["created_at"] or "",
     )
-    todas = msgs.scalars().all()
     ultima_msg = todas[-1] if todas else None
-    mensagem_cliente = ultima_msg.conteudo if ultima_msg else ""
+    mensagem_cliente = ultima_msg["conteudo"] if ultima_msg else ""
 
     historico = "\n".join(
-        f"[{m.remetente.value}] {m.conteudo or '(mídia)'}" for m in todas
+        f"[{m['remetente']}] {m['conteudo'] or '(mídia)'}" for m in todas
     )
 
     llm = _get_llm()
@@ -133,27 +115,27 @@ async def solucionar(
     )
     result = await llm.chat_json(messages)
 
-    # Atualizar status do chat conforme resposta da IA
     try:
         precisa_humano = result.get("precisa_humano", True)
         solucao = result.get("solucao")
 
-        if chat.status in (StatusChat.novo, StatusChat.aguardando_cliente):
-            chat.status = StatusChat.ia_analisando
+        data = {}
+        if chat["status"] in (StatusChat.novo.value, StatusChat.aguardando_cliente.value):
+            data["status"] = StatusChat.ia_analisando.value
 
-        chat.solucao_sugerida_ia = solucao
-        chat.necessita_humano = precisa_humano
+        data["solucao_sugerida_ia"] = solucao
+        data["necessita_humano"] = precisa_humano
 
         if precisa_humano:
-            chat.status = (
-                StatusChat.aguardando_humano_com_solucao
+            data["status"] = (
+                StatusChat.aguardando_humano_com_solucao.value
                 if solucao
-                else StatusChat.aguardando_humano_sem_solucao
+                else StatusChat.aguardando_humano_sem_solucao.value
             )
         else:
-            chat.status = StatusChat.aguardando_cliente
+            data["status"] = StatusChat.aguardando_cliente.value
 
-        await session.commit()
+        await repos.chats.update(chat_id, data)
     except Exception:
         pass
 

@@ -1,13 +1,9 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from app.models.atendente import Atendente
-from app.models.chat import Chat, PrioridadeChat, StatusChat
-from app.models.cliente import Cliente
+from app.appwrite.repositories import Repositories
+from app.models.chat import PrioridadeChat, StatusChat
 
 STATUS_TRANSITIONS = {
     StatusChat.novo: [StatusChat.ia_analisando],
@@ -35,160 +31,154 @@ STATUS_TRANSITIONS = {
 
 
 class ChatService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, repos: Repositories):
+        self.repos = repos
 
     async def listar(
         self,
         skip: int = 0,
         limit: int = 50,
         status: StatusChat | None = None,
-        cliente_id: int | None = None,
+        cliente_id: str | None = None,
         prioridade: PrioridadeChat | None = None,
-        user: Atendente | None = None,
-    ) -> tuple[list[Chat], int]:
-        query = select(Chat).order_by(Chat.ultima_mensagem_em.desc().nullslast())
-        count_query = select(Chat.id)
+        user: dict | None = None,
+    ) -> tuple[list[dict], int]:
+        chats = await self.repos.chats.list_all()
 
-        if user and user.perfil.value == "atendente":
-            unassigned = Chat.atendente_id.is_(None)
-            no_setor = Chat.setor_alvo.is_(None)
-            meu_setor = Chat.setor_alvo == user.setor
-            condition = (Chat.atendente_id == user.id) | (unassigned & (no_setor | meu_setor))
-            query = query.where(condition)
-            count_query = count_query.where(condition)
+        if user and user["perfil"] == "atendente":
+            def pode_ver(c: dict) -> bool:
+                if c["atendente_id"] == user["id"]:
+                    return True
+                return (
+                    c["atendente_id"] is None
+                    and (c["setor_alvo"] is None or c["setor_alvo"] == user["setor"])
+                )
+
+            chats = [c for c in chats if pode_ver(c)]
         if status:
-            query = query.where(Chat.status == status)
-            count_query = count_query.where(Chat.status == status)
+            chats = [c for c in chats if c["status"] == status.value]
         if cliente_id:
-            query = query.where(Chat.cliente_id == cliente_id)
-            count_query = count_query.where(Chat.cliente_id == cliente_id)
+            chats = [c for c in chats if c["cliente_id"] == cliente_id]
         if prioridade:
-            query = query.where(Chat.prioridade == prioridade)
-            count_query = count_query.where(Chat.prioridade == prioridade)
+            chats = [c for c in chats if c["prioridade"] == prioridade.value]
 
-        total = len((await self.session.execute(count_query)).scalars().all())
-        result = await self.session.execute(
-            query.options(selectinload(Chat.cliente)).offset(skip).limit(limit)
-        )
-        return list(result.scalars().all()), total
+        chats.sort(key=lambda c: c.get("ultima_mensagem_em") or "", reverse=True)
+        total = len(chats)
+        page = chats[skip : skip + limit]
 
-    async def obter(self, chat_id: int) -> Chat:
-        result = await self.session.execute(
-            select(Chat)
-            .where(Chat.id == chat_id)
-            .options(
-                selectinload(Chat.cliente),
-                selectinload(Chat.mensagens),
-                selectinload(Chat.diagnosticos),
+        result = []
+        for c in page:
+            cliente = await self.repos.clientes.get(c["cliente_id"])
+            msgs = await self.repos.mensagens.list_by_chat(c["id"])
+            ultima = max(msgs, key=lambda m: m["created_at"]) if msgs else None
+            result.append(
+                {
+                    "id": c["id"],
+                    "cliente_id": c["cliente_id"],
+                    "cliente_nome": cliente["nome"] if cliente else None,
+                    "status": c["status"],
+                    "prioridade": c["prioridade"],
+                    "resumo_problema": c["resumo_problema"],
+                    "solucao_sugerida_ia": c["solucao_sugerida_ia"],
+                    "nivel_confianca_ia": c["nivel_confianca_ia"],
+                    "necessita_humano": c["necessita_humano"],
+                    "atendente_id": c["atendente_id"],
+                    "setor_alvo": c["setor_alvo"],
+                    "ultima_mensagem_em": c["ultima_mensagem_em"],
+                    "ultima_mensagem": ultima["conteudo"] if ultima else None,
+                    "created_at": c["created_at"],
+                }
             )
-        )
-        chat = result.scalar_one_or_none()
+        return result, total
+
+    async def obter(self, chat_id: str) -> dict:
+        chat = await self.repos.chats.get(chat_id)
         if not chat:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
             )
         return chat
 
-    async def criar(self, data: dict) -> Chat:
-        cliente_id = data.get("cliente_id")
-        result = await self.session.execute(
-            select(Cliente).where(Cliente.id == cliente_id)
-        )
-        if not result.scalar_one_or_none():
+    async def criar(self, data: dict) -> dict:
+        if not await self.repos.clientes.get(data["cliente_id"]):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado"
             )
-        chat = Chat(**data)
-        self.session.add(chat)
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+        return await self.repos.chats.create(
+            {
+                "cliente_id": data["cliente_id"],
+                "loja_id": data.get("loja_id"),
+                "whatsapp_number": data.get("whatsapp_number"),
+                "status": StatusChat.novo.value,
+                "prioridade": PrioridadeChat.media.value,
+            }
+        )
 
-    async def atualizar_status(self, chat_id: int, novo_status: StatusChat) -> Chat:
+    async def atualizar_status(self, chat_id: str, novo_status: StatusChat) -> dict:
         chat = await self.obter(chat_id)
-        if novo_status not in STATUS_TRANSITIONS.get(chat.status, []):
+        if novo_status not in STATUS_TRANSITIONS.get(chat["status"], []):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Transição inválida: {chat.status.value} → {novo_status.value}",
+                detail=f"Transição inválida: {chat['status']} → {novo_status.value}",
             )
-        chat.status = novo_status
+        data = {"status": novo_status.value}
         if novo_status in (StatusChat.resolvido, StatusChat.encerrado):
-            chat.ultima_mensagem_em = datetime.now(UTC)
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+            data["ultima_mensagem_em"] = datetime.now(UTC).isoformat()
+        return await self.repos.chats.update(chat_id, data)
 
-    async def assinar(self, chat_id: int, atendente_id: int) -> Chat:
+    async def assinar(self, chat_id: str, atendente_id: str) -> dict:
         chat = await self.obter(chat_id)
-        chat.atendente_id = atendente_id
-        if chat.status == StatusChat.novo:
-            chat.status = StatusChat.em_atendimento
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+        data = {"atendente_id": atendente_id}
+        if chat["status"] == StatusChat.novo:
+            data["status"] = StatusChat.em_atendimento.value
+        return await self.repos.chats.update(chat_id, data)
 
     async def definir_prioridade(
-        self, chat_id: int, prioridade: PrioridadeChat
-    ) -> Chat:
-        chat = await self.obter(chat_id)
-        chat.prioridade = prioridade
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+        self, chat_id: str, prioridade: PrioridadeChat
+    ) -> dict:
+        await self.obter(chat_id)
+        return await self.repos.chats.update(chat_id, {"prioridade": prioridade.value})
 
-    async def pegar(self, chat_id: int, atendente_id: int) -> Chat:
+    async def pegar(self, chat_id: str, atendente_id: str) -> dict:
         chat = await self.obter(chat_id)
-        if chat.atendente_id is not None and chat.atendente_id != atendente_id:
+        if chat["atendente_id"] is not None and chat["atendente_id"] != atendente_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Este chamado já está com outro atendente",
             )
-        chat.atendente_id = atendente_id
-        chat.setor_alvo = None
-        if chat.status == StatusChat.novo:
-            chat.status = StatusChat.em_atendimento
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+        data = {"atendente_id": atendente_id, "setor_alvo": None}
+        if chat["status"] == StatusChat.novo:
+            data["status"] = StatusChat.em_atendimento.value
+        return await self.repos.chats.update(chat_id, data)
 
-    async def transferir(self, chat_id: int, novo_atendente_id: int, user: Atendente) -> Chat:
+    async def transferir(self, chat_id: str, novo_atendente_id: str, user: dict) -> dict:
         chat = await self.obter(chat_id)
-        if user.perfil.value == "atendente" and chat.atendente_id != user.id:
+        if user["perfil"] == "atendente" and chat["atendente_id"] != user["id"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Você só pode transferir chamados seus",
             )
-        result = await self.session.execute(
-            select(Atendente).where(Atendente.id == novo_atendente_id)
-        )
-        if not result.scalar_one_or_none():
+        if not await self.repos.atendentes.get(novo_atendente_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Atendente não encontrado"
             )
-        chat.atendente_id = novo_atendente_id
-        chat.setor_alvo = None
-        if chat.status in (
-            StatusChat.aguardando_humano_com_solucao,
-            StatusChat.aguardando_humano_sem_solucao,
-            StatusChat.novo,
+        data = {"atendente_id": novo_atendente_id, "setor_alvo": None}
+        if chat["status"] in (
+            "AGUARDANDO_HUMANO_COM_SOLUCAO",
+            "AGUARDANDO_HUMANO_SEM_SOLUCAO",
+            "NOVO",
         ):
-            chat.status = StatusChat.em_atendimento
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+            data["status"] = StatusChat.em_atendimento.value
+        return await self.repos.chats.update(chat_id, data)
 
-    async def transferir_grupo(self, chat_id: int, setor: str, user: Atendente) -> Chat:
+    async def transferir_grupo(self, chat_id: str, setor: str, user: dict) -> dict:
         chat = await self.obter(chat_id)
-        if user.perfil.value == "atendente" and chat.atendente_id != user.id:
+        if user["perfil"] == "atendente" and chat["atendente_id"] != user["id"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Você só pode transferir chamados seus",
             )
-        chat.atendente_id = None
-        chat.setor_alvo = setor
-        if chat.status == StatusChat.em_atendimento:
-            chat.status = StatusChat.novo
-        await self.session.commit()
-        await self.session.refresh(chat)
-        return chat
+        data = {"atendente_id": None, "setor_alvo": setor}
+        if chat["status"] == StatusChat.em_atendimento:
+            data["status"] = StatusChat.novo.value
+        return await self.repos.chats.update(chat_id, data)

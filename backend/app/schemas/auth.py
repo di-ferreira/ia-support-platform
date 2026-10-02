@@ -19,7 +19,7 @@ class RefreshRequest(BaseModel):
 
 
 class AtendenteResponse(BaseModel):
-    id: int
+    id: str
     nome: str
     email: str
     perfil: str
@@ -49,7 +49,7 @@ class UsuarioUpdate(BaseModel):
 
 
 class UsuarioListResponse(BaseModel):
-    id: int
+    id: str
     nome: str
     email: str
     perfil: str

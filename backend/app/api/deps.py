@@ -2,12 +2,9 @@
 from appwrite.client import Client
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
+from app.appwrite.repositories import Repositories
 from app.core.security import decode_token
-from app.models.atendente import Atendente
 
 security = HTTPBearer()
 
@@ -16,10 +13,14 @@ def get_appwrite(request: Request) -> Client:
     return request.app.state.appwrite
 
 
+def get_repositories(request: Request) -> Repositories:
+    return request.app.state.repositories
+
+
 async def _get_user_from_token(
     credentials: HTTPAuthorizationCredentials | None,
-    session: AsyncSession,
-) -> Atendente:
+    repos: Repositories,
+) -> dict:
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token obrigatório"
@@ -29,12 +30,9 @@ async def _get_user_from_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
         )
-    user_id = int(payload.get("sub"))
-    result = await session.execute(
-        select(Atendente).where(Atendente.id == user_id)
-    )
-    user = result.scalar_one_or_none()
-    if user is None or not user.ativo:
+    user_id = payload.get("sub")
+    user = await repos.atendentes.get(user_id)
+    if user is None or not user["ativo"]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado"
         )
@@ -43,14 +41,14 @@ async def _get_user_from_token(
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    session: AsyncSession = Depends(get_session),
-) -> Atendente:
-    return await _get_user_from_token(credentials, session)
+    repos: Repositories = Depends(get_repositories),
+) -> dict:
+    return await _get_user_from_token(credentials, repos)
 
 
 def require_perfil(*perfis: str):
-    async def _check(user: Atendente = Depends(get_current_user)) -> Atendente:
-        if user.perfil.value not in perfis:
+    async def _check(user: dict = Depends(get_current_user)) -> dict:
+        if user["perfil"] not in perfis:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Sem permissão para esta ação",

@@ -5,9 +5,9 @@ from app.core.security import decode_token
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[int, list[WebSocket]] = {}
+        self.active_connections: dict[str, list[WebSocket]] = {}
 
-    async def connect(self, chat_id: int, websocket: WebSocket, token: str | None = None):
+    async def connect(self, chat_id: str, websocket: WebSocket, token: str | None = None):
         payload = decode_token(token or "")
         if payload is None or payload.get("typ") != "access":
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
@@ -17,13 +17,13 @@ class ConnectionManager:
             self.active_connections[chat_id] = []
         self.active_connections[chat_id].append(websocket)
 
-    def disconnect(self, chat_id: int, websocket: WebSocket):
+    def disconnect(self, chat_id: str, websocket: WebSocket):
         if chat_id in self.active_connections:
             self.active_connections[chat_id].remove(websocket)
             if not self.active_connections[chat_id]:
                 del self.active_connections[chat_id]
 
-    async def broadcast(self, chat_id: int, message: dict):
+    async def broadcast(self, chat_id: str, message: dict):
         if chat_id in self.active_connections:
             for connection in self.active_connections[chat_id]:
                 try:
@@ -31,7 +31,7 @@ class ConnectionManager:
                 except Exception:
                     pass
 
-    async def send_event(self, chat_id: int, event: str, data: dict | None = None):
+    async def send_event(self, chat_id: str, event: str, data: dict | None = None):
         await self.broadcast(chat_id, {"event": event, "data": data or {}})
 
 

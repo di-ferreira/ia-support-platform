@@ -21,7 +21,7 @@ class StatusCount(BaseModel):
 
 
 class ChatRecente(BaseModel):
-    id: int
+    id: str
     cliente_nome: str | None
     status: str
     prioridade: str

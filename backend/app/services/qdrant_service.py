@@ -45,7 +45,7 @@ async def search_similar(query_embedding: list[float], limit: int = 5) -> list[d
 
 
 async def upsert_article(
-    article_id: int,
+    article_id: str,
     titulo: str,
     conteudo: str | None,
     categoria: str,

@@ -1,11 +1,11 @@
 import hmac
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_repositories
 from app.api.websocket_manager import manager
+from app.appwrite.repositories import Repositories
 from app.core.config import settings
-from app.core.database import get_session
 from app.schemas.webhook import (
     WebhookClienteUpdate,
     WebhookContexto,
@@ -40,10 +40,10 @@ def _normalizar_payload(body: dict) -> dict:
     if whatsapp:
         result = dict(body)
         if "chat_id" in result:
-            try:
-                result["chat_id"] = int(result["chat_id"])
-            except (ValueError, TypeError):
+            if result["chat_id"] is None:
                 del result["chat_id"]
+            else:
+                result["chat_id"] = str(result["chat_id"])
         return result
 
     data = body.get("data") or {}
@@ -68,17 +68,17 @@ def _normalizar_payload(body: dict) -> dict:
 @router.post("/mensagem", status_code=201)
 async def webhook_mensagem(
     request: Request,
-    session: AsyncSession = Depends(get_session),
+    repos: Repositories = Depends(get_repositories),
     webhook_auth: None = Depends(verify_webhook),
 ):
     body = await request.json()
     payload = _normalizar_payload(body)
     validated = WebhookMensagem(**payload)
-    service = WebhookService(session)
+    service = WebhookService(repos)
     mensagem = await service.receber_mensagem(validated.model_dump())
     await manager.send_event(
-        mensagem.chat_id, "nova_mensagem",
-        {"chat_id": mensagem.chat_id, "mensagem_id": mensagem.id},
+        mensagem["chat_id"], "nova_mensagem",
+        {"chat_id": mensagem["chat_id"], "mensagem_id": mensagem["id"]},
     )
     return mensagem
 
@@ -86,10 +86,10 @@ async def webhook_mensagem(
 @router.patch("/chat/status")
 async def webhook_status(
     body: WebhookStatusUpdate,
-    session: AsyncSession = Depends(get_session),
+    repos: Repositories = Depends(get_repositories),
     webhook_auth: None = Depends(verify_webhook),
 ):
-    service = WebhookService(session)
+    service = WebhookService(repos)
     chat = await service.atualizar_status(body.chat_id, body.status)
     await manager.send_event(
         body.chat_id, "status_update",
@@ -101,40 +101,38 @@ async def webhook_status(
 @router.post("/chat/diagnostico")
 async def webhook_diagnostico(
     body: WebhookDiagnostico,
-    session: AsyncSession = Depends(get_session),
+    repos: Repositories = Depends(get_repositories),
     webhook_auth: None = Depends(verify_webhook),
 ):
-    service = WebhookService(session)
+    service = WebhookService(repos)
     diagnostico = await service.salvar_diagnostico(body.model_dump())
     await manager.send_event(
         body.chat_id, "diagnostico",
-        {"chat_id": body.chat_id, "diagnostico_id": diagnostico.id},
+        {"chat_id": body.chat_id, "diagnostico_id": diagnostico["id"]},
     )
     return diagnostico
 
 
 @router.patch("/cliente/{chat_id}")
 async def webhook_atualizar_cliente(
-    chat_id: int,
+    chat_id: str,
     body: WebhookClienteUpdate,
-    session: AsyncSession = Depends(get_session),
+    repos: Repositories = Depends(get_repositories),
     webhook_auth: None = Depends(verify_webhook),
 ):
-    service = WebhookService(session)
+    service = WebhookService(repos)
     return await service.atualizar_cliente(chat_id, body.model_dump(exclude_none=True))
 
 
 @router.get("/chat/{chat_id}/contexto", response_model=WebhookContexto)
 async def webhook_contexto(
-    chat_id: int,
-    session: AsyncSession = Depends(get_session),
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
     webhook_auth: None = Depends(verify_webhook),
 ):
-    service = WebhookService(session)
+    service = WebhookService(repos)
     contexto = await service.obter_contexto(chat_id)
     if not contexto:
-        from fastapi import HTTPException, status
-
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
         )

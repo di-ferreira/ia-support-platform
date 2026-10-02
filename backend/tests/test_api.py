@@ -1,5 +1,33 @@
 import pytest
 
+from app.core.security import hash_password
+
+
+async def seed_client(client, token, nome="Auto Peças Ltda", documento="11222333000181") -> str:
+    resp = await client.post(
+        "/clientes",
+        json={"nome": nome, "documento": documento},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+async def seed_chat(client, token, cliente_id: str) -> str:
+    resp = await client.post(
+        "/chats",
+        json={"cliente_id": cliente_id},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+async def seed_client_direct(fake_repos, nome="Teste", documento="11222333000181") -> str:
+    """Cria um cliente direto no repositório, sem passar pela rota (permissoes)."""
+    rec = await fake_repos.clientes.create({"nome": nome, "documento": documento})
+    return rec["id"]
+
 
 @pytest.mark.asyncio
 async def test_health(client):
@@ -9,22 +37,18 @@ async def test_health(client):
 
 
 @pytest.mark.asyncio
-async def test_login_success(client, session):
-    from app.core.security import hash_password
-    from app.models.atendente import Atendente
-
-    session.add(
-        Atendente(
-            nome="Admin",
-            email="admin@test.com",
-            hash_senha=hash_password("admin123"),
-            perfil="admin",
-            ativo=True,
-        )
+async def test_login_success(client, fake_repos):
+    await fake_repos.atendentes.create(
+        {
+            "nome": "Admin",
+            "email": "admin@test.com",
+            "hash_senha": hash_password("admin123"),
+            "perfil": "admin",
+        }
     )
-    await session.commit()
-
-    resp = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
+    resp = await client.post(
+        "/auth/login", json={"email": "admin@test.com", "senha": "admin123"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "access_token" in data
@@ -33,7 +57,9 @@ async def test_login_success(client, session):
 
 @pytest.mark.asyncio
 async def test_login_invalid(client):
-    resp = await client.post("/auth/login", json={"email": "noone@test.com", "senha": "wrong"})
+    resp = await client.post(
+        "/auth/login", json={"email": "noone@test.com", "senha": "wrong"}
+    )
     assert resp.status_code == 401
 
 
@@ -45,48 +71,42 @@ async def test_me(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_refresh_token_rejected_as_access(client, session):
-    from app.core.security import hash_password
-    from app.models.atendente import Atendente
-
-    session.add(
-        Atendente(
-            nome="Admin",
-            email="admin@test.com",
-            hash_senha=hash_password("admin123"),
-            perfil="admin",
-            ativo=True,
-        )
+async def test_refresh_token_rejected_as_access(client, fake_repos):
+    await fake_repos.atendentes.create(
+        {
+            "nome": "Admin",
+            "email": "admin@test.com",
+            "hash_senha": hash_password("admin123"),
+            "perfil": "admin",
+        }
     )
-    await session.commit()
-
-    login = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
+    login = await client.post(
+        "/auth/login", json={"email": "admin@test.com", "senha": "admin123"}
+    )
     refresh_token = login.json()["refresh_token"]
-
-    resp = await client.get("/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
+    resp = await client.get(
+        "/auth/me", headers={"Authorization": f"Bearer {refresh_token}"}
+    )
     assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
-async def test_access_token_rejected_at_refresh(client, session):
-    from app.core.security import hash_password
-    from app.models.atendente import Atendente
-
-    session.add(
-        Atendente(
-            nome="Admin",
-            email="admin@test.com",
-            hash_senha=hash_password("admin123"),
-            perfil="admin",
-            ativo=True,
-        )
+async def test_access_token_rejected_at_refresh(client, fake_repos):
+    await fake_repos.atendentes.create(
+        {
+            "nome": "Admin",
+            "email": "admin@test.com",
+            "hash_senha": hash_password("admin123"),
+            "perfil": "admin",
+        }
     )
-    await session.commit()
-
-    login = await client.post("/auth/login", json={"email": "admin@test.com", "senha": "admin123"})
+    login = await client.post(
+        "/auth/login", json={"email": "admin@test.com", "senha": "admin123"}
+    )
     access_token = login.json()["access_token"]
-
-    resp = await client.post("/auth/refresh", json={"refresh_token": access_token})
+    resp = await client.post(
+        "/auth/refresh", json={"refresh_token": access_token}
+    )
     assert resp.status_code == 401
 
 
@@ -103,17 +123,19 @@ async def test_create_cliente(client, admin_token):
 
 @pytest.mark.asyncio
 async def test_list_clientes_empty(client, admin_token):
-    resp = await client.get("/clientes", headers={"Authorization": f"Bearer {admin_token}"})
+    resp = await client.get(
+        "/clientes", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     assert resp.status_code == 200
     assert resp.json() == []
 
 
 @pytest.mark.asyncio
 async def test_create_chat(client, admin_token):
-    await test_create_cliente(client, admin_token)
+    cliente_id = await seed_client(client, admin_token)
     resp = await client.post(
         "/chats",
-        json={"cliente_id": 1},
+        json={"cliente_id": cliente_id},
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert resp.status_code == 201
@@ -122,14 +144,10 @@ async def test_create_chat(client, admin_token):
 
 @pytest.mark.asyncio
 async def test_create_message(client, admin_token):
-    await test_create_cliente(client, admin_token)
-    await client.post(
-        "/chats",
-        json={"cliente_id": 1},
-        headers={"Authorization": f"Bearer {admin_token}"},
-    )
+    cliente_id = await seed_client(client, admin_token)
+    chat_id = await seed_chat(client, admin_token, cliente_id)
     resp = await client.post(
-        "/chats/1/mensagens",
+        f"/chats/{chat_id}/mensagens",
         json={"remetente": "cliente", "tipo": "texto", "conteudo": "NF-e rejeitada"},
         headers={"Authorization": f"Bearer {admin_token}"},
     )
@@ -139,13 +157,11 @@ async def test_create_message(client, admin_token):
 
 @pytest.mark.asyncio
 async def test_kanban(client, admin_token):
-    await test_create_cliente(client, admin_token)
-    await client.post(
-        "/chats",
-        json={"cliente_id": 1},
-        headers={"Authorization": f"Bearer {admin_token}"},
+    cliente_id = await seed_client(client, admin_token)
+    await seed_chat(client, admin_token, cliente_id)
+    resp = await client.get(
+        "/kanban", headers={"Authorization": f"Bearer {admin_token}"}
     )
-    resp = await client.get("/kanban", headers={"Authorization": f"Bearer {admin_token}"})
     assert resp.status_code == 200
     data = resp.json()
     assert len(data["colunas"]) == 7
@@ -155,15 +171,12 @@ async def test_kanban(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_webhook_message(client, session):
+async def test_webhook_message(client, fake_repos):
     from app.core.config import settings
-    from app.models.cliente import Cliente
 
-    session.add(
-        Cliente(nome="Cliente Teste", documento="5511999999999", telefone="5511999999999")
+    await fake_repos.clientes.create(
+        {"nome": "Cliente Teste", "documento": "5511999999999", "telefone": "5511999999999"}
     )
-    await session.commit()
-
     headers = {
         "content-type": "application/json",
         "X-Webhook-Secret": settings.webhook_secret,
@@ -177,7 +190,7 @@ async def test_webhook_message(client, session):
 
 
 @pytest.mark.asyncio
-async def test_atendente_cannot_create_cliente(client, atendente_token, session):
+async def test_atendente_cannot_create_cliente(client, atendente_token):
     resp = await client.post(
         "/clientes",
         json={"nome": "Teste", "documento": "11222333000181"},
@@ -187,18 +200,11 @@ async def test_atendente_cannot_create_cliente(client, atendente_token, session)
 
 
 @pytest.mark.asyncio
-async def test_atendente_cannot_set_prioridade(client, atendente_token, session):
-    from app.models.cliente import Cliente
-
-    session.add(Cliente(nome="Teste", documento="11222333000181"))
-    await session.commit()
-    await client.post(
-        "/chats",
-        json={"cliente_id": 1},
-        headers={"Authorization": f"Bearer {atendente_token}"},
-    )
+async def test_atendente_cannot_set_prioridade(client, atendente_token, fake_repos):
+    cliente_id = await seed_client_direct(fake_repos)
+    chat_id = await seed_chat(client, atendente_token, cliente_id)
     resp = await client.patch(
-        "/chats/1/prioridade",
+        f"/chats/{chat_id}/prioridade",
         json={"prioridade": "alta"},
         headers={"Authorization": f"Bearer {atendente_token}"},
     )
@@ -206,18 +212,11 @@ async def test_atendente_cannot_set_prioridade(client, atendente_token, session)
 
 
 @pytest.mark.asyncio
-async def test_admin_can_set_prioridade(client, admin_token, session):
-    from app.models.cliente import Cliente
-
-    session.add(Cliente(nome="Teste", documento="11222333000181"))
-    await session.commit()
-    await client.post(
-        "/chats",
-        json={"cliente_id": 1},
-        headers={"Authorization": f"Bearer {admin_token}"},
-    )
+async def test_admin_can_set_prioridade(client, admin_token):
+    cliente_id = await seed_client(client, admin_token)
+    chat_id = await seed_chat(client, admin_token, cliente_id)
     resp = await client.patch(
-        "/chats/1/prioridade",
+        f"/chats/{chat_id}/prioridade",
         json={"prioridade": "urgente"},
         headers={"Authorization": f"Bearer {admin_token}"},
     )
@@ -226,19 +225,14 @@ async def test_admin_can_set_prioridade(client, admin_token, session):
 
 
 @pytest.mark.asyncio
-async def test_atendente_cannot_assinar_chat(client, atendente_token, session):
-    from app.models.cliente import Cliente
-
-    session.add(Cliente(nome="Teste", documento="11222333000181"))
-    await session.commit()
-    await client.post(
-        "/chats",
-        json={"cliente_id": 1},
-        headers={"Authorization": f"Bearer {atendente_token}"},
-    )
+async def test_atendente_cannot_assinar_chat(client, atendente_token, fake_repos):
+    cliente_id = await seed_client_direct(fake_repos)
+    chat_id = await seed_chat(client, atendente_token, cliente_id)
+    atendentes = await fake_repos.atendentes.list_all()
+    atendente_id = atendentes[0]["id"] if atendentes else "sem-atendente"
     resp = await client.patch(
-        "/chats/1/assinar",
-        json={"atendente_id": 1},
+        f"/chats/{chat_id}/assinar",
+        json={"atendente_id": atendente_id},
         headers={"Authorization": f"Bearer {atendente_token}"},
     )
     assert resp.status_code == 403

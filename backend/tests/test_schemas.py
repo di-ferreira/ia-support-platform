@@ -21,7 +21,7 @@ def test_refresh_request():
 def test_atendente_response():
     from datetime import datetime
     data = AtendenteResponse(
-        id=1, nome="João", email="joao@emsoft.app",
+        id="1", nome="João", email="joao@emsoft.app",
         perfil="admin", ativo=True,
         created_at=datetime(2026, 1, 1),
     )
@@ -36,15 +36,15 @@ def test_cliente_create():
 def test_cliente_response():
     from datetime import datetime
     data = ClienteResponse(
-        id=1, nome="Teste", documento="11222333000181",
+        id="1", nome="Teste", documento="11222333000181",
         created_at=datetime(2026, 1, 1), updated_at=datetime(2026, 1, 1),
     )
     assert data.nome == "Teste"
 
 
 def test_chat_create():
-    data = ChatCreate(cliente_id=1)
-    assert data.cliente_id == 1
+    data = ChatCreate(cliente_id="1")
+    assert data.cliente_id == "1"
 
 
 def test_chat_update_status():
@@ -61,8 +61,8 @@ def test_mensagem_create():
 
 
 def test_mover_card():
-    data = MoverCardRequest(chat_id=1, novo_status="EM_ATENDIMENTO")
-    assert data.chat_id == 1
+    data = MoverCardRequest(chat_id="1", novo_status="EM_ATENDIMENTO")
+    assert data.chat_id == "1"
 
 
 def test_knowledge_base_create():
@@ -80,14 +80,14 @@ def test_webhook_mensagem():
 
 def test_webhook_status():
     from app.models.chat import StatusChat
-    data = WebhookStatusUpdate(chat_id=1, status=StatusChat.resolvido)
+    data = WebhookStatusUpdate(chat_id="1", status=StatusChat.resolvido)
     assert data.status == StatusChat.resolvido
 
 
 def test_webhook_diagnostico():
     from app.models.ia_diagnostico import StatusIA
     data = WebhookDiagnostico(
-        chat_id=1, status_ia=StatusIA.resolvido_pela_ia,
+        chat_id="1", status_ia=StatusIA.resolvido_pela_ia,
         confianca=0.95
     )
     assert data.confianca == 0.95

@@ -20,7 +20,7 @@ class KnowledgeBaseUpdate(BaseModel):
 
 
 class KnowledgeBaseResponse(BaseModel):
-    id: int
+    id: str
     titulo: str
     conteudo: str | None = None
     categoria: CategoriaConhecimento

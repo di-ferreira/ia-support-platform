@@ -10,8 +10,8 @@ class LojaBase(BaseModel):
 
 
 class LojaResponse(LojaBase):
-    id: int
-    cliente_id: int
+    id: str
+    cliente_id: str
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -40,7 +40,7 @@ class ClienteUpdate(BaseModel):
 
 
 class ClienteResponse(ClienteBase):
-    id: int
+    id: str
     created_at: datetime
     updated_at: datetime
     lojas: list[LojaResponse] = []
@@ -49,7 +49,7 @@ class ClienteResponse(ClienteBase):
 
 
 class ClienteListResponse(BaseModel):
-    id: int
+    id: str
     nome: str
     documento: str
     email: str | None = None
