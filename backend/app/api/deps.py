@@ -1,5 +1,6 @@
 
-from fastapi import Depends, HTTPException, status
+from appwrite.client import Client
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,10 @@ from app.core.security import decode_token
 from app.models.atendente import Atendente
 
 security = HTTPBearer()
+
+
+def get_appwrite(request: Request) -> Client:
+    return request.app.state.appwrite
 
 
 async def _get_user_from_token(

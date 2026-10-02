@@ -19,12 +19,14 @@ from app.api.routes import (
     whatsapp_router,
 )
 from app.api.websocket_manager import manager
+from app.core.appwrite import build_appwrite_client
 from app.core.config import settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings.validate_production_secrets()
+    app.state.appwrite = build_appwrite_client()
     yield
 
 

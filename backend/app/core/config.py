@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     database_url_prod: str | None = None
 
+    appwrite_endpoint: str = "http://127.0.0.1:8020/v1"
+    appwrite_project_id: str = ""
+    appwrite_api_key: str = ""
+
     secret_key: str = _INSECURE_DEFAULT_SECRET
     webhook_secret: str | None = None
     algorithm: str = "HS256"
