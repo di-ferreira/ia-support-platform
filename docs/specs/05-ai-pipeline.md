@@ -186,10 +186,10 @@ Ver [adr/0005-dimensao-de-embedding.md](adr/0005-dimensao-de-embedding.md).
 **Sem filtro de score.** Os 5 mais próximos entram, mesmo que irrelevantes. `docs/n8n-workflow.md:93-97`
 promete "min score 0.7" — isso não existe no código.
 
-**Falha degrada silenciosamente.** Se o embedding ou a busca falhar, `rag_context` vira a
-string `"Nenhum artigo relevante encontrado na base de conhecimento."` e a IA responde
-mesmo assim — ou seja, **sem base nenhuma**. Isso é a causa raiz do Cenário C falso: uma
-Qdrant fora do ar produz "sem solução" em vez de erro. Ver gap 05-6.
+**Falha de RAG é erro.** Se o embedding ou a busca falhar, o pipeline responde 503 —
+não degrada para "nenhum artigo encontrado". Um Qdrant fora do ar não pode produzir
+Cenário C falso (sem base nenhuma): a decisão de cenário só é honesta com base real.
+Ver gap 05-6.
 
 ### Sincronização Appwrite ↔ Qdrant
 
@@ -269,22 +269,22 @@ mensagem, e servir a solução antiga seria um bug funcional.
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
 | 05-1 | **Crítico.** O pipeline de IA não está conectado. `/ai/classificar`, `/ai/analisar` e `/ai/solucionar` não têm chamador. O n8n roda um AI Agent sem tools que alucina | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **ABERTO** |
-| 05-2 | **Crítico.** `POST /webhooks/chat/diagnostico` nunca é chamado. `ia_diagnosticos` nunca é populada. Todo o histórico de decisão da IA está perdido, e os KPIs do dashboard leem de campos que ninguém escreve | `routes/webhooks.py`; `ia_diagnostico.py` | **Crítica** | **ABERTO** |
-| 05-3 | **Crítico.** `PATCH /webhooks/chat/status` nunca é chamado. O status do chat nunca sai de `NOVO` no fluxo real. A taxa de 70% é estruturalmente 0 | `workflow-support-ai.json` | **Crítica** | **ABERTO** |
-| 05-4 | Cenário A não tem caminho de fechamento. Vai para `AGUARDANDO_CLIENTE` e ninguém confirma | `ai/router.py:129-136` | **Alta** | **ABERTO** |
-| 05-5 | CRUD da base de conhecimento não sincroniza o Qdrant. Índice e banco divergem | `KnowledgeBaseService` | **Alta** | **ABERTO** |
-| 05-6 | Falha de RAG degrada para "nenhum artigo encontrado" em vez de erro. Qdrant fora do ar produz Cenário C falso | `ai/router.py:105-106` | **Alta** | **ABERTO** |
-| 05-7 | `/ai/solucionar` escreve no chat via repositório, furando a máquina de estados. E `except Exception: pass` engole falha de persistência sem log | `ai/router.py:118-140` | **Alta** | **ABERTO** |
-| 05-8 | `/ai/solucionar` retorna `result` da LLM sem validar shape. Campo faltando vira `None` silenciosamente | `ai/router.py:119-127` | Média | **ABERTO** |
-| 05-9 | `/ai/*` não tem resposta Pydantic. Contrato é o dict cru do LLM | `ai/router.py` | Média | **ABERTO** |
-| 05-10 | `/ai/classificar` não usa Pydantic — o `chat_id` do `/ai/analisar` é query param, e o conteúdo vai na URL | `ai/router.py:31,48,73` | **Alta** | **ABERTO** |
-| 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536). `LLM_PROVIDER=openai` quebra o RAG | `qdrant_service.py:7`; `openai_service.py` | **Alta** | **ABERTO** → [adr/0005](adr/0005-dimensao-de-embedding.md) |
-| 05-12 | `_get_llm` cai em Ollama silenciosamente se `LLM_PROVIDER=openai` sem `OPENAI_API_KEY` | `ai/router.py:22-27` | Média | **ABERTO** |
-| 05-13 | `except Exception: pass` também engole falha de embedding | `ai/router.py:105` | Média | **ABERTO** |
+| 05-2 | **Crítico.** `POST /webhooks/chat/diagnostico` nunca é chamado. `ia_diagnosticos` nunca é populada. Todo o histórico de decisão da IA está perdido, e os KPIs do dashboard leem de campos que ninguém escreve | `services/ai_pipeline.py`; `ia_diagnostico.py` | **Crítica** | **ABERTO** — o pipeline já grava o diagnóstico em `_finalizar` quando o solver roda (ADR-0004; o endpoint isolado ficou redundante); falta o n8n chamar o solver (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
+| 05-3 | **Crítico.** `PATCH /webhooks/chat/status` nunca é chamado. O status do chat nunca sai de `NOVO` no fluxo real. A taxa de 70% é estruturalmente 0 | `workflow-support-ai.json` | **Crítica** | **ABERTO** — o pipeline já transiciona o status em `_finalizar` (e grava o diagnóstico junto, 05-2); o que falta é o n8n chamar o solver (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
+| 05-4 | Cenário A não tem caminho de fechamento. Vai para `AGUARDANDO_CLIENTE` e ninguém confirma | painel (frontend) | **Alta** | **ABERTO** → [07-frontend](07-frontend.md) |
+| 05-5 | CRUD da base de conhecimento não sincroniza o Qdrant. Índice e banco divergem | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** — `criar`/`atualizar` (se `ativo`) embutem + `upsert_article`; desativar/remover apaga o ponto; falha de Qdrant/embedding vira erro (503), sem escrita parcial silenciosa |
+| 05-6 | Falha de RAG degrada para "nenhum artigo encontrado" em vez de erro. Qdrant fora do ar produz Cenário C falso | `services/ai_pipeline.py` `_buscar_base` | **Alta** | **CORRIGIDO** — falha de embedding ou busca responde 503; Cenário C só acontece com base real consultada |
+| 05-7 | `/ai/solucionar` escreve no chat via repositório, furando a máquina de estados. E `except Exception: pass` engole falha de persistência sem log | `services/ai_pipeline.py`; `ai/router.py`; `api/routes/webhooks.py` | **Alta** | **CORRIGIDO** — ambos os endpoints delegam a `AIPipelineService`, que transiciona via `ChatService.atualizar_status` e propaga falha de persistência |
+| 05-8 | `/ai/solucionar` retorna `result` da LLM sem validar shape. Campo faltando vira `None` silenciosamente | `services/ai_pipeline.py` `SolucaoLLM` | Média | **CORRIGIDO** — veredito parseado via Pydantic; JSON inválido responde 502 com o trecho bruto |
+| 05-9 | `/ai/*` não tem resposta Pydantic. Contrato é o dict cru do LLM | `ai/router.py`; `schemas/webhook.py` | Média | **ABERTO** — `/ai/solucionar` e `/webhooks/ai/solucionar` usam `WebhookSolucaoResponse`; `/ai/classificar` e `/ai/analisar` ainda devolvem o dict cru do LLM |
+| 05-10 | `/ai/classificar` não usa Pydantic — o `chat_id` do `/ai/analisar` é query param, e o conteúdo vai na URL | `ai/router.py:34-54` | **Alta** | **ABERTO** |
+| 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536). `LLM_PROVIDER=openai` quebra o RAG | `services/qdrant_service.py`; `ai/provider.py` | **Alta** | **CORRIGIDO** → [adr/0005](adr/0005-dimensao-de-embedding.md) — embedding sempre Ollama `nomic-embed-text` (768), independentemente do provider de LLM |
+| 05-12 | `_get_llm` cai em Ollama silenciosamente se `LLM_PROVIDER=openai` sem `OPENAI_API_KEY` | `ai/provider.py` | Média | **CORRIGIDO** — `get_llm` falha rápido com `LLMIndisponivelError` (openai sem chave, provider desconhecido) |
+| 05-13 | `except Exception: pass` também engole falha de embedding | `services/ai_pipeline.py` `_buscar_base` | Média | **CORRIGIDO** — falha de embedding propaga e responde 503 |
 | 05-14 | AI Agent do n8n usa `nemotron-3-super:cloud`; `.env` aponta `deepseek-v4-flash:cloud`; `config.py` aponta `llama3.2`. Três modelos diferentes em três lugares | `workflow-support-ai.json`; `infra/.env.example:26`; `config.py:31` | Média | **ABERTO** |
 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`. `clear()` nunca é chamado | `ai/ai_cache.py:29,37,46` | Média | **ABERTO** |
-| 05-16 | `prompt.format(**kwargs)` quebra se o conteúdo do artigo tiver `{` ou `}` — chaves de template não escapadas | `ai/prompts.py:75` | **Alta** | **ABERTO** |
+| 05-16 | `prompt.format(**kwargs)` quebra se o conteúdo do artigo tiver `{` ou `}` — chaves de template não escapadas | `ai/prompts.py` | **Alta** | **CORRIGIDO** — os prompts viraram constantes (`CLASSIFY_SYSTEM`/`SUMMARIZE_SYSTEM`/`SOLUTION_SYSTEM`/`DIAGNOSE_SYSTEM`) e o conteúdo dinâmico (mensagem/RAG/histórico) entra como *valor* de f-string em `build_solution_messages`, nunca como template — `{}` no artigo não são reinterpretados |
 | 05-17 | Categoria `multiempresa` é reconhecida pela IA mas não existe no schema de conhecimento | `prompts.py:16` vs `schema.py:52` | **Alta** | **ABERTO** → [02-data-model](02-data-model.md) |
 | 05-18 | `IADiagnosticoRepository.get_by_chat` não é chamado por nada | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **ABERTO** |
 | 05-19 | Dependência `openai` está declarada em `pyproject.toml` e `requirements.txt` mas nunca importada — o serviço usa `httpx` cru | `pyproject.toml:18` | Baixa | **ABERTO** |
-| 05-20 | Nenhum teste cobre `app/ai/` inteiro. Nenhum LLM é stubado em teste | `tests/` | **Alta** | **ABERTO** → [10-test-strategy](10-test-strategy.md) |
+| 05-20 | Nenhum teste cobre `app/ai/` inteiro. Nenhum LLM é stubado em teste | `tests/` | **Alta** | **ABERTO** — mitigado: `tests/test_ai_pipeline.py` exercita `AIPipelineService` com `get_llm`/`get_embedder` stubados (classificar, RAG, cenários B/C, `_finalizar`); ainda sem teste unitário direto de `ai_cache.py`, `router.py`, `ollama_service.py` e `openai_service.py` → [10-test-strategy](10-test-strategy.md) |
