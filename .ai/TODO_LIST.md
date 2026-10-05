@@ -1,7 +1,21 @@
 # TODO LIST — EMSoft Support AI Platform
 
-> Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSoft (autopeças).
-> Stack: Python (FastAPI) + Next.js + SQLite/PostgreSQL + n8n + RAG + Evolution API
+> **📦 ARQUIVADO.** Este é o plano de implementação original. Não reflete a pilha real
+> e **não é a fonte de verdade** (descreve, por exemplo, 19 nós de workflow e MinIO; o
+> reality check mostrou 8 nós e nenhum MinIO — ver
+> [gap 00-5](../docs/specs/00-escopo.md)).
+>
+> **Fonte de verdade:** [`docs/specs/`](../docs/specs/) — escopo, domínio, contrato,
+> decisões e *Registro de Gaps*. Mudanças de pilha desde este plano:
+> - Dados: **Appwrite** (self-hosted), não SQLite/PostgreSQL.
+> - IA: **backend dono** do RAG + LLM + decisão de cenário (n8n só transporta) —
+>   [ADR-0004](../docs/specs/adr/0004-backend-dono-da-ia.md).
+> - LLM/embedding: **Ollama** (768) como alvo; OpenAI bloqueado p/ RAG —
+>   [ADR-0005](../docs/specs/adr/0005-dimensao-de-embedding.md).
+
+> **Descrição original.** Plataforma SaaS de atendimento WhatsApp com IA para suporte
+> técnico do ERP EMSoft (autopeças). Stack (original): Python (FastAPI) + Next.js +
+> SQLite/PostgreSQL + n8n + RAG + Evolution API.
 
 ---
 

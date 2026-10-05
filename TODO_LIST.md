@@ -1,8 +1,26 @@
 # EMSoft Support AI — TODO List
 
-## Status Geral
+> **⚠️ Histórico de implementação.** Este arquivo registra as fases na ordem em que
+> foram executadas. **Não é mais a fonte de verdade nem o índice de trabalho.**
+>
+> - **Especificações + registro de gaps (fonte de verdade):**
+>   [`docs/specs/`](docs/specs/) — cada spec termina com um *Registro de Gaps*; um gap
+>   `ABERTO` é o trabalho Known.
+> - **O que mudou depois desta lista:**
+>   - A fonte de dados é **Appwrite** (não PostgreSQL/Supabase).
+>   - O **backend é dono da IA** — RAG + LLM + decisão do cenário A/B/C
+>     ([ADR-0004](docs/specs/adr/0004-backend-dono-da-ia.md)); o n8n é só transporte.
+>   - O **alvo de LLM/embedding é Ollama** (768); o OpenAI está bloqueado para RAG
+>     ([ADR-0005](docs/specs/adr/0005-dimensao-de-embedding.md)).
+> - O "✅" de **Fase 8 (Workflow n8n Completo)** está desatualizado: o workflow atual tem
+>   8 nós **sem RAG, sem tools e sem roteamento de cenário** — ver
+>   [gap 00-3](docs/specs/00-escopo.md) e a [spec 06](docs/specs/06-n8n-workflow.md).
 
-| Fase | Descrição | Status |
+---
+
+## Status Geral (histórico)
+
+| Fase | Descrição | Status histórico |
 |------|-----------|--------|
 | 1 | Infraestrutura (Evolution, n8n, Qdrant) | ✅ |
 | 2 | Evolution Integration Service | ✅ |

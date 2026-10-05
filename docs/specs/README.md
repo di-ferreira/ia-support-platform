@@ -51,9 +51,9 @@ aberto é uma spec concluída.
 | Documento | Status |
 |---|---|
 | `README.md` | Setup rápido. Aponta para cá. |
-| `TODO_LIST.md` | Índice de gaps. Não lista trabalho. |
-| `docs/n8n-workflow.md` | **Substituído** por [06-n8n-workflow](06-n8n-workflow.md). Arquivar. |
-| `.ai/PROJECT.md` | Visão original. Stack declarada (NestJS/Prisma) nunca foi usada. |
+| `TODO_LIST.md` | Histórico de implementação + pontes para as specs. O trabalho conhecido está nos Registros de Gaps. |
+| `docs/n8n-workflow.md` | **Substituído** e **arquivado** por banner; canônico: [06-n8n-workflow](06-n8n-workflow.md). |
+| `.ai/PROJECT.md` | Visão original arquivada por banner. Stack declarada (NestJS/Prisma) nunca foi usada. |
 | `.ai/SUPORTE_AGENT.md` | Persona da IA. Entrada do prompt, não do código. Ver [05-ai-pipeline](05-ai-pipeline.md) §Prompt. |
 | `.ai/TODO_LIST.md` | **Arquivado.** Descreve 19 nós de workflow e MinIO; reality check mostrou 8 nós e nenhum MinIO. |
 | `DesignSystem/DESIGN-MANIFEST.json` | Contrato visual. Telas cortadas removidas na Fase 5. |

@@ -10,15 +10,13 @@
       "configuracoes.html",
       "conhecimento.html",
       "dashboard.html",
-      "ia-dashboard.html",
       "index.html",
       "kanban.html",
       "mqsetnut-Captura-de-tela_2025-10-15_15-35-32.png",
       "mqsetnuz-Captura-de-tela_2025-10-16_16-24-19.png",
       "mqsfed6b-logo.png",
       "mqsfed6c-logo-branca.png",
-      "mqsfennw-favicon_blue.svg",
-      "relatorios.html"
+      "mqsfennw-favicon_blue.svg"
     ],
     "html": [
       "atendimento.html",
@@ -26,10 +24,8 @@
       "configuracoes.html",
       "conhecimento.html",
       "dashboard.html",
-      "ia-dashboard.html",
       "index.html",
-      "kanban.html",
-      "relatorios.html"
+      "kanban.html"
     ],
     "css": [],
     "scriptsAndComponents": [],
@@ -69,22 +65,12 @@
       "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
     },
     {
-      "file": "ia-dashboard.html",
-      "role": "product-screen",
-      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
-    },
-    {
       "file": "index.html",
       "role": "launcher-overview",
       "implementationNote": "Use this as the navigation/overview entry only; implement each linked screen file as its own route/surface."
     },
     {
       "file": "kanban.html",
-      "role": "screen",
-      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
-    },
-    {
-      "file": "relatorios.html",
       "role": "screen",
       "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
     }

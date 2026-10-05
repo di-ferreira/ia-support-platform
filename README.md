@@ -3,6 +3,10 @@
 Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSoft
 (autopeças). Reduza em até 70% a carga operacional do suporte humano.
 
+> **Este README é um guia de setup rápido.** A fonte única de verdade — escopo,
+> domínio, contrato de API, decisões e registro de gaps — vive em [`docs/specs/`](docs/specs/).
+> Em caso de divergência, vale o que está lá.
+
 ---
 
 ## Stack
@@ -15,9 +19,9 @@ Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSo
 | **Cache** | Redis |
 | **Vetores** | Qdrant |
 | **Orquestração** | n8n |
-| **LLM** | OpenAI (gpt-4o-mini) / Ollama (fallback local) |
+| **LLM** | Ollama (alvo local) / OpenAI (só LLM chat, nunca RAG — [ADR-0005](docs/specs/adr/0005-dimensao-de-embedding.md)) |
 | **WhatsApp** | Evolution API |
-| **Armazenamento** | Supabase Storage |
+| **Armazenamento** | Appwrite (arquivos/mídia — não existe Supabase na pilha) |
 | **Infra** | Docker, Docker Compose, Traefik |
 
 ---
@@ -31,7 +35,7 @@ Plataforma SaaS de atendimento WhatsApp com IA para suporte técnico do ERP EMSo
 
 ```bash
 cp infra/.env.example infra/.env
-# Editar infra/.env com suas chaves (OpenAI, Evolution API, etc.)
+# Editar infra/.env com suas chaves (Ollama, Evolution API, etc.)
 ```
 
 ### 1. Appwrite (fonte de dados)
@@ -100,7 +104,7 @@ prepara o frontend e roda o seed (best-effort).
 ```
 ├── backend/
 │   ├── app/
-│   │   ├── ai/              # Módulo de IA (OpenAI, Ollama, prompts)
+│   │   ├── ai/              # Módulo de IA (Ollama alvo; OpenAI bloqueado para RAG, ADR-0005)
 │   │   ├── api/
 │   │   │   ├── routes/      # Endpoints (auth, clientes, chats, etc.)
 │   │   │   └── websocket_manager.py
@@ -259,7 +263,11 @@ Copie `infra/.env.example` para `infra/.env` e ajuste:
 | `ENVIRONMENT` | `development` | Sim |
 | `SECRET_KEY` | `dev-secret-key...` | Sim (mude em prod) |
 | `EVOLUTION_API_KEY` | `evolution_dev_key` | Sim (mude em prod) |
-| `OPENAI_API_KEY` | — | Para usar OpenAI |
+| `LLM_PROVIDER` | `ollama` | Sim (alvo local) |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Sim (alvo) |
+| `OLLAMA_MODEL` | `llama3.2` | LLM chat |
+| `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | Embedding (768) |
+| `OPENAI_API_KEY` | — | Opcional — só LLM chat, nunca RAG ([ADR-0005](docs/specs/adr/0005-dimensao-de-embedding.md)) |
 
 ---
 
@@ -275,12 +283,14 @@ n8n (:5678)            ← webhook, orquestra fluxo
 Backend API (:8001)    ← salva chat/mensagem
        ↓
 Qdrant (:6333)         ← busca RAG na base de conhecimento
-       ↓
-LLM (OpenAI/Ollama)    ← gera diagnóstico/solução
-       ↓
-n8n                    ← decide cenário A/B/C
-       ↓
+        ↓
+LLM (Ollama; OpenAI bloqueado para RAG) ← gera diagnóstico/solução
+        ↓
+Backend API (:8001)    ← decide cenário A/B/C (regra determinística, ver ADR-0004)
+        ↓
 Evolution API          ← envia resposta ao cliente
 ```
 
-Ver `docs/n8n-workflow.md` para detalhes do fluxo.
+O n8n é apenas o orquestrador de transporte: ele não contém prompt de negócio nem decide
+o cenário. Ver [`docs/specs/06-n8n-workflow.md`](docs/specs/06-n8n-workflow.md) e
+[`docs/specs/05-ai-pipeline.md`](docs/specs/05-ai-pipeline.md) para detalhes do fluxo.

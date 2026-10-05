@@ -132,12 +132,12 @@ Ver [08-non-functional](08-non-functional.md) §Métricas de produto para a impl
 
 | # | Claim | Onde | Realidade | Status |
 |---|---|---|---|---|
-| 00-1 | "n8n decide cenário A/B/C" | `README.md:281` | Cenários existem **só como prosa** no system prompt. Nenhum nó decide. `PATCH /webhooks/chat/status` nunca é chamado. | **ABERTO** → [05-ai-pipeline](05-ai-pipeline.md) |
+| 00-1 | "n8n decide cenário A/B/C" | `README.md:281` | Cenários existem **só como prosa** no system prompt. Nenhum nó decide. `PATCH /webhooks/chat/status` nunca é chamado. | **CORRIGIDO (doc)** → [05-ai-pipeline](05-ai-pipeline.md) |
 | 00-2 | "Fase 7 — Qdrant + RAG Semântico ✅" | `TODO_LIST.md:72` | RAG inalcançável: `/ai/solucionar` nunca é chamado por nada. | **ABERTO** → [05-ai-pipeline](05-ai-pipeline.md) |
 | 00-3 | "Fase 8 — Workflow n8n Completo ✅" | `TODO_LIST.md:77` | Workflow de 8 nós sem RAG, sem tools, sem roteamento de cenário. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |
-| 00-4 | "Armazenamento: Supabase Storage" | `README.md:20` | Não existe Supabase. A fonte de dados é Appwrite. | **ABERTO** → Fase 5 |
-| 00-5 | Stack obrigatória "NestJS, TypeScript, Prisma" | `.ai/PROJECT.md:120-136` | Nunca usada. O backend é Python/FastAPI. | **ABERTO** → Fase 5 |
-| 00-6 | "workflow exportável (19 nós)" | `.ai/TODO_LIST.md:210` | São 8 nós. O doc descreve ~12, o JSON tem 8. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |
+| 00-4 | "Armazenamento: Supabase Storage" | `README.md:20` | Não existe Supabase. A fonte de dados é Appwrite. | **CORRIGIDO (doc)** → Fase 5 |
+| 00-5 | Stack obrigatória "NestJS, TypeScript, Prisma" | `.ai/PROJECT.md:120-136` | Nunca usada. O backend é Python/FastAPI. | **CORRIGIDO (doc)** → Fase 5 |
+| 00-6 | "workflow exportável (19 nós)" | `.ai/TODO_LIST.md:210` | São 8 nós. O doc descreve ~12, o JSON tem 8. | **CORRIGIDO (doc)** → [06-n8n-workflow](06-n8n-workflow.md) |
 | 00-7 | "Backup PostgreSQL + Qdrant + MinIO" | `.ai/TODO_LIST.md:261` | MinIO não é usado por código algum. Backup do Qdrant nunca dispara. | **ABERTO** → [09-infra-deploy](09-infra-deploy.md) §Backup |
 
 ### O que o objetivo de 70% exige e não existe

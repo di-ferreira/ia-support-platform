@@ -9,8 +9,9 @@ Ver [adr/0004-backend-dono-da-ia.md](adr/0004-backend-dono-da-ia.md).
 `infra/n8n/workflow-support-ai.json` — export versionado, importável. É a única
 definição do fluxo. O que está no console do n8n é consequência do import.
 
-`docs/n8n-workflow.md` é o documento narrativo antigo. Ele descreve um workflow de 12 nós
-com Qdrant e LLM Chain que **nunca foi implementado**. Ver gap 06-11.
+`docs/n8n-workflow.md` é o documento narrativo antigo, agora **arquivado** por banner. Ele
+descreve um workflow de 12 nós com Qdrant e LLM Chain que **nunca foi implementado**. Ver
+gap 06-11.
 
 ## Configuração de ambiente
 

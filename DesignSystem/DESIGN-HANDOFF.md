@@ -68,10 +68,8 @@ For responsive web exports, treat these as a modern breakpoint system for one ad
 - `configuracoes.html`
 - `conhecimento.html`
 - `dashboard.html`
-- `ia-dashboard.html`
 - `index.html`
 - `kanban.html`
-- `relatorios.html`
 
 ## Styles
 - None detected

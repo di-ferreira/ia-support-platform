@@ -38,9 +38,9 @@ Grupo de rotas `(app)` com layout autenticado (`(app)/layout.tsx`).
 | `/usuarios` | Usuários | Gestão de contas | Implementada |
 | `/configuracoes` | Configurações | Config | Implementada |
 
-O `DesignSystem/DESIGN-MANIFEST.json` lista **9 telas** de produto, incluindo `ia-dashboard.html`
-e `relatorios.html`. Essas duas **não existem** no app — o usuário as cortou do escopo. O
-manifest ainda as referencia, o que é drift. Ver gaps 07-7 e 07-8.
+O `DesignSystem/DESIGN-MANIFEST.json` tinha **9 telas** de produto, incluindo `ia-dashboard.html`
+e `relatorios.html`. Essas duas **não existem** no app — o usuário as cortou do escopo. As
+telas foram removidas do manifest, do handoff e dos protótipos na Fase 5. Ver gaps 07-7 e 07-8.
 
 ## Autenticação
 
@@ -122,5 +122,5 @@ validação. `atendimento` já implementa vazio e erro (banner fixo) e carregame
 | 07-4 | Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme`; inconsistência com o DesignSystem | `atendimento/page.tsx`, `dashboard/page.tsx` | Média | **ABERTO** |
 | 07-5 | `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte de verdade | `chat-store.ts` vs `atendimento/page.tsx:15` | Baixa | **ABERTO** |
 | 07-6 | Selects de status/prioridade usam `<select>` nativo em vez de `components/ui/select`; quebra de padrão visual | `atendimento/page.tsx:226-247` | Baixa | **ABERTO** |
-| 07-7 | Manifest referencia `relatorios.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **ABERTO** → Fase 5 |
-| 07-8 | Manifest referencia `ia-dashboard.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **ABERTO** → Fase 5 |
+| 07-7 | Manifest referencia `relatorios.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** → Fase 5 |
+| 07-8 | Manifest referencia `ia-dashboard.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** → Fase 5 |

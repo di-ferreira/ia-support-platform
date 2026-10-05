@@ -1,5 +1,9 @@
 # EMSoft Support AI Platform
 
+> **VISÃO ORIGINAL — HISTÓRICO.** Este documento registrou a visão inicial do projeto.
+> A stack "obrigatória" abaixo (NestJS/Prisma) **nunca foi usada**: o backend real é
+> Python/FastAPI + Appwrite. A fonte de verdade é [`docs/specs/`](../docs/specs/).
+
 ## Visão Geral
 
 Desenvolver uma plataforma SaaS de atendimento WhatsApp especializada para suporte técnico do ERP EMSoft.

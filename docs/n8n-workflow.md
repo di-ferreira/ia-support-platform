@@ -1,5 +1,10 @@
 # Fluxo n8n — EMSoft Support AI
 
+> **ARQUIVADO — SUBSTITUÍDO.** Este documento não é mais fonte de verdade. O contrato
+> atual do workflow n8n está em [`docs/specs/06-n8n-workflow.md`](specs/06-n8n-workflow.md).
+> Mantido apenas para histórico.
+
+
 ## Visão Geral
 
 O n8n atua como o **cérebro da operação**, orquestrando:
