@@ -86,7 +86,12 @@ services:
     environment:
       N8N_PROTOCOL: https
       N8N_HOST: n8n.emsoft.app
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_SECURE_COOKIE: "true"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       EVOLUTION_API_URL: http://evolution-api:8080
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-emsoft-support}
+      BACKEND_URL: http://backend:8000
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
     labels:
       - "traefik.enable=true"
