@@ -34,6 +34,7 @@ class Mensagem(Base):
     )
     conteudo: Mapped[str | None] = mapped_column(Text)
     url_arquivo: Mapped[str | None] = mapped_column(String(500))
+    whatsapp_message_id: Mapped[str | None] = mapped_column(String(100), index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )

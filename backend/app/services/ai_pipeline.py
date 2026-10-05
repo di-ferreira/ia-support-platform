@@ -21,6 +21,7 @@ _STATUS_INICIAIS = (
     StatusChat.novo,
     StatusChat.ia_analisando,
     StatusChat.aguardando_cliente,
+    StatusChat.resolvido,
 )
 
 _STATUS_FINAL = {
@@ -53,7 +54,11 @@ class AIPipelineService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Chat não está em estado que permita resolução pela IA",
             )
-        if status_atual in (StatusChat.novo, StatusChat.aguardando_cliente):
+        if status_atual in (
+            StatusChat.novo,
+            StatusChat.aguardando_cliente,
+            StatusChat.resolvido,
+        ):
             await self.chats.atualizar_status(chat_id, StatusChat.ia_analisando)
 
         historico = await self._historico(chat_id)

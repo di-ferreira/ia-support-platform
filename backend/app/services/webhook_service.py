@@ -53,6 +53,14 @@ class WebhookService:
             else RemetenteMensagem.cliente
         )
 
+        whatsapp_message_id = data.get("whatsapp_message_id")
+        if whatsapp_message_id:
+            existente = await self.repos.mensagens.get_by(
+                "whatsapp_message_id", whatsapp_message_id
+            )
+            if existente:
+                return {**existente, "duplicada": True}
+
         mensagem = await self.repos.mensagens.create(
             {
                 "chat_id": chat_id,
@@ -60,6 +68,7 @@ class WebhookService:
                 "tipo": _val(data.get("tipo", "texto")),
                 "conteudo": data.get("conteudo"),
                 "url_arquivo": data.get("url_arquivo"),
+                "whatsapp_message_id": whatsapp_message_id,
             }
         )
         await self.repos.chats.update(

@@ -25,7 +25,7 @@ STATUS_TRANSITIONS = {
         StatusChat.resolvido,
         StatusChat.encerrado,
     ],
-    StatusChat.resolvido: [StatusChat.encerrado],
+    StatusChat.resolvido: [StatusChat.ia_analisando, StatusChat.encerrado],
     StatusChat.encerrado: [],
 }
 

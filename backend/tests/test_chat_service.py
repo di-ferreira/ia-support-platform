@@ -62,8 +62,27 @@ async def test_full_state_machine(fake_repos):
         assert chat["status"] == target_status.value
 
 
+@pytest.mark.asyncio
+async def test_transition_resolvido_to_ia(fake_repos):
+    cliente_id = await _seed_cliente(fake_repos)
+    service = ChatService(fake_repos)
+    chat = await service.criar({"cliente_id": cliente_id})
+
+    for target in (
+        StatusChat.ia_analisando,
+        StatusChat.aguardando_cliente,
+        StatusChat.resolvido,
+    ):
+        chat = await service.atualizar_status(chat["id"], target)
+        assert chat["status"] == target.value
+
+    chat = await service.atualizar_status(chat["id"], StatusChat.ia_analisando)
+    assert chat["status"] == StatusChat.ia_analisando.value
+
+
 def test_transition_definition():
     assert StatusChat.novo in STATUS_TRANSITIONS
     assert StatusChat.ia_analisando in STATUS_TRANSITIONS[StatusChat.novo]
+    assert StatusChat.ia_analisando in STATUS_TRANSITIONS[StatusChat.resolvido]
     assert StatusChat.encerrado in STATUS_TRANSITIONS
     assert STATUS_TRANSITIONS[StatusChat.encerrado] == []

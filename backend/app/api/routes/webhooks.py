@@ -1,6 +1,7 @@
 import hmac
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 
 from app.api.deps import get_repositories
 from app.api.websocket_manager import manager
@@ -36,6 +37,26 @@ async def verify_webhook(request: Request) -> None:
         )
 
 
+def _extrair_mensagem_bruta(message: dict) -> tuple[str | None, str, str | None]:
+    """Deriva (conteudo, tipo, url_arquivo) do bloco `message` do payload bruto."""
+    if message.get("conversation"):
+        return message["conversation"], "texto", None
+    texto = (message.get("extendedTextMessage") or {}).get("text")
+    if texto:
+        return texto, "texto", None
+    for campo, tipo in (
+        ("imageMessage", "imagem"),
+        ("videoMessage", "documento"),
+        ("audioMessage", "audio"),
+        ("documentMessage", "documento"),
+        ("stickerMessage", "imagem"),
+    ):
+        bloco = message.get(campo) or {}
+        if bloco:
+            return bloco.get("caption") or "", tipo, bloco.get("url")
+    return None, "texto", None
+
+
 def _normalizar_payload(body: dict) -> dict:
     whatsapp = body.get("whatsapp_number")
     remetente = body.get("remetente")
@@ -55,12 +76,15 @@ def _normalizar_payload(body: dict) -> dict:
 
     remote_jid = key.get("remoteJid", "")
     if remote_jid:
-        content = (
-            message.get("conversation")
-            or (message.get("extendedTextMessage") or {}).get("text")
-            or ""
-        )
-        result = {"whatsapp_number": remote_jid, "conteudo": content}
+        conteudo, tipo, url_arquivo = _extrair_mensagem_bruta(message)
+        result = {
+            "whatsapp_number": remote_jid.removesuffix("@s.whatsapp.net"),
+            "conteudo": conteudo,
+            "tipo": tipo,
+            "whatsapp_message_id": key.get("id"),
+        }
+        if url_arquivo:
+            result["url_arquivo"] = url_arquivo
         if remetente:
             result["remetente"] = remetente
         return result
@@ -68,7 +92,7 @@ def _normalizar_payload(body: dict) -> dict:
     return body
 
 
-@router.post("/mensagem", status_code=201)
+@router.post("/mensagem")
 async def webhook_mensagem(
     request: Request,
     repos: Repositories = Depends(get_repositories),
@@ -79,11 +103,14 @@ async def webhook_mensagem(
     validated = WebhookMensagem(**payload)
     service = WebhookService(repos)
     mensagem = await service.receber_mensagem(validated.model_dump())
-    await manager.send_event(
-        mensagem["chat_id"], "nova_mensagem",
-        {"chat_id": mensagem["chat_id"], "mensagem_id": mensagem["id"]},
-    )
-    return mensagem
+    duplicada = bool(mensagem.get("duplicada"))
+    if not duplicada:
+        await manager.send_event(
+            mensagem["chat_id"], "nova_mensagem",
+            {"chat_id": mensagem["chat_id"], "mensagem_id": mensagem["id"]},
+        )
+    code = status.HTTP_200_OK if duplicada else status.HTTP_201_CREATED
+    return JSONResponse(status_code=code, content=mensagem)
 
 
 @router.patch("/chat/status")

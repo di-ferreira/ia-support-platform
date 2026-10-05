@@ -154,6 +154,7 @@ COLLECTIONS: dict[str, dict] = {
             enum_attr("tipo", TIPO_MENSAGEM, required=False, default="texto"),
             text_attr("conteudo"),
             str_attr("url_arquivo", 500, required=False),
+            str_attr("whatsapp_message_id", 100, required=False),
         ],
     },
     "tags": {
