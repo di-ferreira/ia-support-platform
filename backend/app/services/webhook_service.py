@@ -73,7 +73,7 @@ class WebhookService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
             )
-        await self.repos.chats.update(chat_id, {"status": _val(status)})
+        await self.repos.chats.update(chat_id, {"status": _val(novo_status)})
         return await self.repos.chats.get(chat_id)
 
     async def atualizar_cliente(self, chat_id: str, data: dict) -> dict:

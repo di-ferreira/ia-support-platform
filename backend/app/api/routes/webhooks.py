@@ -11,8 +11,11 @@ from app.schemas.webhook import (
     WebhookContexto,
     WebhookDiagnostico,
     WebhookMensagem,
+    WebhookSolucaoRequest,
+    WebhookSolucaoResponse,
     WebhookStatusUpdate,
 )
+from app.services.ai_pipeline import AIPipelineService
 from app.services.webhook_service import WebhookService
 
 router = APIRouter(prefix="/webhooks", tags=["Webhooks (n8n)"])
@@ -111,6 +114,16 @@ async def webhook_diagnostico(
         {"chat_id": body.chat_id, "diagnostico_id": diagnostico["id"]},
     )
     return diagnostico
+
+
+@router.post("/ai/solucionar", response_model=WebhookSolucaoResponse)
+async def webhook_ai_solucionar(
+    body: WebhookSolucaoRequest,
+    repos: Repositories = Depends(get_repositories),
+    webhook_auth: None = Depends(verify_webhook),
+):
+    service = AIPipelineService(repos)
+    return await service.solucionar(body.chat_id)
 
 
 @router.patch("/cliente/{chat_id}")

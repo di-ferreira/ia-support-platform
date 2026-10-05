@@ -249,7 +249,27 @@ async def test_supervisor_can_create_cliente(client, supervisor_token):
 
 
 @pytest.mark.asyncio
-async def test_knowledge_base_crud(client, admin_token):
+async def test_knowledge_base_crud(client, admin_token, monkeypatch):
+    from app.services import knowledge_base_service, qdrant_service
+
+    async def _ensure_collection():
+        return None
+
+    async def _upsert_article(**kwargs):
+        return None
+
+    async def _delete_article(artigo_id):
+        return None
+
+    class _FakeEmbedder:
+        async def embed(self, texto):
+            return [0.0] * 768
+
+    monkeypatch.setattr(qdrant_service, "ensure_collection", _ensure_collection)
+    monkeypatch.setattr(qdrant_service, "upsert_article", _upsert_article)
+    monkeypatch.setattr(qdrant_service, "delete_article", _delete_article)
+    monkeypatch.setattr(knowledge_base_service, "get_embedder", lambda: _FakeEmbedder())
+
     create = await client.post(
         "/knowledge-base",
         json={"titulo": "Erro NF-e", "categoria": "fiscal", "conteudo": "Solução para erro NF-e"},

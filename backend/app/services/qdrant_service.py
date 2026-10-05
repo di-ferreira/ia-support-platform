@@ -44,6 +44,15 @@ async def search_similar(query_embedding: list[float], limit: int = 5) -> list[d
     ]
 
 
+async def delete_article(article_id: str) -> None:
+    client = get_qdrant()
+    await ensure_collection()
+    client.delete(
+        collection_name=COLLECTION_NAME,
+        points=models.PointIdsList(points=[article_id]),
+    )
+
+
 async def upsert_article(
     article_id: str,
     titulo: str,

@@ -1,7 +1,9 @@
 from fastapi import HTTPException, status
 
+from app.ai.provider import get_embedder
 from app.appwrite.repositories import Repositories
 from app.models.knowledge_base import CategoriaConhecimento
+from app.services import qdrant_service
 
 
 class KnowledgeBaseService:
@@ -11,6 +13,21 @@ class KnowledgeBaseService:
     @staticmethod
     def _enum(value):
         return value.value if hasattr(value, "value") else value
+
+    async def _indexar_artigo(self, artigo: dict) -> None:
+        texto = f"{artigo.get('titulo') or ''}\n{artigo.get('conteudo') or ''}"
+        embedding = await get_embedder().embed(texto)
+        await qdrant_service.ensure_collection()
+        await qdrant_service.upsert_article(
+            article_id=artigo["id"],
+            titulo=artigo.get("titulo") or "",
+            conteudo=artigo.get("conteudo"),
+            categoria=artigo.get("categoria") or "",
+            embedding=embedding,
+        )
+
+    async def _desindexar_artigo(self, artigo_id: str) -> None:
+        await qdrant_service.delete_article(artigo_id)
 
     async def listar(
         self,
@@ -46,7 +63,10 @@ class KnowledgeBaseService:
             "url_arquivo": data.get("url_arquivo"),
             "ativo": data.get("ativo", True),
         }
-        return await self.repos.knowledge_bases.create(data)
+        artigo = await self.repos.knowledge_bases.create(data)
+        if artigo.get("ativo", True):
+            await self._indexar_artigo(artigo)
+        return artigo
 
     async def atualizar(self, artigo_id: str, data: dict) -> dict:
         artigo = await self.obter(artigo_id)
@@ -57,8 +77,14 @@ class KnowledgeBaseService:
         }
         if not update:
             return artigo
-        return await self.repos.knowledge_bases.update(artigo_id, update)
+        artigo = await self.repos.knowledge_bases.update(artigo_id, update)
+        if artigo.get("ativo", True):
+            await self._indexar_artigo(artigo)
+        else:
+            await self._desindexar_artigo(artigo_id)
+        return artigo
 
     async def remover(self, artigo_id: str) -> None:
         await self.obter(artigo_id)
         await self.repos.knowledge_bases.delete(artigo_id)
+        await self._desindexar_artigo(artigo_id)

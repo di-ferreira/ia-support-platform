@@ -47,3 +47,20 @@ class WebhookContexto(BaseModel):
     cliente_nome: str | None = None
     whatsapp_number: str | None = None
     ultima_mensagem: str | None = None
+
+
+class WebhookSolucaoRequest(BaseModel):
+    chat_id: str
+
+
+class WebhookSolucaoResponse(BaseModel):
+    chat_id: str
+    status_ia: StatusIA
+    categoria: str | None = None
+    solucao: str | None = None
+    instrucoes_cliente: str | None = None
+    precisa_humano: bool
+    referencia: str | None = None
+    confianca: float | None = None
+    mensagem_cliente: str
+    chat_status: StatusChat
