@@ -1,0 +1,290 @@
+# SPEC 05 — Pipeline de IA
+
+Esta é a spec mais importante do conjunto. Ela define o comportamento que sustenta o
+objetivo de 70% ([00-escopo](00-escopo.md) §Objetivo).
+
+## Decisão arquitetural
+
+> **ADR-0004:** o **backend é o dono da IA**. O n8n orquestra transporte; ele não decide
+> nada. Ver [adr/0004-backend-dono-da-ia.md](adr/0004-backend-dono-da-ia.md).
+
+Consequência prática: prompts, busca no RAG, parsing de resposta e a decisão do cenário
+vivem em Python, versionados e testados. O n8n não contém prompt de negócio.
+
+## Fluxo ponta a ponta
+
+```
+Cliente manda mensagem no WhatsApp
+        │
+        ▼
+[Evolution API]  :8080        evento MESSAGES_UPSERT
+        │
+        ▼
+[n8n]  Webhook                normaliza o payload bruto
+        │
+        ├─▶ POST /webhooks/mensagem          persiste mensagem, cria chat se preciso
+        │                                    devolve { chat_id }
+        │
+        ├─▶ GET  /webhooks/chat/{id}/contexto  o chat está sob controle da IA?
+        │         ├ status em NOVO | IA_ANALISANDO | AGUARDANDO_CLIENTE → IA responde
+        │         └ status em EM_ATENDIMENTO | AGUARDANDO_HUMANO_* | RESOLVIDO
+        │           → humano responde. IA não intervém.
+        │
+        ├─▶ POST /webhooks/ai/solucionar      RAG + LLM (backend decide o cenário)
+        │         ├ grava ia_diagnosticos
+        │         ├ espelha resumo/solução/confiança no chat
+        │         ├ transiciona o status conforme o cenário
+        │         └ devolve { status_ia, mensagem_cliente }
+        │
+        ├─▶ POST /webhooks/mensagem          persiste a resposta da IA (remetente="ia")
+        │
+        └─▶ [Evolution API]  sendText        entrega ao cliente
+                 │
+                 └──(evento WebSocket)──▶ painel do atendente
+```
+
+## Cenários
+
+A decisão **não** é do LLM. O LLM produz um veredito estruturado; o backend aplica uma
+regra determinística. Isso é o que garante que os três cenários existam de verdade.
+
+### Entrada
+
+`SOLUTION_SYSTEM` (`backend/app/ai/prompts.py:35-52`) pede exatamente:
+
+```json
+{
+  "solucao": "passo a passo da solução",
+  "instrucoes_cliente": "o que o cliente pode fazer, ou null",
+  "precisa_humano": false,
+  "referencia": "título do artigo consultado, ou null"
+}
+```
+
+### Regra de decisão
+
+```
+                    ┌─────────────────────────┐
+                    │ solucao preenchida?     │
+                    └───────────┬─────────────┘
+                    não │                 │ sim
+                        ▼                 ▼
+              ┌──────────────────┐  ┌───────────────────┐
+              │  CENÁRIO C       │  │ precisa_humano?   │
+              │ TRANSFERIR_      │  └─────────┬─────────┘
+              │ SEM_SOLUCAO      │   false │           │ true
+              └──────────────────┘          ▼           ▼
+              status →                      ┌─────────┐ ┌──────────┐
+              AGUARDANDO_HUMANO_           │ CENÁRIO │ │ CENÁRIO B│
+              SEM_SOLUCAO                  │    A    │ │TRANSFERIR│
+              status_ia =                  │         │ │COM_SOLUCAO│
+              TRANSFERIR_SEM_SOLUCAO       │         │ └──────────┘
+                                           │         │ status →
+                                           │         │ AGUARDANDO_
+                                           │         │ HUMANO_COM_
+                                           │         │ SOLUCAO
+                                           │         │ status_ia =
+                                           │         │ TRANSFERIR_
+                                           │         │ COM_SOLUCAO
+                                           └────┬────┘
+                                                ▼
+                                   status → AGUARDANDO_CLIENTE
+                                   status_ia = RESOLVIDO_PELA_IA
+```
+
+### Efeito colateral por cenário
+
+| Cenário | `status` | `necessita_humano` | `solucao_sugerida_ia` | Vai para o cliente |
+|---|---|---|---|---|
+| **A** | `AGUARDANDO_CLIENTE` | `false` | preenchida | Sim, o passo a passo |
+| **B** | `AGUARDANDO_HUMANO_COM_SOLUCAO` | `true` | preenchida | Sim, confirmação + aviso |
+| **C** | `AGUARDANDO_HUMANO_SEM_SOLUCAO` | `true` | vazia | Sim, pedido de mais detalhes |
+
+### Cenário A precisa de confirmação
+
+O Cenário A vai para `AGUARDANDO_CLIENTE`, **não** direto para `RESOLVIDO`. O cliente
+recebe o passo a passo; se confirmar, alguém move para `RESOLVIDO`. Isso é intencional:
+marcar como resolvido algo que o cliente ainda não testou inflaria a taxa de resolução da
+IA e quebraria a métrica de 70%.
+
+A transição `AGUARDANDO_CLIENTE → RESOLVIDO` já existe na máquina de estados
+([01-domain-glossary](01-domain-glossary.md) §Tabela de transições).
+
+> Hoje **ninguém** faz essa confirmação, nem a IA nem o painel. O chat fica parado em
+> `AGUARDANDO_CLIENTE`. Ver gap 05-4.
+
+## Autenticação M2M — por que `/webhooks/ai/solucionar`
+
+**O n8n não consegue chamar `/ai/*`.** Dois motivos:
+
+1. `/ai/*` exige `get_current_user`, que é JWT Bearer
+   (`backend/app/ai/router.py:33,51,76` → `deps.py:42`). O n8n tem apenas
+   `X-Webhook-Secret`.
+2. Dar um JWT ao n8n exigiria uma conta de serviço real no Appwrite, com rotação e escopo
+   — complexityidade desproporcional para quem só precisa de um segredo compartilhado que
+   já existe.
+
+Decisão: **`POST /webhooks/ai/solucionar`**, sob `verify_webhook`, é o endpoint que o n8n
+chama. Ele reutiliza `OllamaService`/`OpenAIService`, `search_similar` e `SOLUTION_SYSTEM`.
+
+`/ai/*` permanece como **API humana** autenticada por JWT, para depuração e uso manual.
+
+### Contrato
+
+```http
+POST /webhooks/ai/solucionar
+X-Webhook-Secret: <WEBHOOK_SECRET>
+Content-Type: application/json
+
+{ "chat_id": "<ulid>" }
+```
+
+```json
+{
+  "status_ia": "TRANSFERIR_COM_SOLUCAO",
+  "categoria": "fiscal",
+  "solucao": "1. Acesse Configurações > Fiscal ...",
+  "instrucoes_cliente": "Verifique o CNPJ no cadastro tributário.",
+  "precisa_humano": true,
+  "referencia": "NF-e rejeitada — CNPJ inválido",
+  "confianca": 0.87,
+  "mensagem_cliente": "Texto pronto para enviar ao cliente.",
+  "chat_status": "AGUARDANDO_HUMANO_COM_SOLUCAO"
+}
+```
+
+`mensagem_cliente` é o texto que o n8n entrega ao WhatsApp. O backend monta a
+composição (solução ou pedido de detalhes) para que a lógica de redação fica no backend.
+
+## RAG
+
+### Pipeline de indexação
+
+O texto do artigo é **embutido como um vetor único por artigo**. Não há chunking.
+
+| Parâmetro | Valor | Fonte |
+|---|---|---|
+| Coleção | `emsoft-knowledge-base` | `qdrant_service.py:6` |
+| Dimensão | **768** | `qdrant_service.py:7` |
+| Distância | Cosine | `qdrant_service.py:22` |
+| Modelo de embedding | `nomic-embed-text` | `config.py:32` |
+| Payload | `titulo`, `conteudo`, `categoria` | `qdrant_service.py:60-64` |
+| ID do ponto | ULID do artigo (mesmo id do Appwrite) | `upsert_article(article_id=...)` |
+
+**768 dimensões é a restrição dominante.** `nomic-embed-text` produz 768. O
+`text-embedding-3-small` do OpenAI produz **1536** e **não é compatível** com a coleção.
+Ver [adr/0005-dimensao-de-embedding.md](adr/0005-dimensao-de-embedding.md).
+
+### Consultar
+
+1. Pega a última mensagem do cliente.
+2. Embute com o mesmo modelo da indexação.
+3. `search_similar(embedding, limit=5)`.
+4. Monta `rag_context` com `Título:` + `Conteúdo:` de cada artigo, separados por linha em
+   branco.
+
+**Sem filtro de score.** Os 5 mais próximos entram, mesmo que irrelevantes. `docs/n8n-workflow.md:93-97`
+promete "min score 0.7" — isso não existe no código.
+
+**Falha degrada silenciosamente.** Se o embedding ou a busca falhar, `rag_context` vira a
+string `"Nenhum artigo relevante encontrado na base de conhecimento."` e a IA responde
+mesmo assim — ou seja, **sem base nenhuma**. Isso é a causa raiz do Cenário C falso: uma
+Qdrant fora do ar produz "sem solução" em vez de erro. Ver gap 05-6.
+
+### Sincronização Appwrite ↔ Qdrant
+
+Toda escrita na base de conhecimento **tem** que sincronizar o vetor:
+
+| Operação | Ação obrigatória |
+|---|---|
+| Criar artigo | `ensure_collection()` se preciso + `upsert_article` com embedding |
+| Atualizar artigo | Apagar o vetor antigo, `upsert_article` com o novo |
+| Remover artigo | Apagar o ponto por `article_id` |
+| Desativar artigo | Apagar o ponto |
+
+Hoje `KnowledgeBaseService` **não faz nada disso**. O CRUD e o índice divergem sem caminho
+de reconciliação. Ver gap 05-5.
+
+### Chunking — decisão
+
+**Um vetor por artigo, sem chunking.** Motivo: os 20 artigos do seed têm 300–600
+palavras, e um artigo é uma unidade semântica coesa. Chunking (500/50, como promete
+`docs/n8n-workflow.md:212`) só passa a ser necessário quando a base tiver manuais de
+dezenas de páginas. Registrado aqui para que a decisão não se perca.
+
+## Prompts
+
+| Prompt | Uso | Persiste? |
+|---|---|---|
+| `CLASSIFY_SYSTEM` | `/ai/classificar` — categoria ERP + subcategoria + confiança. Usa cache Redis. | Não |
+| `SUMMARIZE_SYSTEM` | `/ai/analisar?tipo=summarizar` | Não |
+| `DIAGNOSE_SYSTEM` | `/ai/analisar?tipo=diagnosticar` | Não |
+| `SOLUTION_SYSTEM` | `/webhooks/ai/solucionar` — o prompt do fluxo real | Sim, via `ia_diagnosticos` |
+
+A persona da IA (tom, regras de interação, limites de escalonamento) está em
+`.ai/SUPORTE_AGENT.md`. Ela é **entrada de prompt**, não código. Ao migrar o fluxo,
+`SOLUTION_SYSTEM` precisa absorver as regras de `SUPORTE_AGENT.md` que importam —
+principalmente "não invente solução" e "não prometa prazo".
+
+### Inconsistência de categoria
+
+`CLASSIFY_SYSTEM` (`prompts.py:11-17`) reconhece **7** categorias: `fiscal`, `estoque`,
+`compras`, `vendas`, `financeiro`, `multiempresa`, `outro`.
+`CATEGORIA_CONHECIMENTO` (`schema.py:52`) tem **5**: sem `multiempresa`, sem `outro`.
+
+Resultado: a IA classifica como `multiempresa`, mas **não existe artigo** com essa
+categoria para ela achar. Ver gap 02-1.
+
+## Selecting de provider
+
+```
+LLM_PROVIDER == "ollama"      → OllamaService
+LLM_PROVIDER != "ollama" e OPENAI_API_KEY set → OpenAIService
+caso contrário                → OllamaService
+```
+
+O default é `ollama`. Notar que o segundo branch é contraditório: se alguém define
+`LLM_PROVIDER=openai` sem chave, cai em Ollama silenciosamente.
+
+## Cache
+
+`AICache` usa Redis, chave `SHA-256(prompt + modelo)`, TTL 3600s. Só `/ai/classificar`
+usa. Falha de Redis é engolida e degrada para sem-cache.
+
+`/webhooks/ai/solucionar` **não** deve usar cache: o histórico do chat muda a cada
+mensagem, e servir a solução antiga seria um bug funcional.
+
+## O que NÃO é responsabilidade da IA
+
+| Não pode | Por quê |
+|---|---|
+| Inventar solução | Se a base não respondeu, é Cenário C |
+| Prometer prazo | `.ai/SUPORTE_AGENT.md:144` |
+| Executar alteração em banco | `.ai/SUPORTE_AGENT.md:143` |
+| Expor senha ou dado bancário do cliente | `.ai/SUPORTE_AGENT.md:142` |
+| Mover chat para `EM_ATENDIMENTO` | Esse estado significa "humano no comando" |
+
+## Registro de Gaps
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 05-1 | **Crítico.** O pipeline de IA não está conectado. `/ai/classificar`, `/ai/analisar` e `/ai/solucionar` não têm chamador. O n8n roda um AI Agent sem tools que alucina | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **ABERTO** |
+| 05-2 | **Crítico.** `POST /webhooks/chat/diagnostico` nunca é chamado. `ia_diagnosticos` nunca é populada. Todo o histórico de decisão da IA está perdido, e os KPIs do dashboard leem de campos que ninguém escreve | `routes/webhooks.py`; `ia_diagnostico.py` | **Crítica** | **ABERTO** |
+| 05-3 | **Crítico.** `PATCH /webhooks/chat/status` nunca é chamado. O status do chat nunca sai de `NOVO` no fluxo real. A taxa de 70% é estruturalmente 0 | `workflow-support-ai.json` | **Crítica** | **ABERTO** |
+| 05-4 | Cenário A não tem caminho de fechamento. Vai para `AGUARDANDO_CLIENTE` e ninguém confirma | `ai/router.py:129-136` | **Alta** | **ABERTO** |
+| 05-5 | CRUD da base de conhecimento não sincroniza o Qdrant. Índice e banco divergem | `KnowledgeBaseService` | **Alta** | **ABERTO** |
+| 05-6 | Falha de RAG degrada para "nenhum artigo encontrado" em vez de erro. Qdrant fora do ar produz Cenário C falso | `ai/router.py:105-106` | **Alta** | **ABERTO** |
+| 05-7 | `/ai/solucionar` escreve no chat via repositório, furando a máquina de estados. E `except Exception: pass` engole falha de persistência sem log | `ai/router.py:118-140` | **Alta** | **ABERTO** |
+| 05-8 | `/ai/solucionar` retorna `result` da LLM sem validar shape. Campo faltando vira `None` silenciosamente | `ai/router.py:119-127` | Média | **ABERTO** |
+| 05-9 | `/ai/*` não tem resposta Pydantic. Contrato é o dict cru do LLM | `ai/router.py` | Média | **ABERTO** |
+| 05-10 | `/ai/classificar` não usa Pydantic — o `chat_id` do `/ai/analisar` é query param, e o conteúdo vai na URL | `ai/router.py:31,48,73` | **Alta** | **ABERTO** |
+| 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536). `LLM_PROVIDER=openai` quebra o RAG | `qdrant_service.py:7`; `openai_service.py` | **Alta** | **ABERTO** → [adr/0005](adr/0005-dimensao-de-embedding.md) |
+| 05-12 | `_get_llm` cai em Ollama silenciosamente se `LLM_PROVIDER=openai` sem `OPENAI_API_KEY` | `ai/router.py:22-27` | Média | **ABERTO** |
+| 05-13 | `except Exception: pass` também engole falha de embedding | `ai/router.py:105` | Média | **ABERTO** |
+| 05-14 | AI Agent do n8n usa `nemotron-3-super:cloud`; `.env` aponta `deepseek-v4-flash:cloud`; `config.py` aponta `llama3.2`. Três modelos diferentes em três lugares | `workflow-support-ai.json`; `infra/.env.example:26`; `config.py:31` | Média | **ABERTO** |
+| 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`. `clear()` nunca é chamado | `ai/ai_cache.py:29,37,46` | Média | **ABERTO** |
+| 05-16 | `prompt.format(**kwargs)` quebra se o conteúdo do artigo tiver `{` ou `}` — chaves de template não escapadas | `ai/prompts.py:75` | **Alta** | **ABERTO** |
+| 05-17 | Categoria `multiempresa` é reconhecida pela IA mas não existe no schema de conhecimento | `prompts.py:16` vs `schema.py:52` | **Alta** | **ABERTO** → [02-data-model](02-data-model.md) |
+| 05-18 | `IADiagnosticoRepository.get_by_chat` não é chamado por nada | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **ABERTO** |
+| 05-19 | Dependência `openai` está declarada em `pyproject.toml` e `requirements.txt` mas nunca importada — o serviço usa `httpx` cru | `pyproject.toml:18` | Baixa | **ABERTO** |
+| 05-20 | Nenhum teste cobre `app/ai/` inteiro. Nenhum LLM é stubado em teste | `tests/` | **Alta** | **ABERTO** → [10-test-strategy](10-test-strategy.md) |
