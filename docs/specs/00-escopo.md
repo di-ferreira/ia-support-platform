@@ -133,7 +133,7 @@ Ver [08-non-functional](08-non-functional.md) §Métricas de produto para a impl
 | # | Claim | Onde | Realidade | Status |
 |---|---|---|---|---|
 | 00-1 | "n8n decide cenário A/B/C" | `README.md:281` | Cenários existem **só como prosa** no system prompt. Nenhum nó decide. `PATCH /webhooks/chat/status` nunca é chamado. | **CORRIGIDO (doc)** → [05-ai-pipeline](05-ai-pipeline.md) |
-| 00-2 | "Fase 7 — Qdrant + RAG Semântico ✅" | `TODO_LIST.md:72` | RAG inalcançável: `/ai/solucionar` nunca é chamado por nada. | **ABERTO** → [05-ai-pipeline](05-ai-pipeline.md) |
+| 00-2 | "Fase 7 — Qdrant + RAG Semântico ✅" | `TODO_LIST.md:72` | RAG inalcançável: `/ai/solucionar` nunca é chamado por nada. | **PROVADO (pipeline, runtime 2026-10-05)** — RAG real de ponta a ponta: `search_similar` → artigo "Estoque negativo" (conf. 0.95) → LLM → `RESOLVIDO_PELA_IA`; falta só o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
 | 00-3 | "Fase 8 — Workflow n8n Completo ✅" | `TODO_LIST.md:77` | Workflow de 8 nós sem RAG, sem tools, sem roteamento de cenário. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |
 | 00-4 | "Armazenamento: Supabase Storage" | `README.md:20` | Não existe Supabase. A fonte de dados é Appwrite. | **CORRIGIDO (doc)** → Fase 5 |
 | 00-5 | Stack obrigatória "NestJS, TypeScript, Prisma" | `.ai/PROJECT.md:120-136` | Nunca usada. O backend é Python/FastAPI. | **CORRIGIDO (doc)** → Fase 5 |
@@ -144,8 +144,8 @@ Ver [08-non-functional](08-non-functional.md) §Métricas de produto para a impl
 
 | # | Lacuna | Impacto no objetivo | Status |
 |---|---|---|---|
-| 00-8 | O status do chat nunca sai de `NOVO` no fluxo real | **Crítico.** Sem transição de status, a taxa de 70% é sempre 0. Nada é medido. | **ABERTO** → [05-ai-pipeline](05-ai-pipeline.md) |
-| 00-9 | `ia_diagnosticos` nunca é populado | **Crítico.** `taxa_resolucao_ia`, `ia_resolvidos` e `confianca_media` no dashboard leem de campos que nada escreve. | **ABERTO** → [05-ai-pipeline](05-ai-pipeline.md) |
+| 00-8 | O status do chat nunca sai de `NOVO` no fluxo real | **Crítico.** Sem transição de status, a taxa de 70% é sempre 0. Nada é medido. | **PROVADO (pipeline, runtime 2026-10-05)** — chat transicionou NOVO → AGUARDANDO_CLIENTE via `_finalizar`, espelho validado no Appwrite; falta o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
+| 00-9 | `ia_diagnosticos` nunca é populado | **Crítico.** `taxa_resolucao_ia`, `ia_resolvidos` e `confianca_media` no dashboard leem de campos que nada escreve. | **PROVADO (pipeline, runtime 2026-10-05)** — `ia_diagnostico` real gravado (RESOLVIDO_PELA_IA, conf. 0.95, `modelo_usado=gpt-oss:120b-cloud`), lido direto no Appwrite; falta o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
 | 00-10 | `tempo_medio_resposta` mede a média do intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta | **Alto.** A métrica não representa o que o nome promete, então não mede a meta de 70%. | **ABERTO** → [08-non-functional](08-non-functional.md) §Métricas |
 | 00-11 | Não há CSAT/NPS nem coleta de feedback | **Médio.** Não dá para medir qualidade da solução da IA. | **ABERTO** → adiado |
 | 00-12 | Só texto funciona no WhatsApp; `extendedTextMessage`, imagem e áudio são descartados | **Alto.** Um print de tela é o anexo mais comum num chamado de ERP. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |

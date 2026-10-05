@@ -268,9 +268,9 @@ mensagem, e servir a solução antiga seria um bug funcional.
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 05-1 | **Crítico.** O pipeline de IA não está conectado. `/ai/classificar`, `/ai/analisar` e `/ai/solucionar` não têm chamador. O n8n roda um AI Agent sem tools que alucina | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **ABERTO** |
-| 05-2 | **Crítico.** `POST /webhooks/chat/diagnostico` nunca é chamado. `ia_diagnosticos` nunca é populada. Todo o histórico de decisão da IA está perdido, e os KPIs do dashboard leem de campos que ninguém escreve | `services/ai_pipeline.py`; `ia_diagnostico.py` | **Crítica** | **ABERTO** — o pipeline já grava o diagnóstico em `_finalizar` quando o solver roda (ADR-0004; o endpoint isolado ficou redundante); falta o n8n chamar o solver (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
-| 05-3 | **Crítico.** `PATCH /webhooks/chat/status` nunca é chamado. O status do chat nunca sai de `NOVO` no fluxo real. A taxa de 70% é estruturalmente 0 | `workflow-support-ai.json` | **Crítica** | **ABERTO** — o pipeline já transiciona o status em `_finalizar` (e grava o diagnóstico junto, 05-2); o que falta é o n8n chamar o solver (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
+| 05-1 | **Crítico.** O pipeline de IA não está conectado. `/ai/classificar`, `/ai/analisar` e `/ai/solucionar` não têm chamador. O n8n roda um AI Agent sem tools que alucina | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **ABERTO (orquestração n8n)** — o backend é dono da IA (ADR-0004) e os endpoints foram provados em runtime no e2e P0 (2026-10-05, §Evidência de runtime). Falta o n8n orquestrar `POST /webhooks/ai/solucionar` no fluxo prod → [06-n8n-workflow](06-n8n-workflow.md) |
+| 05-2 | **Crítico.** `POST /webhooks/chat/diagnostico` nunca é chamado. `ia_diagnosticos` nunca é populada. Todo o histórico de decisão da IA está perdido, e os KPIs do dashboard leem de campos que ninguém escreve | `services/ai_pipeline.py`; `ia_diagnostico.py` | **Crítica** | **PROVADO (pipeline, runtime 2026-10-05)** — `_finalizar` gravou `ia_diagnostico` real (RESOLVIDO_PELA_IA, confiança 0.95, `modelo_usado=gpt-oss:120b-cloud`), validado direto no Appwrite (§Evidência de runtime). Falta só o chamado vivo do n8n (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
+| 05-3 | **Crítico.** `PATCH /webhooks/chat/status` nunca é chamado. O status do chat nunca sai de `NOVO` no fluxo real. A taxa de 70% é estruturalmente 0 | `workflow-support-ai.json` | **Crítica** | **PROVADO (pipeline, runtime 2026-10-05)** — `_finalizar` transicionou o chat NOVO → AGUARDANDO_CLIENTE e espelhou `necessita_humano=false`/`nivel_confianca_ia=0.95`, validado direto no Appwrite (§Evidência de runtime). Falta só o chamado vivo do n8n (05-1 → [06-n8n-workflow](06-n8n-workflow.md)) |
 | 05-4 | Cenário A não tem caminho de fechamento. Vai para `AGUARDANDO_CLIENTE` e ninguém confirma | painel (frontend) | **Alta** | **ABERTO** → [07-frontend](07-frontend.md) |
 | 05-5 | CRUD da base de conhecimento não sincroniza o Qdrant. Índice e banco divergem | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** — `criar`/`atualizar` (se `ativo`) embutem + `upsert_article`; desativar/remover apaga o ponto; falha de Qdrant/embedding vira erro (503), sem escrita parcial silenciosa |
 | 05-6 | Falha de RAG degrada para "nenhum artigo encontrado" em vez de erro. Qdrant fora do ar produz Cenário C falso | `services/ai_pipeline.py` `_buscar_base` | **Alta** | **CORRIGIDO** — falha de embedding ou busca responde 503; Cenário C só acontece com base real consultada |
@@ -288,3 +288,39 @@ mensagem, e servir a solução antiga seria um bug funcional.
 | 05-18 | `IADiagnosticoRepository.get_by_chat` não é chamado por nada | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **ABERTO** |
 | 05-19 | Dependência `openai` está declarada em `pyproject.toml` e `requirements.txt` mas nunca importada — o serviço usa `httpx` cru | `pyproject.toml:18` | Baixa | **ABERTO** |
 | 05-20 | Nenhum teste cobre `app/ai/` inteiro. Nenhum LLM é stubado em teste | `tests/` | **Alta** | **ABERTO** — mitigado: `tests/test_ai_pipeline.py` exercita `AIPipelineService` com `get_llm`/`get_embedder` stubados (classificar, RAG, cenários B/C, `_finalizar`); ainda sem teste unitário direto de `ai_cache.py`, `router.py`, `ollama_service.py` e `openai_service.py` → [10-test-strategy](10-test-strategy.md) |
+
+## Evidência de runtime (e2e P0, 2026-10-05)
+
+Cenário 1 (hit RAG) executado no backend `:8001` com o stack dev no ar
+(Appwrite `:8020`, Qdrant `:6333` com 20 pontos, Ollama `:11434` com
+`gpt-oss:120b-cloud` + `nomic-embed-text`):
+
+1. `POST /webhooks/mensagem` (secret `dev-webhook-secret-change-in-production`),
+   `whatsapp_number=5511999990001`, conteúdo
+   "Como resolvo o erro de estoque negativo no meu sistema?" → `201`; chat
+   criado `6ac3f9d0000cfdbb3f2e` em `NOVO`.
+2. `GET /webhooks/chat/{id}/contexto` → `200`, `status=NOVO`,
+   `ultima_mensagem` correta.
+3. `POST /webhooks/ai/solucionar` → `200`:
+   - RAG: `search_similar` (768, `Cosine`) devolveu o artigo
+     "Produto com estoque negativo: como resolver" (categoria `estoque`).
+   - Veredito: `status_ia=RESOLVIDO_PELA_IA`, `referencia=
+     "Produto com estoque negativo: como resolver"`, `confianca=0.95`,
+     `precisa_humano=false`, `modelo_usado=gpt-oss:120b-cloud`.
+
+Persistência validada **direto no Appwrite** (repositórios do próprio backend):
+
+- `ia_diagnosticos.get_by_chat` → doc `6ac3f9d700134f17341b` com
+  `status_ia=RESOLVIDO_PELA_IA`, `confianca=0.95`, `modelo_usado=
+  gpt-oss:120b-cloud` e `solucao` completa (7 passos). Prova o **05-2**.
+- `chats.get` → `status=AGUARDANDO_CLIENTE`, `necessita_humano=false`,
+  `nivel_confianca_ia=0.95`, `solucao_sugerida_ia` preenchida. Prova o
+  **05-3**/`00-8`.
+- RAG semântico real de ponta a ponta (embed → busca → artigo → LLM).
+  Prova o **00-2**.
+
+Cenário C (sem hit): coberto por `tests/test_ai_pipeline.py::
+test_no_hit_rag_sem_llm` (busca vazia → `transferir_sem_solucao` →
+`AGUARDANDO_HUMANO_SEM_SOLUCAO` + `NO_HIT_MENSAGEM`). Não reproduzido em
+HTTP live porque, por design, não há filtro de score e a coleção tem 20 pontos
+— o caminho `if not hits:` só dispara com Qdrant vazio. Suíte: `67 passed`.
