@@ -12,9 +12,9 @@
 >     ([ADR-0004](docs/specs/adr/0004-backend-dono-da-ia.md)); o n8n é só transporte.
 >   - O **alvo de LLM/embedding é Ollama** (768); o OpenAI está bloqueado para RAG
 >     ([ADR-0005](docs/specs/adr/0005-dimensao-de-embedding.md)).
-> - O "✅" de **Fase 8 (Workflow n8n Completo)** está desatualizado: o workflow atual tem
->   8 nós **sem RAG, sem tools e sem roteamento de cenário** — ver
->   [gap 00-3](docs/specs/00-escopo.md) e a [spec 06](docs/specs/06-n8n-workflow.md).
+> - **Atualização (2026-10-05):** o pipeline RAG foi validado em runtime e o workflow n8n
+>   foi reescrito como orquestrador de transporte, sem decisão de IA e sem chamada de Ollama.
+>   O estado atual segue nos [Registros de Gaps](docs/specs/).
 
 ---
 
@@ -31,6 +31,18 @@
 | 7 | Qdrant + RAG Semântico | ✅ |
 | 8 | Workflow n8n Completo | ✅ |
 | 9 | Gerenciamento de Usuários | ✅ |
+
+---
+
+## Atualização (2026-10-05)
+
+- [x] Seed idempotente da base de conhecimento no Appwrite e no Qdrant (20 artigos, 20 pontos, dimensão 768)
+- [x] Validação runtime do pipeline RAG no backend: `POST /webhooks/mensagem`, `GET /webhooks/chat/{chat_id}/contexto` e `POST /webhooks/ai/solucionar`
+- [x] Persistência do diagnóstico IA e espelho de status/solução/confiança em Appwrite confirmada
+- [x] Workflow n8n reescrito como orquestrador de transporte, sem decisão de IA e sem chamada de Ollama
+- [x] Infra e `.env.example` atualizados para expor ao n8n `WEBHOOK_SECRET`, `BACKEND_URL`, `EVOLUTION_INSTANCE` e `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`
+- [ ] Importar/ativar o workflow atual no n8n e validar o caminho vivo Evolution → n8n → backend → WhatsApp
+- [ ] Revisar os gaps de 00, 05, 06 e 09 após a validação do fluxo vivo
 
 ---
 
@@ -88,6 +100,10 @@
 - [x] Coleção `emsoft-knowledge-base` populada com 20 artigos indexados
 
 ## Fase 8 — Workflow n8n Completo ✅
+
+> **Nota (2026-10-05):** a Fase 8 abaixo descreve o estado histórico. O workflow atual foi
+> reescrito como orquestrador de transporte: `Webhook → If → Salvar mensagem → Contexto →
+> Resolver IA → Enviar texto + Salvar resposta`.
 
 - [x] Nó **Salvar mensagem do cliente** — HTTP Request `POST /webhooks/mensagem` (paralelo ao If)
 - [x] Nó **Salvar resposta da IA** — HTTP Request `POST /webhooks/mensagem` (paralelo ao Enviar texto)
@@ -149,12 +165,13 @@
 Cliente WhatsApp
   → Evolution API (:8080) recebe mensagem
     → Webhook → n8n (:5678)
-      → Salvar mensagem (HTTP POST /webhooks/mensagem)
       → If (fromMe == false)
-        → AI Agent (Ollama + RAG Qdrant)
-          → Enviar texto (Evolution API → WhatsApp cliente)
-          → Salvar resposta IA (HTTP POST /webhooks/mensagem)
-            → WebSocket → Frontend em tempo real
+        → Salvar mensagem (POST /webhooks/mensagem)
+        → Contexto (GET /webhooks/chat/{chat_id}/contexto)
+          → Resolver IA (POST /webhooks/ai/solucionar)
+            → Enviar texto (Evolution API → WhatsApp cliente)
+            → Salvar resposta IA (POST /webhooks/mensagem)
+              → WebSocket → Frontend em tempo real
 
 Atendente responde pelo Frontend
   → POST /chats/{id}/mensagens (remetente=atendente)
