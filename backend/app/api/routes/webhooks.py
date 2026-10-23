@@ -7,6 +7,7 @@ from app.api.deps import get_repositories
 from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
 from app.core.config import settings
+from app.models.mensagem import TipoMensagem
 from app.schemas.webhook import (
     WebhookClienteUpdate,
     WebhookContexto,
@@ -92,6 +93,19 @@ def _normalizar_payload(body: dict) -> dict:
     return body
 
 
+TIPO_MENSAGEM_EVOLUTION = {
+    "conversation": "texto",
+    "extendedTextMessage": "texto",
+    "imageMessage": "imagem",
+    "videoMessage": "documento",
+    "audioMessage": "audio",
+    "documentMessage": "documento",
+    "documentWithCaptionMessage": "documento",
+    "stickerMessage": "imagem",
+}
+TIPOS_VALIDOS = tuple(e.value for e in TipoMensagem)
+
+
 @router.post("/mensagem")
 async def webhook_mensagem(
     request: Request,
@@ -100,6 +114,11 @@ async def webhook_mensagem(
 ):
     body = await request.json()
     payload = _normalizar_payload(body)
+    tipo = payload.get("tipo")
+    if tipo:
+        payload["tipo"] = TIPO_MENSAGEM_EVOLUTION.get(tipo, tipo)
+    if payload.get("tipo") not in TIPOS_VALIDOS + (None,):
+        payload["tipo"] = "texto"
     validated = WebhookMensagem(**payload)
     service = WebhookService(repos)
     mensagem = await service.receber_mensagem(validated.model_dump())

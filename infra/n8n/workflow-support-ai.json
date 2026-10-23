@@ -55,7 +55,7 @@
     },
     {
       "parameters": {
-        "assignings": {
+        "assignments": {
           "assignments": [
             {
               "id": "a1e1c30a-0001-4a01-8a01-000000000001",
@@ -78,7 +78,7 @@
             {
               "id": "a1e1c30a-0004-4a04-8a04-000000000004",
               "name": "tipo",
-              "value": "={{ $('Webhook').item.json.body.data.messageType || 'texto' }}",
+              "value": "={{ ({'conversation':'texto','extendedTextMessage':'texto','imageMessage':'imagem','videoMessage':'documento','audioMessage':'audio','documentMessage':'documento','documentWithCaptionMessage':'documento','stickerMessage':'imagem'}[$('Webhook').item.json.body.data.messageType] || 'texto') }}",
               "type": "string"
             },
             {
@@ -92,7 +92,7 @@
         "options": {}
       },
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.7,
+      "typeVersion": 3.5,
       "position": [
         -400,
         0
@@ -131,12 +131,14 @@
           ]
         },
         "sendHeaders": true,
-        "headerParameters": [
-          {
-            "name": "X-Webhook-Secret",
-            "value": "={{ $env.WEBHOOK_SECRET }}"
-          }
-        ],
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "options": {
           "response": {
             "responseErrorCode": "={{ $response.body && $response.body.detail ? $response.body.detail : $response.status }}"
@@ -192,12 +194,14 @@
         "method": "GET",
         "url": "={{ $env.BACKEND_URL }}/webhooks/chat/{{ $('Salvar mensagem').item.json.chat_id }}/contexto",
         "sendHeaders": true,
-        "headerParameters": [
-          {
-            "name": "X-Webhook-Secret",
-            "value": "={{ $env.WEBHOOK_SECRET }}"
-          }
-        ],
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -222,7 +226,7 @@
           "conditions": [
             {
               "id": "c3a3e52c-0007-4c07-8c07-000000000007",
-              "leftValue": "={{ ['novo', 'ia_analisando', 'aguardando_cliente', 'resolvido'].includes($json.status) }}",
+              "leftValue": "={{ ['novo','ia_analisando','aguardando_cliente','resolvido'].includes((($json.status||'').toLowerCase())) }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -258,12 +262,14 @@
           ]
         },
         "sendHeaders": true,
-        "headerParameters": [
-          {
-            "name": "X-Webhook-Secret",
-            "value": "={{ $env.WEBHOOK_SECRET }}"
-          }
-        ],
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -308,12 +314,14 @@
           ]
         },
         "sendHeaders": true,
-        "headerParameters": [
-          {
-            "name": "X-Webhook-Secret",
-            "value": "={{ $env.WEBHOOK_SECRET }}"
-          }
-        ],
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -329,7 +337,7 @@
     {
       "parameters": {
         "resource": "messages-api",
-        "operation": "sendText",
+        "operation": "send-text",
         "instanceName": "={{ $env.EVOLUTION_INSTANCE }}",
         "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
         "messageText": "={{ $('Solucionar (IA)').item.json.mensagem_cliente }}",
@@ -345,8 +353,8 @@
       "name": "Enviar texto",
       "credentials": {
         "evolutionApi": {
-          "id": "MTYK5wjtIxyMTieD",
-          "name": "Evolution account"
+          "id": "QAEVOLUTION01",
+          "name": "Evolution dev"
         }
       },
       "onError": "continue"
