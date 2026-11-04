@@ -27,7 +27,8 @@ export function Header() {
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <button
         onClick={toggle}
-        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus-visible:outline-none"
+        aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
         title={collapsed ? "Expandir menu" : "Recolher menu"}
       >
         {collapsed ? (
@@ -52,7 +53,10 @@ export function Header() {
             </span>
           </div>
         )}
-        <button className="relative rounded-full p-2 hover:bg-gray-100">
+        <button
+          className="relative rounded-full p-2 hover:bg-gray-100"
+          aria-label="Notificações"
+        >
           <Bell className="h-5 w-5 text-gray-600" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent-500" />
         </button>
