@@ -20,7 +20,13 @@ from app.schemas.webhook import (
 from app.services.ai_pipeline import AIPipelineService
 from app.services.webhook_service import WebhookService
 
-router = APIRouter(prefix="/webhooks", tags=["Webhooks (n8n)"])
+from app.core.rate_limit import rate_limit
+
+router = APIRouter(
+    prefix="/webhooks",
+    tags=["Webhooks (n8n)"],
+    dependencies=[Depends(rate_limit(120, 60))],
+)
 
 
 async def verify_webhook(request: Request) -> None:

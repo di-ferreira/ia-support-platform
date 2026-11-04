@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import { api } from "@/lib/api";
+
 interface Atendente {
   id: number;
   nome: string;
@@ -29,8 +31,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem("token");
     set({ token: null, user: null, loading: false });
   },
-  loadFromStorage: () => {
+  loadFromStorage: async () => {
     const token = localStorage.getItem("token");
-    set({ token, loading: false });
+    if (!token) {
+      set({ token: null, user: null, loading: false });
+      return;
+    }
+    set({ token, loading: true });
+    try {
+      const user = await api.get<Atendente>("/auth/me");
+      set({ token, user, loading: false });
+    } catch {
+      localStorage.removeItem("token");
+      set({ token: null, user: null, loading: false });
+    }
   },
 }));

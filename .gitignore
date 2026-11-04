@@ -44,3 +44,6 @@ logs/
 # Environment
 .env.local
 .env.production
+infra/.env
+infra/.env.prod
+infra/.env.local

@@ -15,11 +15,13 @@ export function useChatSocket(chatId: number | null) {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const url = `${WS_BASE}/ws/chat/${chatId}?token=${token}`;
+    const url = `${WS_BASE}/ws/chat/${chatId}`;
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
+      // Envia o token como primeira mensagem (evita expor em query string/logs)
+      ws.send(JSON.stringify({ token }));
       console.log(`[WS] Connected to chat ${chatId}`);
     };
 

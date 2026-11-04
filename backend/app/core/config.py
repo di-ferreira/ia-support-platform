@@ -5,7 +5,7 @@ _INSECURE_DEFAULT_SECRET = "change-me-in-production"
 
 class Settings(BaseSettings):
     app_name: str = "EMSoft Support API"
-    debug: bool = True
+    debug: bool = False
 
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     database_url_prod: str | None = None
@@ -54,6 +54,11 @@ class Settings(BaseSettings):
             raise ValueError(
                 "SECRET_KEY ausente ou com valor padrão; "
                 "defina uma chave forte antes de subir para produção"
+            )
+        if not self.webhook_secret:
+            raise ValueError(
+                "WEBHOOK_SECRET ausente; defina um segredo forte antes de "
+                "subir para produção"
             )
 
 

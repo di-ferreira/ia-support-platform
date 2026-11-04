@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import WebSocket, status
 
 from app.core.security import decode_token
@@ -8,11 +10,21 @@ class ConnectionManager:
         self.active_connections: dict[str, list[WebSocket]] = {}
 
     async def connect(self, chat_id: str, websocket: WebSocket, token: str | None = None):
+        await websocket.accept()
+
+        # Compatibilidade com cliente legado que ainda envia token na query string.
+        if not token:
+            try:
+                first = await asyncio.wait_for(websocket.receive_json(), timeout=10)
+                if isinstance(first, dict):
+                    token = first.get("token")
+            except (asyncio.TimeoutError, Exception):
+                token = None
+
         payload = decode_token(token or "")
         if payload is None or payload.get("typ") != "access":
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-        await websocket.accept()
         if chat_id not in self.active_connections:
             self.active_connections[chat_id] = []
         self.active_connections[chat_id].append(websocket)

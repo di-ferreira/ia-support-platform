@@ -9,6 +9,7 @@ from app.schemas.auth import (
     RefreshRequest,
     TokenResponse,
 )
+from app.core.rate_limit import rate_limit
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/auth", tags=["Autenticação"])
 async def login(
     body: LoginRequest,
     repos: Repositories = Depends(get_repositories),
+    _rl: None = Depends(rate_limit(60, 60)),
 ):
     service = AuthService(repos)
     return await service.login(body.email, body.senha)
