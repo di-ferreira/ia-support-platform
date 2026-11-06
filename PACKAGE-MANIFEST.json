@@ -1,0 +1,32 @@
+{
+  "package": "ia-support-platform-specs-v2",
+  "generated_at": "2026-11-06",
+  "spec_files": [
+    "docs/specs/00-escopo.md",
+    "docs/specs/01-domain-glossary.md",
+    "docs/specs/02-data-model.md",
+    "docs/specs/03-api-contract.md",
+    "docs/specs/04-rbac-matrix.md",
+    "docs/specs/05-ai-pipeline.md",
+    "docs/specs/06-n8n-workflow.md",
+    "docs/specs/07-frontend.md",
+    "docs/specs/08-non-functional.md",
+    "docs/specs/09-infra-deploy.md",
+    "docs/specs/10-departamentos-e-roteamento.md",
+    "docs/specs/11-integracao-api-emsoft.md",
+    "docs/specs/12-confiabilidade-integracoes.md",
+    "docs/specs/13-plano-implementacao.md",
+    "docs/specs/adr/0004-backend-dono-da-ia.md",
+    "docs/specs/adr/0005-dimensao-de-embedding.md",
+    "docs/specs/adr/0006-departamentos-e-roteamento.md",
+    "docs/specs/adr/0007-integracao-chamados-emsoft.md"
+  ],
+  "root_files": [
+    "README.md",
+    "IMPLEMENTATION-PROMPT.md"
+  ],
+  "notes": [
+    "Canonical target-state specs; review against local clone before merge.",
+    "Emsoft API authentication and payload contract remain unverified and block production calls."
+  ]
+}

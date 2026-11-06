@@ -1,119 +1,54 @@
-# SPEC 04 — Matriz de RBAC
+# SPEC 04 — Matriz de Permissões (RBAC)
 
-Três perfis. A autorização é aplicada em duas camadas: **dependência de rota** e
-**regra dentro do serviço**.
+## Perfis existentes
 
-| Dependência | Comportamento |
-|---|---|
-| `get_current_user` (`backend/app/api/deps.py:42`) | Exige JWT válido + usuário ativo. 401 se falhar. |
-| `require_perfil("admin", "supervisor")` (`deps.py:49`) | Além do acima, exige que o `perfil` esteja na lista. 403 se não. |
+- `admin`: controle total da plataforma e configurações.
+- `supervisor`: operação e gestão de equipe, sem poderes administrativos reservados ao admin.
+- `atendente`: atendimento dentro do escopo de chats e departamento autorizado.
 
-O `perfil` **nunca** vem do token: o backend relê o usuário do Appwrite a cada requisição
-(`deps.py:34-37`). Desativar a conta invalida o token imediatamente, sem esperar expirar.
+Não criar um perfil humano adicional para representar a IA. A IA é uma identidade de serviço interna, sem login interativo e sem acesso ao painel.
 
-## Matriz
+## Matriz de permissões
 
-| Operação | `atendente` | `supervisor` | `admin` |
-|---|:---:|:---:|:---:|
-| **Autenticação** ||||
-| `POST /auth/login` | ✅ | ✅ | ✅ |
-| `POST /auth/refresh` | ✅ | ✅ | ✅ |
-| `GET /auth/me` | ✅ | ✅ | ✅ |
-| `PATCH /auth/password` | ✅ | ✅ | ✅ |
-| **Usuários** ||||
-| `GET /auth/usuarios` | ❌ | ✅ | ✅ |
-| `POST /auth/usuarios` (perfil `atendente`) | ❌ | ✅ | ✅ |
-| `POST /auth/usuarios` (perfil `supervisor`/`admin`) | ❌ | ❌ | ✅ |
-| `GET /auth/usuarios/{id}` | ❌ | ✅ | ✅ |
-| `PATCH /auth/usuarios/{id}` (nome, email, setor, ativo) | ❌ | ✅ | ✅ |
-| `PATCH /auth/usuarios/{id}` (alterar `perfil`) | ❌ | ❌ | ✅ |
-| `DELETE /auth/usuarios/{id}` | ❌ | ❌ | ✅ |
-| **Clientes e lojas** ||||
-| `GET /clientes`, `GET /clientes/{id}` | ✅ | ✅ | ✅ |
-| `POST /clientes` | ❌ | ✅ | ✅ |
-| `PATCH /clientes/{id}` | ❌ | ✅ | ✅ |
-| `GET /clientes/{id}/lojas` | ✅ | ✅ | ✅ |
-| `POST /clientes/{id}/lojas` | ❌ | ✅ | ✅ |
-| **Chats** ||||
-| `GET /chats` | ✅ filtrado | ✅ tudo | ✅ tudo |
-| `GET /chats/{id}` | ⚠️ ver §Filtro | ⚠️ ver §Filtro | ✅ |
-| `POST /chats` | ✅ | ✅ | ✅ |
-| `PATCH /chats/{id}/status` | ✅ filtrado | ✅ | ✅ |
-| `PATCH /chats/{id}/assinar` | ❌ | ✅ | ✅ |
-| `PATCH /chats/{id}/prioridade` | ❌ | ✅ | ✅ |
-| `PATCH /chats/{id}/pegar` | ✅ | ✅ | ✅ |
-| `PATCH /chats/{id}/transferir` | ✅ só o próprio | ✅ | ✅ |
-| `PATCH /chats/{id}/transferir-grupo` | ✅ | ✅ | ✅ |
-| **Mensagens** ||||
-| `GET /chats/{id}/mensagens` | ⚠️ ver §Filtro | ⚠️ ver §Filtro | ✅ |
-| `POST /chats/{id}/mensagens` | ✅ | ✅ | ✅ |
-| `POST /chats/enviar-whatsapp` | ✅ | ✅ | ✅ |
-| **Operação** ||||
-| `GET /dashboard` | ⚠️ **não filtrado** | ⚠️ não filtrado | ✅ |
-| `GET /kanban` | ✅ filtrado | ✅ tudo | ✅ tudo |
-| `PATCH /kanban/mover` | ✅ filtrado | ✅ | ✅ |
-| `GET /knowledge-base`, `GET /knowledge-base/{id}` | ✅ | ✅ | ✅ |
-| `POST`/`PATCH`/`DELETE /knowledge-base` | ❌ | ✅ | ✅ |
-| `GET /atendentes/ativos` | ✅ | ✅ | ✅ |
-| **IA (uso humano)** ||||
-| `POST /ai/classificar`, `/ai/analisar`, `/ai/solucionar` | ✅ | ✅ | ✅ |
-| **Webhooks (n8n)** ||||
-| Todas `/webhooks/**` | — | — | — |
-| **Evolution API** ||||
-| Todas `/evolution/**` | ❌ | ❌ | ✅ |
-| **Operação** ||||
-| `GET /health`, `GET /settings/ia-name` | ✅ público | ✅ público | ✅ público |
+| Recurso/ação | Admin | Supervisor | Atendente |
+|---|---:|---:|---:|
+| Visualizar dashboard | Todos os dados | Dados dos departamentos permitidos | Apenas escopo próprio/departamento |
+| Ver chats | Todos | Departamentos gerenciados | Chats do departamento/atribuição permitidos |
+| Assumir chat | Sim | Sim | Se estiver disponível no seu departamento e sem responsável incompatível |
+| Atribuir chat a outra pessoa | Sim | Sim, dentro de equipes gerenciadas | Não; pode solicitar transferência conforme política |
+| Transferir departamento | Sim | Sim, dentro do escopo | Pode transferir o próprio chat conforme regra da operação |
+| Alterar prioridade | Sim | Sim | Conforme permissão operacional já existente; default não alterar crítica sem regra |
+| Encerrar/resolver | Sim | Sim | Chats sob sua responsabilidade |
+| Gerenciar clientes | Sim | Sim | Leitura |
+| Gerenciar atendentes | Sim | Criar/editar atendente conforme política; não alterar perfil admin | Não |
+| Gerenciar departamentos | Sim | Leitura | Leitura de departamentos disponíveis |
+| Gerenciar regras de roteamento | Sim | Leitura | Não |
+| Configurar integração Emsoft | Sim | Leitura de saúde/status | Não |
+| Reprocessar integração | Sim | Sim | Não |
+| Ver diagnóstico e resumo IA | Sim | Sim | Chats visíveis ao atendente |
+| Editar base de conhecimento | Sim | Sim | Não |
+| Ver tokens/segredos | Não via UI; apenas configuração operacional controlada | Não | Não |
 
-## Regras dentro do serviço
+A tabela deve ser adaptada à matriz de permissões já implementada, sem ampliar acesso implicitamente. Qualquer diferença em código precisa ser refletida nos testes e nesta matriz.
 
-A dependência de rota resolve o caso comum. Estas regras só podem ser aplicadas no
-serviço, porque dependem do **dado sendo modificado**:
+## Regras de escopo
 
-| Regra | Implementação |
-|---|---|
-| Supervisor só cria `atendente` | `AuthService.criar_usuario` |
-| Só admin altera `perfil` | `AuthService.atualizar_usuario` |
-| Só admin desativa | Dependência de rota |
-| Atendente só transfere chat que é dele | `ChatService.transferir` |
-| `pegar` falha se o chat já é de outro | `ChatService.pegar` |
+1. A autorização é aplicada no backend; esconder botão no frontend não é controle de segurança.
+2. Supervisor só administra departamento(s) autorizados. O modelo atual não registra escopo múltiplo de supervisor; nesta etapa usar lista/associação explícita se o requisito existir. Não inferir permissão por nome de setor.
+3. Atendente só pode assumir chat de departamento ao qual está associado, salvo transferência autorizada.
+4. Atendente só pode alterar/encerrar chat dentro do escopo e se for responsável, exceto ação explicitamente concedida.
+5. Admin pode mover qualquer chat e gerenciar departamentos/regras.
+6. Dashboard, exportações, Kanban, busca e endpoints de detalhe devem aplicar o mesmo escopo; corrigir a ausência de filtro de visibilidade no dashboard identificada no contrato atual.
+7. `departamento_id` do chat e do atendente devem ser comparados no serviço de atribuição; não confiar em `departamento_id` vindo apenas do frontend.
 
-## Filtro de visibilidade de chat
+## Identidade de serviço da IA
 
-O `atendente` não vê a fila inteira. Ele vê:
+- A IA não autentica no endpoint de usuário e não utiliza JWT pessoal de funcionário.
+- As ações automáticas são executadas pelo backend sob identidade técnica auditável (`actor_type=SYSTEM/IA`).
+- A integração Emsoft usa credencial de servidor com privilégio mínimo.
+- O identificador externo do usuário IA é configuração (`EMSOFT_CHAMADOS_AI_USER_ID`) ou mapeamento administrável protegido; nunca hardcode em frontend.
+- Usuário de serviço externo deve ser criado/confirmado no sistema Emsoft por administrador. Não criar conta externa automaticamente por API sem contrato e autorização.
 
-1. Chats **sem** `atendente_id` cujo `setor_alvo` é igual ao seu `setor`, **ou** cujo
-   `setor_alvo` é nulo (chat novo, sem setor ainda).
-2. Os chats **que já são dele**.
+## Auditoria obrigatória
 
-Aplica-se em `GET /chats` e `GET /kanban`. Está implementado em `ChatService.listar` e
-`KanbanService.obter_kanban`.
-
-## Regras de frontend
-
-A UI **reflete** a matriz, mas não a impõe. O backend é a única autoridade.
-
-| Regra de UI | Onde |
-|---|---|
-| Link "Usuários" só para admin e supervisor | `components/layout/sidebar.tsx` |
-| Link "Configurações" só para admin | `components/layout/sidebar.tsx` |
-| Toggle Ativo/Inativo só para admin | `app/(app)/usuarios/page.tsx` |
-| Indicador de status do WhatsApp só para admin | `components/layout/header.tsx` |
-| Botão "Pegar" só quando o chat está livre | `app/(app)/atendimento/page.tsx`, `app/(app)/kanban/page.tsx` |
-
-> `frontend/` oculta ações em vez de desabilitá-las, e não há guarda de rota por perfil.
-> Um atendente que digitar `/usuarios` na barra de endereço chega à página — a API
-> recusa, a tela fica vazia. Ver gap 04-3.
-
-## Registro de Gaps
-
-| # | Gap | Onde | Severidade | Status |
-|---|---|---|---|---|
-| 04-1 | `GET /dashboard` **não** aplica filtro de visibilidade. Atendente lê contagem global, `taxa_resolucao_ia`, `confianca_media` e o nome dos clientes dos 10 chats mais recentes, inclusive de outros setores | `routes/dashboard.py`, `dashboard_service.py` | **Alta** | **ABERTO** |
-| 04-2 | `GET /chats/{id}`, `GET /chats/{chat_id}/mensagens` e `GET /clientes/{id}` **não** checam posse. Um atendente que descubra o id de um chat de outro setor lê tudo | `routes/chats.py`, `routes/mensagens.py`, `routes/clientes.py` | **Alta** | **ABERTO** |
-| 04-3 | Frontend oculta ações por perfil em vez de desabilitar, e não tem guarda de rota. Digitando a URL, o atendente alcança `/usuarios` e `/configuracoes` (a API recusa, a tela fica vazia) | `sidebar.tsx`, `(app)/layout.tsx` | Média | **ABERTO** → [07-frontend](07-frontend.md) |
-| 04-4 | Regra "supervisor só cria `atendente`" está no serviço, mas **não há teste** que confirme o 403 | `AuthService.criar_usuario`; sem teste em `tests/` | **Alta** | **ABERTO** → [10-test-strategy](10-test-strategy.md) |
-| 04-5 | Regra "só admin altera `perfil`" está no serviço, **sem teste** | `AuthService.atualizar_usuario`; sem teste | **Alta** | **ABERTO** → [10-test-strategy](10-test-strategy.md) |
-| 04-6 | `ChatService` cobre 4 dos 9 métodos em teste. `assinar`, `definir_prioridade`, `transferir`, `transferir_grupo`, `pegar` (taken) e `listar` (filtro) não têm teste | `tests/test_chat_service.py` | **Alta** | **ABERTO** → [10-test-strategy](10-test-strategy.md) |
-| 04-7 | `WEBHOOK_SECRET` dá poder de **forçar o status de qualquer chat**, pulando a máquina de estados, e de **criar diagnóstico falso** em qualquer chat. Um segredo vazado é acesso total aos dados | `routes/webhooks.py`, `verify_webhook` | **Alta** | **ABERTO** → [08-non-functional](08-non-functional.md) |
-| 04-8 | `EvolutionService.criar_instancia` engole 403 e devolve sucesso. O painel recebe 200 sem QR e não consegue distinguir "criado" de "recusado" | `evolution_service.py` | Média | **ABERTO** |
-| 04-9 | `GET /atendentes/ativos` retorna dados de todos os atendentes ativos (id, nome, perfil, setor) para qualquer autenticado. Provavelmente aceitável, mas não está declarado como intencional | `routes/atendentes.py` | Baixa | **ABERTO** |
+Registrar ator, chat, ação, data/hora, departamento anterior/novo, atendente anterior/novo e motivo. Não registrar senha, token ou conteúdo integral sensível. Para ações automáticas, `actor_type=IA` e modelo/versão quando aplicável.

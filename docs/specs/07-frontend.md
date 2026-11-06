@@ -1,126 +1,92 @@
-# SPEC 07 — Frontend (painel do atendente)
+# SPEC 07 — Frontend (Painel de Atendimento)
 
-O frontend é o painel web do atendente. Ele não contém regra de negócio nem prompt de IA:
-consome a API REST do backend, reflete o estado do chat em tempo real via WebSocket, e aplica
-o DesignSystem `DesignSystem/`. A decisão é [adr/0004-backend-dono-da-ia.md](adr/0004-backend-dono-da-ia.md).
+## Responsabilidade
 
-## Stack
+O frontend Next.js exibe e coleta ações do operador. Não contém prompt, classificador, RAG, regra de roteamento ou chamada direta à API Emsoft. Todas as regras são aplicadas no backend FastAPI.
 
-| Camada | Tecnologia | Versão |
-|---|---|---|
-| Framework | Next.js (App Router, `"use client"`) | 15.x |
-| Runtime | React | 19.x |
-| Linguagem | TypeScript | 5.6.x |
-| Estilo | Tailwind CSS (`@theme`) | 4.x |
-| Estado | Zustand | 5.x |
-| Server state / cache | TanStack Query | 5.x |
-| UI base | Radix UI + primitivos próprios em `components/ui` | — |
-| Ícones | lucide-react | 0.460 |
-| Gráficos | recharts | 3.x |
-| Tempo real | WebSocket nativo (`use-chat-socket`) | — |
+## Stack declarada
 
-Não há router de navegação por sidebar com guards de rota por perfil: a restrição de acesso
-é feita no backend (RBAC). O frontend apenas redireciona para `/login` quando não há token.
+- Next.js 15 App Router.
+- React 19 e TypeScript 5.6.
+- Tailwind CSS 4.
+- Zustand 5 para estado local.
+- TanStack Query 5 para server state/cache.
+- Componentes próprios e Radix primitives; lucide-react.
+- WebSocket para eventos em tempo real, com polling de fallback.
+- Design tokens referenciados em `DesignSystem/brand-spec.md` e aplicados por `frontend/src/app/globals.css`.
 
-## Rotas
+Não assumir troca de stack durante esta iniciativa.
 
-Grupo de rotas `(app)` com layout autenticado (`(app)/layout.tsx`).
+## Rotas existentes
 
-| Rota | Tela | Papel | Estado |
-|---|---|---|---|
-| `/login` | Login | Autenticação, guarda entrada | Implementada |
-| `/` | Redireciona para `/atendimento` | Entrada | Implementada |
-| `/atendimento` | Inbox + chat + painel IA | Operação principal | Implementada |
-| `/kanban` | Quadro de status | Visão pipeline | Implementada |
-| `/dashboard` | KPIs e gráficos | Gestão | Implementada |
-| `/conhecimento` | Base de conhecimento | Artigos RAG | Implementada |
-| `/cliente` | Clientes | CRM básico | Implementada |
-| `/usuarios` | Usuários | Gestão de contas | Implementada |
-| `/configuracoes` | Configurações | Config | Implementada |
+Manter `/login`, `/atendimento`, `/kanban`, `/dashboard`, `/conhecimento`, `/cliente`, `/usuarios` e `/configuracoes`. Não recriar rotas já removidas do escopo sem decisão formal.
 
-O `DesignSystem/DESIGN-MANIFEST.json` tinha **9 telas** de produto, incluindo `ia-dashboard.html`
-e `relatorios.html`. Essas duas **não existem** no app — o usuário as cortou do escopo. As
-telas foram removidas do manifest, do handoff e dos protótipos na Fase 5. Ver gaps 07-7 e 07-8.
+## Novas capacidades de UI
 
-## Autenticação
+### Gestão de departamentos
 
-- O login obtém um JWT que é gravado em `localStorage.token` (`lib/stores/auth-store.ts`).
-- `(app)/layout.tsx` chama `GET /auth/me` com o token; se falhar, limpa o token e manda para
-  `/login`. Se passar, popula o store com `perfil` (usado para rótulos, não para guards).
-- Todo pedido HTTP injeta `Authorization: Bearer <token>` em `lib/api.ts`.
-- O WebSocket recebe o token por **query string**: `ws://…/ws/chat/{id}?token=…`
-  (`hooks/use-chat-socket.ts`). Isso expõe o token na URL/headers de proxy — ver gap 07-1.
-- Não há refresh token no cliente, nem renovação automática. O token expira em 60 min
-  (`access_token_expire_minutes`), o que encerra a sessão silenciosamente em uso longo —
-  ver gap 07-2.
+Adicionar seção `/departamentos` ou aba em `/configuracoes`, conforme padrão de navegação atual:
 
-## Camada de dados
+- listar departamentos ativos/inativos;
+- criar/editar nome, descrição, ordem e recebimento de transferência;
+- desativar sem apagar referências;
+- visualizar atendentes associados;
+- impedir exclusão/desativação incompatível com regra de negócio, explicando dependências.
 
-`lib/api.ts` expõe `api.get/post/patch/delete` genéricos sobre `fetch`.
+### Associação de atendentes
 
-- Base em `NEXT_PUBLIC_API_URL` (padrão `http://localhost:8000`).
-- Erro vira `throw new Error(detail)`; quem trata é o `onError` do TanStack mutation.
-- Padrão de cache: `useQuery` com `refetchInterval: 30000` para listas (`chats`, `mensagens`,
-  `dashboard`) e invalidação dirigida por `queryKey` ao receber eventos WebSocket
-  (`nova_mensagem`, `status_update`, `diagnostico`).
+No formulário de usuário, selecionar departamento por ID entre departamentos ativos. Se houver suporte a múltiplos departamentos futuramente, modelar associação N:N em spec própria; nesta versão manter um departamento principal por atendente, salvo se código atual provar o contrário.
 
-Stores Zustand: `auth-store`, `chat-store`, `sidebar-store`. `chat-store` é hoje um par de
-arrays simples; `atendimento/page.tsx` mantém `chatAtivo` em `useState` local, não no store —
-o store `chatAtivo` não é usado. Ver gap 07-5.
+### Atendimento / Inbox
 
-## Tempo real
+O painel de IA deve mostrar, quando disponível:
 
-`use-chat-socket(chatId)` abre `WebSocket /ws/chat/{chatId}` por chat ativo. Ao receber
-`nova_mensagem`, `status_update` ou `diagnostico`, invalida os queries do chat. Há polling
-paralelo de 30 s como rede de segurança. A reconexão é **ausente**: `onclose` só fecha,
-`onerror` fecha, não há reabertura nem backoff. Ver gap 07-3.
+- intenção e subintenção;
+- categoria ERP;
+- departamento sugerido e departamento final;
+- justificativa do roteamento;
+- resumo/causa provável;
+- solução sugerida e artigos consultados;
+- nível de confiança como dado auxiliar, nunca como prova de correção;
+- status e responsável atual;
+- estado da sincronização externa, ID/link do chamado Emsoft e erro sanitizado para perfis autorizados.
 
-## Design tokens
+Ações: transferir departamento, atribuir atendente, confirmar resolução, informar que não resolveu e solicitar intervenção humana. Ações devem chamar endpoints; não atualizar estado local como se a API tivesse confirmado antes da resposta.
 
-Fonte de verdade declarada: `DesignSystem/brand-spec.md`. Fonte de verdade aplicada:
-`frontend/src/app/globals.css` via `@theme`.
+### Kanban
 
-| Token | `globals.css` (`@theme`) |
-|---|---|
-| `primary-500` | `#063778` (azul-escuro) |
-| `primary-600` | `#052f66` |
-| `accent-400` | `#f97316` (laranja) |
-| `success` | `#16a34a` |
-| `warning` | `#d97706` |
-| `danger` | `#dc2626` |
-| `info` | `#2563eb` |
-| `font-sans` | Inter |
-| `font-mono` | JetBrains Mono |
+- Filtrar por departamento e/ou responsável segundo RBAC.
+- Indicar chats sem atendente e com integração externa pendente/erro.
+- Preservar ordenação por prioridade e data.
+- Não duplicar o mesmo chat em várias colunas por causa do vínculo externo.
 
-Os componentes usam tanto a escala `primary-*` quanto `gray-*`/`green-*`/`red-*`/`blue-*`
-raw do Tailwind (ex.: `text-green-500`, `bg-red-500`, `border-red-300`). Há, portanto, cores
-que **não passam pelos tokens** do design system. Ver gap 07-4.
+### Dashboard
 
-## Componentes
+Adicionar métricas por departamento, cenário de IA, solução confirmada e saúde da integração Emsoft. Todos os dados respeitam o escopo RBAC; corrigir eventual exposição de KPIs globais para perfis sem autorização.
 
-Primitivos próprios sobre Radix em `components/ui/`: `button`, `badge`, `card`, `input`,
-`select`. `components/layout/`: `sidebar`, `header`. `components/providers.tsx` monta o
-QueryClient.
+### Configuração da integração
 
-Não há biblioteca de UI pronta (shadcn/ui completo); os primitivos são o suficiente, mas
-partes da UI (ex.: selects de status/prioridade em `atendimento`) usam `<select>` nativo
-inline em vez do componente `components/ui/select`. Ver gap 07-6.
+Exibir somente estado habilitado/desabilitado, conectividade conhecida, últimas sincronizações e filas pendentes. Não mostrar token, header de autenticação ou payload sensível. A edição de credenciais é operacional via ambiente/secret manager, não via UI na primeira versão.
 
-## Estados obrigatórios por tela
+## Cache e tempo real
 
-Cada tela de produto deve ter: vazio, carregando, erro, sucesso e (quando houver formulário)
-validação. `atendimento` já implementa vazio e erro (banner fixo) e carregamento
-(`Loader2`). As demais têm vazio/erro em graus variados — auditar por tela na implementação.
+- TanStack Query é a fonte de server state.
+- Invalidar `chats`, `mensagens`, `dashboard`, `departamentos` e `integracoes` ao receber eventos relevantes.
+- WebSocket precisa de reconexão com backoff exponencial e polling de fallback.
+- Não gravar JWT em query string do WebSocket na nova implementação; adotar mecanismo autenticado compatível com servidor/proxy.
+- Atualizar interface após resposta confirmada do backend.
 
-## Registro de Gaps
+## Estados de interface obrigatórios
 
-| # | Gap | Onde | Severidade | Status |
-|---|---|---|---|---|
-| 07-1 | Token JWT passado na query string do WebSocket (`?token=`), exposto em URL/headers de proxy | `hooks/use-chat-socket.ts:18` | **Alta** | **ABERTO** |
-| 07-2 | Sem refresh token / renovação. Sessão cai após 60 min sem avisar o atendente | `auth-store.ts`, `config.py:20` | **Alta** | **ABERTO** |
-| 07-3 | WebSocket sem reconexão nem backoff; queda de conexão mata o tempo real até o polling de 30 s | `hooks/use-chat-socket.ts:51-57` | Média | **ABERTO** |
-| 07-4 | Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme`; inconsistência com o DesignSystem | `atendimento/page.tsx`, `dashboard/page.tsx` | Média | **ABERTO** |
-| 07-5 | `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte de verdade | `chat-store.ts` vs `atendimento/page.tsx:15` | Baixa | **ABERTO** |
-| 07-6 | Selects de status/prioridade usam `<select>` nativo em vez de `components/ui/select`; quebra de padrão visual | `atendimento/page.tsx:226-247` | Baixa | **ABERTO** |
-| 07-7 | Manifest referencia `relatorios.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** → Fase 5 |
-| 07-8 | Manifest referencia `ia-dashboard.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** → Fase 5 |
+Cada tela deve contemplar carregando, vazio, erro, sucesso e validação. Integração pendente não deve bloquear o chat; exibir status de sincronização separado.
+
+## Design system
+
+Usar tokens existentes; evitar cores raw de Tailwind fora do tema. Priorizar consistência de componentes para selects, badges, feedback e estados de carregamento. Não introduzir biblioteca visual completa sem necessidade.
+
+## Acessibilidade e conteúdo
+
+- Labels explícitos e navegação por teclado.
+- Status com texto/ícone, nunca apenas cor.
+- Dados técnicos devem ser legíveis e copiáveis.
+- Resumo gerado por IA deve ser identificável como sugestão automática até revisão humana.

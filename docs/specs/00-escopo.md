@@ -2,161 +2,111 @@
 
 ## Objetivo
 
-Reduzir em **pelo menos 70%** a carga operacional do suporte técnico do ERP EMSoft
-(setor de autopeças), automatizando o primeiro contato via WhatsApp com IA apoiada por
-base de conhecimento.
+Reduzir em **pelo menos 70%** a carga operacional do suporte técnico do ERP EMSoft, automatizando o primeiro contato via WhatsApp com uma IA apoiada por uma base de conhecimento e encaminhando cada solicitação à equipe apropriada quando necessário.
 
-O número 70% é a métrica de sucesso do produto. Ele é medido como: **proporção de
-chamados que não chegam a um atendente humano**, ver [08-non-functional](08-non-functional.md)
-§Métricas de produto.
+A métrica de 70% representa a proporção de atendimentos elegíveis concluídos sem intervenção humana, com resolução confirmada pelo cliente. Ver `08-non-functional.md`.
 
-## O produto em uma frase
+## Produto em uma frase
 
-Painel web onde uma equipe de suporte atende chamados de WhatsApp de clientes do ERP
-EMSoft, com IA classificando, pesquisando na base de conhecimento e transbordando
-chamados que exigem intervenção humana.
+Painel web interno para atendimento WhatsApp de clientes do ERP EMSoft, com IA que entende a intenção, consulta conhecimento técnico, propõe correções e encaminha conversas para departamentos e atendentes, registrando também os chamados no sistema interno Emsoft.
 
-## Quem usa
+## Personas
 
-| Persona | Entra por | Precisa de |
+| Persona | Entrada | Necessidade |
 |---|---|---|
-| **Atendente** | `/atendimento`, `/kanban` | Ver os chats que pode atender, responder pelo WhatsApp, mover no Kanban |
-| **Supervisor** | + `/usuarios`, `/clientes` | Mesma coisa, mais atribuir chats, definir prioridade, gerenciar usuários e clientes |
-| **Admin** | tudo, + `/configuracoes` | Configurar a conexão WhatsApp, gerenciar a base de conhecimento |
-| **Cliente final** | WhatsApp | Nunca vê o sistema. Fala com a IA primeiro, com um humano se necessário. |
+| Cliente final | WhatsApp | Resolver dúvidas/problemas ou falar com o departamento correto |
+| Atendente | `/atendimento`, `/kanban` | Ver e assumir chats do seu departamento, responder e executar orientações |
+| Supervisor | Painel + `/usuarios`, `/clientes`, departamentos | Atribuir chats, supervisionar filas e organizar equipes |
+| Admin | Todas as telas + configurações | Gerenciar usuários, departamentos, regras e integrações |
+| IA Support | Serviço de backend | Classificar, consultar conhecimento, orientar e registrar sua própria atuação |
 
-## Os três cenários — o coração do produto
+## Escopo funcional
 
-Toda a arquitetura existe para sustentar esta regra. Definida em
-`.ai/AGENT.md:11-16` e `.ai/SUPORTE_AGENT.md:59-77`.
+- Atendimento exclusivamente pelo WhatsApp nesta fase, via Evolution API.
+- Persistência de clientes, chats e mensagens no Appwrite.
+- IA para classificar intenção, categoria/subcategoria do ERP, resumir, diagnosticar e propor orientação com RAG.
+- Base de conhecimento com armazenamento Appwrite e busca vetorial Qdrant.
+- Máquina de estados de oito estados descrita em `01-domain-glossary.md`.
+- Departamentos gerenciáveis, atendentes associados a departamentos e regras de roteamento.
+- Transferência direta para departamento, fila geral ou atendente.
+- Painel web para atendimento, Kanban, dashboard, clientes, usuários, conhecimento, departamentos e integração.
+- Integração backend-to-backend com a API interna de chamados Emsoft para criar e atualizar chamados relacionados aos chats.
+- Registro de chamados externos atribuídos ao usuário técnico da IA quando ela apresentar uma solução e atribuídos ao atendente humano após transferência/assunção conforme o contrato externo.
+- Auditoria operacional, reprocessamento seguro e monitoramento de falhas de sincronização.
 
-### Cenário A — Resolução direta
+## Cenários principais de atendimento
 
-A IA encontrou a solução **e** o cliente consegue executar sozinho sozinho.
+### Cenário A — IA apresenta uma solução que o cliente pode executar
 
-→ A IA orienta passo a passo.
-→ O chamado vai para `AGUARDANDO_CLIENTE`.
-→ Se o cliente confirmar, vai para `RESOLVIDO`.
+1. O backend classifica o assunto e identifica a categoria ERP.
+2. Para problema técnico, consulta a base de conhecimento.
+3. A IA só orienta se houver evidência suficiente e conteúdo compatível na base.
+4. O chat passa para `AGUARDANDO_CLIENTE`.
+5. A integração cria um chamado externo atribuído ao usuário técnico da IA, com status externo equivalente a aguardando confirmação, se esse status existir no contrato Emsoft.
+6. Se o cliente confirmar, o backend transiciona o chat para `RESOLVIDO` e atualiza o chamado externo.
+7. Se o cliente disser que não resolveu, o mesmo chamado externo é atualizado com a tentativa e encaminhado a humano; não criar um segundo ticket.
 
-### Cenário B — Transbordo com solução
+### Cenário B — IA encontra orientação, mas exige ação humana
 
-A IA encontrou a solução, **mas** ela exige intervenção humana (ajuste em banco,
-liberação de tela, configuração interna).
+1. A IA identifica uma solução ou procedimento interno que não deve ser executado automaticamente.
+2. Persiste o diagnóstico, a solução proposta e as evidências.
+3. O chat passa para `AGUARDANDO_HUMANO_COM_SOLUCAO`.
+4. O backend determina o departamento e aguarda/realiza a atribuição humana conforme regra da equipe.
+5. Quando houver atendente designado, cria ou atualiza o chamado externo atribuindo-o a essa pessoa.
+6. O atendente recebe o resumo, tentativas e solução sugerida.
 
-→ A IA preenche `solucao_sugerida_ia` com o passo a passo exato.
-→ O chamado vai para `AGUARDANDO_HUMANO_COM_SOLUCAO`.
-→ O atendente executa a receita.
+### Cenário C — IA não encontra solução confiável
 
-### Cenário C — Transbordo sem solução
+1. O backend consulta o RAG.
+2. Se os resultados forem insuficientes, a IA não inventa solução.
+3. A IA pode pedir detalhes indispensáveis (mensagem de erro, módulo, versão, operação realizada).
+4. O backend gera resumo técnico do que foi verificado e encaminha para o departamento técnico adequado.
+5. Ao atribuir um atendente, cria/atualiza o chamado externo no nome dessa pessoa.
 
-A IA **não** encontrou resposta na base de conhecimento.
+### Cenário D — Solicitação de outro departamento
 
-→ A IA coleta mais detalhes com o cliente.
-→ A IA gera um relatório técnico do que sabe.
-→ O chamado vai para `AGUARDANDO_HUMANO_SEM_SOLUCAO`.
+1. O classificador identifica a intenção (por exemplo, financeiro, comercial ou administrativo).
+2. O backend resolve a intenção para um departamento ativo por regra determinística.
+3. Se a intenção e o destino forem claros, encaminha sem executar o pipeline RAG técnico.
+4. Se o destino não for claro, faz uma pergunta de esclarecimento; não escolhe aleatoriamente.
+5. A fila do departamento recebe a conversa. A chamada externa deve refletir a pessoa quando atribuída individualmente, ou a fila se a API externa suportar esse conceito.
 
-A distinção entre B e C é o valor que o humano recebe: em B ele já sabe o que fazer,
-em C ele precisa investigar. **Nunca inventar solução** — se a base não respondeu, é
-Cenário C (`.ai/SUPORTE_AGENT.md:145`).
+### Cenário E — Pedido explícito por humano
 
-A regra determinística que implementa isso está em [05-ai-pipeline](05-ai-pipeline.md)
-§Cenários.
+A IA reconhece frases como “quero falar com uma pessoa/atendente”. Deve interromper a tentativa de resolução automática, preservar o contexto e encaminhar para o departamento atual ou perguntar qual departamento quando não houver contexto suficiente.
 
-## Fronteira do produto
+## Fora do escopo
 
-### Dentro do escopo
-
-- Autenticação com JWT e três perfis (admin, supervisor, atendente)
-- Chats com máquina de estados de 8 estados
-- Kanban operacional de 7 colunas
-- Atendimento via WhatsApp usando Evolution API
-- IA: classificar, resumir, diagnosticar, gerar solução com RAG
-- Base de conhecimento (artigos) com busca semântica via Qdrant
-- Painel operacional com métricas
-- Gerência de usuários, clientes e lojas
-
-### Fora do escopo
-
-Estas coisas **não** são responsabilidade deste sistema. Se surgirem Requirements, é um
-produto novo.
-
-| Fora | Por quê |
+| Item | Motivo |
 |---|---|
-| Sistema de bilhetaria ou SLA contratual com o cliente final | O cliente fala com o suporte da EMSoft, não com este sistema |
-| Execução de correção no ERP do cliente | A IA **orienta**; a execução é humana e monitorada (`.ai/SUPORTE_AGENT.md:143`) |
-| Qualquer canal além de WhatsApp | O produto é "100% WhatsApp" (`.ai/AGENT.md:1`) |
-| Estoque, vendas, fiscal do ERP do cliente | São **assunto** dos chamados, não funcionalidade do sistema |
-| Cobrança, assinatura, multi-tenant comercial | É plataforma interna da EMSoft, não SaaS multi-cliente |
+| SaaS multi-tenant comercial, assinatura e billing | Plataforma interna da EMSoft |
+| Portal de chamados para o cliente final | O cliente permanece no WhatsApp |
+| Execução automática de SQL, alteração de dados ou configuração de ERP | IA orienta; ação interna permanece humana e auditada |
+| Promessa de prazo/SLA pela IA | Somente equipe autorizada pode informar prazos |
+| Canais além do WhatsApp | Fora desta etapa |
+| Agentes autônomos múltiplos e comunicação entre agentes | Complexidade desnecessária para o fluxo atual |
+| Sincronização bidirecional irrestrita de todo o sistema externo | Integração limitada a chamados vinculados ao chat |
 
-### Adiado explicitamente
+## Regras inegociáveis
 
-Cortado de propósito, com decisão registrada. Não são bugs — são **fora do escopo até
-novo pedido**.
+1. A IA nunca inventa solução. Sem evidência suficiente na base, classifica como sem solução e transfere.
+2. A IA nunca promete prazo, disponibilidade ou resultado garantido.
+3. A IA não expõe senha, credencial, dado bancário ou informação de outro cliente.
+4. A IA não executa alteração em banco, permissões ou ambiente do cliente.
+5. Toda mensagem recebida é persistida antes de qualquer resposta/ação da IA.
+6. O backend é autoridade para estado, departamento, responsável e integração externa.
+7. A categoria ERP não é departamento; não misturar os dois conceitos.
+8. O n8n transporta mensagens e não decide negócio nem chama diretamente a API Emsoft.
+9. Uma conversa produz no máximo um chamado externo vinculado; a transferência atualiza o mesmo chamado quando possível.
+10. Falha na integração externa não pode apagar nem bloquear a conversa: registra pendência e reprocessa de forma segura.
+11. Não habilitar criação/atualização real no endpoint Emsoft até autenticação, payload e status serem confirmados com documentação ou exemplos reais.
 
-| Item | Decisão | Onde documentado |
-|---|---|---|
-| `/relatorios` | Removida: era placeholder estático sem fonte de dados | [07-frontend](07-frontend.md) §Rotas |
-| `/ia-dashboard` | Removida: KPIs parcialmente migrados para `/dashboard` | [07-frontend](07-frontend.md) §Rotas |
-| Upload de mídia | Campo `url_arquivo` existe no schema, sem UI e sem upload | [02-data-model](02-data-model.md) |
-| Dark mode | Tokens sem variante escura | [07-frontend](07-frontend.md) §Tokens |
-| PWA / push notification | — |
-| Editar/deletar mensagens | — |
-| Componentes Radix UI | Instalados, não usados. Componentes atuais são hand-rolled | [07-frontend](07-frontend.md) §Componentes |
+## Indicadores de sucesso
 
-## Regras de negócio que não são negociáveis
-
-1. **A IA nunca inventa solução.** Sem resultado na base, é Cenário C.
-2. **A IA nunca promete prazo.** (`.ai/SUPORTE_AGENT.md:144`)
-3. **A IA não expõe dado sensível do cliente** (senha, dado bancário). (`.ai/SUPORTE_AGENT.md:142`)
-4. **A IA não executa alteração em banco sem supervisão humana.** (`.ai/SUPORTE_AGENT.md:143`)
-5. **Toda mensagem do cliente é persistida antes de a IA responder.** Se a IA falhar,
-   o histórico não pode estar perdido.
-6. **O atendente sempre pode assumir o controle** de qualquer chat. A IA nunca é um
-   beco sem saída.
-7. **A resposta vai ao cliente por WhatsApp, não só para o painel.** É o mesmo canal.
-
-## Métrica de sucesso
-
-| Métrica | Como medir | Alvo |
-|---|---|---|
-| Redução de carga do suporte humano | Chamados que não foram para atendente ÷ total | **≥ 70%** |
-| Taxa de resolução da IA | `RESOLVIDO` com `status_ia = RESOLVIDO_PELA_IA` ÷ total | Definir baseline |
-| Qualidade da transbordo | Cenário B com solução preenchida ÷ total de B e C | ≥ 90% |
-| Tempo médio de primeira resposta | `criado_at` → primeira mensagem de atendente | Definir baseline |
-
-Ver [08-non-functional](08-non-functional.md) §Métricas de produto para a implementação.
-
-## Registro de Gaps
-
-### Claims da documentação que não correspondem à realidade
-
-| # | Claim | Onde | Realidade | Status |
-|---|---|---|---|---|
-| 00-1 | "n8n decide cenário A/B/C" | `README.md:281` | Cenários existem **só como prosa** no system prompt. Nenhum nó decide. `PATCH /webhooks/chat/status` nunca é chamado. | **CORRIGIDO (doc)** → [05-ai-pipeline](05-ai-pipeline.md) |
-| 00-2 | "Fase 7 — Qdrant + RAG Semântico ✅" | `TODO_LIST.md:72` | RAG inalcançável: `/ai/solucionar` nunca é chamado por nada. | **PROVADO (pipeline, runtime 2026-10-05)** — RAG real de ponta a ponta: `search_similar` → artigo "Estoque negativo" (conf. 0.95) → LLM → `RESOLVIDO_PELA_IA`; falta só o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
-| 00-3 | "Fase 8 — Workflow n8n Completo ✅" | `TODO_LIST.md:77` | Workflow de 8 nós sem RAG, sem tools, sem roteamento de cenário. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |
-| 00-4 | "Armazenamento: Supabase Storage" | `README.md:20` | Não existe Supabase. A fonte de dados é Appwrite. | **CORRIGIDO (doc)** → Fase 5 |
-| 00-5 | Stack obrigatória "NestJS, TypeScript, Prisma" | `.ai/PROJECT.md:120-136` | Nunca usada. O backend é Python/FastAPI. | **CORRIGIDO (doc)** → Fase 5 |
-| 00-6 | "workflow exportável (19 nós)" | `.ai/TODO_LIST.md:210` | São 8 nós. O doc descreve ~12, o JSON tem 8. | **CORRIGIDO (doc)** → [06-n8n-workflow](06-n8n-workflow.md) |
-| 00-7 | "Backup PostgreSQL + Qdrant + MinIO" | `.ai/TODO_LIST.md:261` | MinIO não é usado por código algum. Backup do Qdrant nunca dispara. | **ABERTO** → [09-infra-deploy](09-infra-deploy.md) §Backup |
-
-### O que o objetivo de 70% exige e não existe
-
-| # | Lacuna | Impacto no objetivo | Status |
-|---|---|---|---|
-| 00-8 | O status do chat nunca sai de `NOVO` no fluxo real | **Crítico.** Sem transição de status, a taxa de 70% é sempre 0. Nada é medido. | **PROVADO (pipeline, runtime 2026-10-05)** — chat transicionou NOVO → AGUARDANDO_CLIENTE via `_finalizar`, espelho validado no Appwrite; falta o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
-| 00-9 | `ia_diagnosticos` nunca é populado | **Crítico.** `taxa_resolucao_ia`, `ia_resolvidos` e `confianca_media` no dashboard leem de campos que nada escreve. | **PROVADO (pipeline, runtime 2026-10-05)** — `ia_diagnostico` real gravado (RESOLVIDO_PELA_IA, conf. 0.95, `modelo_usado=gpt-oss:120b-cloud`), lido direto no Appwrite; falta o chamado vivo do n8n → [05-ai-pipeline](05-ai-pipeline.md) §Evidência de runtime |
-| 00-10 | `tempo_medio_resposta` mede a média do intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta | **Alto.** A métrica não representa o que o nome promete, então não mede a meta de 70%. | **ABERTO** → [08-non-functional](08-non-functional.md) §Métricas |
-| 00-11 | Não há CSAT/NPS nem coleta de feedback | **Médio.** Não dá para medir qualidade da solução da IA. | **ABERTO** → adiado |
-| 00-12 | Só texto funciona no WhatsApp; `extendedTextMessage`, imagem e áudio são descartados | **Alto.** Um print de tela é o anexo mais comum num chamado de ERP. | **ABERTO** → [06-n8n-workflow](06-n8n-workflow.md) |
-
-### Confirmado conforme o escopo
-
-| Item | Verificação |
-|---|---|
-| Autenticação JWT + 3 perfis | `backend/app/core/security.py`, `backend/app/api/deps.py` — conforme |
-| 8 estados de chat | `backend/app/models/chat.py` — conforme |
-| Kanban de 7 colunas | `backend/app/services/kanban_service.py` — conforme |
-| Evolution API integrada | `backend/app/services/evolution_service.py` — conforme |
-| Base de conhecimento com categorias | `backend/app/appwrite/schema.py` — conforme |
-| Métricas no painel | `backend/app/services/dashboard_service.py` — presente, porém com semântica errada (00-10) |
+- Percentual de chats resolvidos pela IA com confirmação do cliente.
+- Percentual de chats transferidos por departamento.
+- Taxa de reclassificação/transferência corrigida por humano.
+- Tempo entre mensagem e primeira resposta.
+- Taxa de sincronização de chamados externos.
+- Quantidade de chamados externos duplicados (meta: zero).
+- Quantidade de falhas pendentes e idade da fila de integração.
