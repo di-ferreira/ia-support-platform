@@ -86,3 +86,28 @@ Não confiar apenas no bootstrap para atualizar enums/atributos existentes, pois
 ## Rollback
 
 Desabilitar `EMSOFT_CHAMADOS_ENABLED` interrompe novos envios, mas preserva outbox pendente. Não apagar `integracao_chamados` nem outbox. Ao reabilitar, reprocessar com a mesma idempotency key e reconciliar eventos ambíguos antes de criar novos tickets.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 09-1 | Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` | `infra/docker-compose.prod.yml`; `core/config.py:13` | **Crítica** | **ABERTO** |
+| 09-2 | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | `infra/docker-compose.prod.yml`; `core/config.py` | **Crítica** | **ABERTO** |
+| 09-3 | MinIO órfão no compose prod sem referência no código | `infra/docker-compose.prod.yml` | Baixa | **ABERTO** |
+| 09-4 | Pilha do Appwrite em rede isolada; backend prod não a alcança | `infra/appwrite/` vs `docker-compose.prod.yml` | **Alta** | **ABERTO** |
+| 09-5 | Backup Qdrant usa bind mount divergente do volume named de prod | `scripts/backup.sh` | **Alta** | **ABERTO** |
+| 09-6 | Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente | `scripts/backup.sh` | **Alta** | **ABERTO** |
+| 09-7 | `backup.sh` não é agendado | `scripts/` | **Alta** | **ABERTO** |
+| 09-8 | Senha do Postgres em claro no compose/string da Evolution | `infra/docker-compose.prod.yml` | Média | **ABERTO** |
+| 09-9 | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` | `pyproject.toml`; `backend/Dockerfile`; `ci.yml` | Baixa | **ABERTO** |
+| 09-10 | Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **ABERTO** → 05-14 |
+| 09-11 | `infra/.env.prod` não era gitignored | `.gitignore` | **Alta** | **CORRIGIDO** — `infra/.env*` (exceto `.env.example`) ignorado |
+| 09-12 | Alembic/Postgres híbrido com runtime em Appwrite | `alembic/env.py`; `seed_qdrant.py` | Média | **ABERTO** → 02-14 |
+| 09-13 | Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env | `infra/docker-compose.*.yml` | **Alta** | **CORRIGIDO** |
+| 09-14 | CI: mypy e lint do frontend report-only; sem job de teste do frontend | `.github/workflows/ci.yml` | Média | **ABERTO** → [14](14-test-strategy.md) |
+| 09-15 | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | `infra/docker-compose.prod.yml`; `core/config.py:30` | **Crítica** | **ABERTO** |
+| 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic | `scripts/start-prod.sh` | Baixa | **ABERTO** |
+| 09-17 | Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração | `core/config.py`; `infra/` | **Alta** | **ABERTO** → 11, 12 |
+| 09-18 | Sem runbook de rollout/rollback da integração Emsoft | `infra/` | Média | **ABERTO** → 11, 12 |

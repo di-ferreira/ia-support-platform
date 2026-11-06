@@ -95,3 +95,17 @@ Manter histórico suficiente de tentativas, erros, event keys e IDs externos con
 - Falha externa não muda indevidamente status do chat.
 - Painel informa integração pendente/erro com ação autorizada de reprocessamento.
 - Logs possuem correlation/event key e não possuem segredo.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec existe no código atual.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 12-1 | Coleção `integration_outbox` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
+| 12-2 | Worker/lock/lease de outbox inexistente | `app/` | **Alta** | **ABERTO** |
+| 12-3 | `event_key` determinística/idempotency key inexistente | `app/` | **Alta** | **ABERTO** |
+| 12-4 | Timeout/retry/backoff+jitter de integrações externas inexistentes | `services/evolution_service.py` | **Alta** | **ABERTO** |
+| 12-5 | Reconciliação de timeout ambíguo inexistente | `app/` | **Alta** | **ABERTO** |
+| 12-6 | Logs sem correlation/event key | `app/**` | Média | **ABERTO** → 08-5 |
+| 12-7 | Sem painel de pendência/reprocessamento para operador | `frontend/`; `api/routes/` | Média | **ABERTO** → 03, 07 |

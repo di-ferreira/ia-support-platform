@@ -110,3 +110,36 @@ A IA reconhece frases como “quero falar com uma pessoa/atendente”. Deve inte
 - Taxa de sincronização de chamados externos.
 - Quantidade de chamados externos duplicados (meta: zero).
 - Quantidade de falhas pendentes e idade da fila de integração.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06. Ver [13-plano-implementacao.md](13-plano-implementacao.md).
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 00-1 | Cenário A/B/C existiam só como prosa; nenhum nó decidia o cenário | histórico (`README.md`) | Média | **CORRIGIDO (doc)** → [05](05-ai-pipeline.md) |
+| 00-2 | RAG inalcançável: `/ai/solucionar` não era chamado pelo fluxo | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — n8n chama `POST /webhooks/ai/solucionar`; RAG real provado em runtime |
+| 00-3 | Workflow n8n de 8 nós sem RAG/roteamento | `infra/n8n/workflow-support-ai.json` | **Alta** | **CORRIGIDO** — workflow delega classificação/solução ao backend |
+| 00-4 | Docs citavam Supabase Storage como armazenamento | docs históricos | Baixa | **CORRIGIDO (doc)** |
+| 00-5 | Docs citavam stack NestJS/TypeScript/Prisma | `.ai/PROJECT.md` | Baixa | **ABERTO** → 01-1 (docs legados ainda no repo) |
+| 00-6 | Docs citavam workflow de 19 nós | `.ai/TODO_LIST.md` | Baixa | **ABERTO** → 01-1 |
+| 00-7 | Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod | `scripts/backup.sh`; `infra/docker-compose.prod.yml` | **Alta** | **ABERTO** → [09](09-infra-deploy.md) |
+| 00-8 | Status do chat nunca saía de `NOVO` no fluxo real | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` transiciona via `ChatService.atualizar_status` |
+| 00-9 | `ia_diagnosticos` nunca era populado | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` grava o diagnóstico |
+| 00-10 | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta | `services/dashboard_service.py:44-59` | **Alta** | **ABERTO** → [08](08-non-functional.md) |
+| 00-11 | Sem CSAT/NPS nem coleta de feedback | — | Média | **ABERTO** (fora de escopo desta fase) |
+| 00-12 | Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio | `api/routes/webhooks.py`; `workflow-support-ai.json` | **Alta** | **ABERTO** → 02-6, 06-17 |
+| 00-13 | Departamentos, roteamento e pedido explícito por humano/setor não existem | `app/` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 00-14 | Integração com a API interna de chamados Emsoft não existe | `app/` | **Alta** | **ABERTO** → [11](11-integracao-api-emsoft.md) |
+| 00-15 | Sem outbox/idempotência para chamados externos | `app/` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
+| 00-16 | Indicadores de sucesso por departamento/duplicidade sem instrumentação | `services/dashboard_service.py` | Média | **ABERTO** → 08-9 |
+
+### Confirmado conforme o escopo
+
+| Item | Verificação |
+|---|---|
+| Autenticação JWT + 3 perfis | `backend/app/core/security.py`, `backend/app/api/deps.py` — conforme |
+| 8 estados de chat | `backend/app/models/chat.py` — conforme |
+| Kanban de 7 colunas | `backend/app/services/kanban_service.py` — conforme |
+| Webhooks com segredo e fail-closed | `app/api/routes/webhooks.py` — conforme |
+| Base de conhecimento indexada no Qdrant | `app/services/knowledge_base_service.py` — conforme |

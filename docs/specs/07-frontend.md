@@ -90,3 +90,21 @@ Usar tokens existentes; evitar cores raw de Tailwind fora do tema. Priorizar con
 - Status com texto/ícone, nunca apenas cor.
 - Dados técnicos devem ser legíveis e copiáveis.
 - Resumo gerado por IA deve ser identificável como sugestão automática até revisão humana.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 07-1 | Token JWT do WebSocket na query string | `hooks/use-chat-socket.ts` | **Alta** | **CORRIGIDO** — token enviado como 1ª mensagem |
+| 07-2 | Sem refresh token/renovação; sessão cai após 60 min | `lib/stores/auth-store.ts`; `core/config.py:20` | **Alta** | **ABERTO** — `/auth/me` no boot, mas `/auth/refresh` sem uso |
+| 07-3 | WebSocket sem reconexão nem backoff | `hooks/use-chat-socket.ts:53-59` | Média | **ABERTO** |
+| 07-4 | Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme` | `(app)/atendimento/page.tsx`, `dashboard/page.tsx`, demais telas | Média | **ABERTO** |
+| 07-5 | `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte | `lib/stores/chat-store.ts` vs `(app)/atendimento/page.tsx:15` | Baixa | **ABERTO** |
+| 07-6 | Selects de status/prioridade usam `<select>` nativo | `(app)/atendimento/page.tsx:226,235` | Baixa | **ABERTO** |
+| 07-7 | Manifest referenciava `relatorios.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** |
+| 07-8 | Manifest referenciava `ia-dashboard.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** |
+| 07-9 | Sem telas de departamento, fila por departamento e transferência por departamento | `frontend/src/app/` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 07-10 | Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado | `(app)/atendimento/page.tsx` | **Alta** | **ABERTO** → 10, 11 |
+| 07-11 | Sem guarda de rota por perfil | `(app)/layout.tsx` | Média | **ABERTO** → [04](04-rbac-matrix.md) |

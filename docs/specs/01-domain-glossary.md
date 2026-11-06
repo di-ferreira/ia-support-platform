@@ -123,3 +123,21 @@ Qualquer mudança da tabela exige atualização de `STATUS_TRANSITIONS`, enum Ap
 - `integracao.chamado_falhou`
 
 Eventos são internos ao backend. O n8n não publica eventos de domínio diretamente.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) | `.ai/AGENT.md`, `.ai/PROJECT_CONTEXT.md` | Baixa | **ABERTO** |
+| 01-2 | `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | `api/routes/webhooks.py`; `services/webhook_service.py:79-86` | **Alta** | **ABERTO** → [03](03-api-contract.md) |
+| 01-3 | Urgência da IA (`critica`) não tem coluna; existe só no prompt | `ai/prompts.py` vs `PRIORIDADE_CHAT` | Média | **ABERTO** → [02](02-data-model.md) |
+| 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
+| 01-5 | `chats.loja_id` nunca é populado; nenhum endpoint define a loja | `appwrite/schema.py:135` | Média | **ABERTO** → [02](02-data-model.md) |
+| 01-6 | `transferir` usa literais de string; `transferir_grupo` usa o enum | `services/chat_service.py:166-171` | Baixa | **ABERTO** |
+| 01-7 | `chat["status"] == StatusChat.em_atendimento` compara string com membro de `StrEnum` | `services/chat_service.py:182` | Baixa | **ABERTO** |
+| 01-8 | Sem tabela de auditoria; não há como saber quem mudou status/atribuição | `historico` removido | Média | **ABERTO** → [04](04-rbac-matrix.md) |
+| 01-9 | Sem entidade departamento nem atribuição por departamento na máquina de estados | `appwrite/schema.py`; `services/chat_service.py` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 01-10 | Domínio não separa categoria ERP de departamento; intenção não é modelada | `ai/prompts.py`; `appwrite/schema.py` | **Alta** | **ABERTO** → 05, 10 |
+| 01-11 | Sem distinção de reabertura/confirmação de resolução pelo cliente além de `RESOLVIDO → IA_ANALISANDO` | `services/chat_service.py:28` | Média | **ABERTO** → [05](05-ai-pipeline.md) |

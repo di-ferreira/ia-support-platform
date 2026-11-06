@@ -149,3 +149,29 @@ O modelo pode sugerir `departamento_sugerido_codigo`; o backend precisa validar 
 - Não colocar JWT em query string do WebSocket em nova implementação; adotar autenticação por mecanismo seguro compatível com a infraestrutura/proxy.
 - Aplicar paginação e filtro de visibilidade também no dashboard.
 - Redigir erros externos antes de devolver/logar; tokens, documentos e dados pessoais não devem aparecer em logs.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 03-1 | `GET /dashboard` não aplica filtro de visibilidade | `api/routes/dashboard.py:11-17` | **Alta** | **ABERTO** → [04](04-rbac-matrix.md) |
+| 03-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py:36-43`; `mensagens.py`; `clientes.py` | **Alta** | **ABERTO** |
+| 03-3 | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | `services/webhook_service.py:79-86` | **Alta** | **ABERTO** → [01](01-domain-glossary.md) |
+| 03-4 | `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) | `ai/router.py:34-54` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
+| 03-5 | `/ai/solucionar` escrevia no chat furando a máquina de estados | `ai/router.py` | **Alta** | **CORRIGIDO** — delega a `AIPipelineService`/`ChatService` |
+| 03-6 | JWT do WebSocket viajava em query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** — token na 1ª mensagem (fallback legado ainda aceito) |
+| 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution | `api/routes/mensagens.py:55-59,111-115`; `evolution.py` | Média | **ABERTO** |
+| 03-8 | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) | `api/routes/chats.py`, `kanban.py` | Média | **ABERTO** |
+| 03-9 | `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend | `api/routes/chats.py:67-75` | Baixa | **ABERTO** |
+| 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | `api/routes/auth.py` | **Alta** | **ABERTO** → [07](07-frontend.md) |
+| 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota | `api/routes/mensagens.py:69-122` | Média | **ABERTO** |
+| 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota | `api/routes/atendentes.py` | Baixa | **ABERTO** |
+| 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |
+| 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | `api/routes/evolution.py:86` | **Alta** | **ABERTO** → [06](06-n8n-workflow.md) |
+| 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution | `api/routes/mensagens.py:51,107`; `evolution_service.py:25` | Média | **ABERTO** |
+| 03-16 | `WEBHOOK_SECRET` sem validação no startup | `core/config.py:50-62` | Média | **CORRIGIDO** — `validate_production_secrets` exige segredo em produção |
+| 03-17 | `GET /settings/ia-name` é público e não requer autenticação | `main.py:85-87` | Baixa | **ABERTO** |
+| 03-18 | `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) | `api/routes/webhooks.py` | Média | **ABERTO** → [05](05-ai-pipeline.md) |
+| 03-19 | Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | `api/routes/` | **Alta** | **ABERTO** → 10, 11, 12 |

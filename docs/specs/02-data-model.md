@@ -210,3 +210,30 @@ O worker deve possuir lease/lock lógico para não processar o mesmo evento simu
 Appwrite não fornece as constraints compostas assumidas pelo domínio. Fazer checagem no repositório e testes concorrentes para `departamentos.codigo`, `regras_roteamento` (chave lógica), `integracao_chamados(chat_id,sistema_externo)` e `integration_outbox.event_key`.
 
 O bootstrap deve ser aditivo e idempotente. Não iniciar aplicação em produção como se schema estivesse atualizado quando criação de atributo/coleção falhar: logar erro estruturado e expor health check degradado. Não usar Alembic para migrar Appwrite; a camada ORM legada não é fonte do schema atual.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 02-1 | `CLASSIFY_SYSTEM` reconhece 7 categorias (`multiempresa`, `outro`); `CATEGORIA_CONHECIMENTO` tem 5 — artigos dessas áreas não podem ser gravados | `ai/prompts.py:5-21` vs `appwrite/schema.py:52` | **Alta** | **ABERTO** |
+| 02-2 | `CategoriaConhecimento` sem `multiempresa`, que é área real do negócio | `appwrite/schema.py:52` | Média | **ABERTO** |
+| 02-3 | `TipoMensagem` sem `sticker`/`local`; o normalizador do webhook mapeia sticker→imagem, mas o enum não espelha a Evolution | `appwrite/schema.py:48`; `api/routes/webhooks.py:102-111` | Média | **ABERTO** |
+| 02-4 | `atendentes.setor` e `chats.setor_alvo` são string livre, sem enum/validação (legado a migrar para departamento) | `appwrite/schema.py:107,144` | Média | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 02-5 | `chats.loja_id` nunca é populado | `appwrite/schema.py:135` | Média | **ABERTO** |
+| 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage | `appwrite/schema.py:156,194` | Média | **ABERTO** |
+| 02-7 | `ia_diagnosticos` nunca era populado; `get_by_chat` sem chamador | `appwrite/repositories/ia_diagnostico.py` | **Crítica** | **CORRIGIDO** — `AIPipelineService._finalizar` grava o diagnóstico (o `get_by_chat` ainda não tem chamador → 05-18) |
+| 02-8 | CRUD da base de conhecimento não sincronizava o Qdrant | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** — criar/atualizar embute+upsert; desativar/remover apaga o ponto |
+| 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) | `appwrite/schema.py:160-173` | Baixa | **ABERTO** |
+| 02-10 | Bootstrap aditivo **não propaga mudança de enum**; health degradado não implementado | `appwrite/bootstrap.py` | **Alta** | **ABERTO** |
+| 02-11 | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | `backend/alembic/`; `scripts/migrate.sh` | **Alta** | **ABERTO** |
+| 02-12 | Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida | `appwrite/schema.py:14-15` | Média | **ABERTO** |
+| 02-13 | `scripts/seed_knowledge_base.py` importava `async_session` inexistente | `scripts/seed_knowledge_base.py` | **Alta** | **CORRIGIDO** — o script cria o próprio engine; há `seed_knowledge_base_appwrite.py` |
+| 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | `scripts/seed_qdrant.py` | **Alta** | **ABERTO** |
+| 02-15 | `dashboard_service.py` chama `clientes.get` dentro do loop de recentes | `services/dashboard_service.py:73-74` | Média | **ABERTO** → [08](08-non-functional.md) |
+| 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente | `appwrite/schema.py` | Média | **ABERTO** |
+| 02-17 | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | `appwrite/schema.py` | **Alta** | **ABERTO** → 10, 11, 12 |
+| 02-18 | `departamento_id` ausente em `atendentes`/`chats` | `appwrite/schema.py` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 02-19 | `ia_diagnosticos` não guarda intenção, categoria ERP, departamento destino, artigos consultados nem razão | `appwrite/schema.py:174-186` | **Alta** | **ABERTO** → 05, 10 |
+| 02-20 | Sem trilha de auditoria de atribuição/transferência (exigida em 04) | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |

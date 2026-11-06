@@ -90,3 +90,22 @@ Resposta esperada: se já existe departamento contextual válido, encaminhar par
 - Destino inválido/inativo nunca é aceito pelo backend.
 - Conflito de atribuição concorrente resulta em apenas um responsável.
 - Testes cobrem intenções conhecidas, ambíguas, baixa confiança e pedido explícito por humano.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec existe no código atual.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 10-1 | Coleção `departamentos` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
+| 10-2 | Coleção `regras_roteamento` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
+| 10-3 | `atendentes.departamento_id` ausente; `setor` legado é string livre | `appwrite/schema.py:107` | **Alta** | **ABERTO** |
+| 10-4 | `chats.departamento_id` ausente; `setor_alvo` legado é string livre | `appwrite/schema.py:144` | **Alta** | **ABERTO** |
+| 10-5 | Endpoints de CRUD `/departamentos*` inexistentes | `api/routes/` | **Alta** | **ABERTO** |
+| 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **ABERTO** |
+| 10-7 | `/chats/{id}/roteamento` (resolver determinístico) inexistente | `api/routes/` | **Alta** | **ABERTO** |
+| 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **ABERTO** |
+| 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **ABERTO** |
+| 10-10 | Migração de `setor`/`setor_alvo` para `departamento_id` inexistente | `scripts/`; `appwrite/` | **Alta** | **ABERTO** |
+| 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **ABERTO** |
+| 10-12 | Sem auditoria de transferência/atribuição | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |

@@ -52,3 +52,22 @@ A tabela deve ser adaptada à matriz de permissões já implementada, sem amplia
 ## Auditoria obrigatória
 
 Registrar ator, chat, ação, data/hora, departamento anterior/novo, atendente anterior/novo e motivo. Não registrar senha, token ou conteúdo integral sensível. Para ações automáticas, `actor_type=IA` e modelo/versão quando aplicável.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 04-1 | `GET /dashboard` não aplica filtro de visibilidade; atendente lê KPIs globais e nomes de clientes | `api/routes/dashboard.py`; `services/dashboard_service.py` | **Alta** | **ABERTO** |
+| 04-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py`; `mensagens.py`; `clientes.py` | **Alta** | **ABERTO** |
+| 04-3 | Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` | `components/layout/sidebar.tsx`; `(app)/layout.tsx` | Média | **ABERTO** → [07](07-frontend.md) |
+| 04-4 | Regra "supervisor só cria `atendente`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
+| 04-5 | Regra "só admin altera `perfil`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
+| 04-6 | `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste | `tests/test_chat_service.py` | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
+| 04-7 | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit | `api/routes/webhooks.py` | **Alta** | **ABERTO** → 01, 03 |
+| 04-8 | `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |
+| 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado | `api/routes/atendentes.py` | Baixa | **ABERTO** |
+| 04-10 | Escopo por departamento não é aplicado (departamento não existe) | `services/chat_service.py` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 04-11 | Identidade de serviço da IA / `actor_type` auditável não implementada | `app/` | Média | **ABERTO** → 04, 11 |
+| 04-12 | Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) | `app/` | Média | **ABERTO** → [02](02-data-model.md) |

@@ -107,3 +107,34 @@ Evidência RAG insuficiente, falha não documentada ou risco de orientação inc
 ## Métricas e avaliação
 
 Manter dataset de casos rotulados por intenção, categoria ERP, departamento e cenário. Avaliar accuracy por classe, matriz de confusão, taxa de correção humana, precisão de recuperação RAG, taxa de solução confirmada e falsos positivos de resolução. Mudança de modelo/prompt exige execução do conjunto de regressão.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 05-1 | Pipeline de IA não conectado ao fluxo produtivo do n8n | `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — n8n chama `POST /webhooks/ai/solucionar` |
+| 05-2 | `/webhooks/chat/diagnostico` sem chamador; `ia_diagnosticos` não populado | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` grava o diagnóstico |
+| 05-3 | `PATCH /webhooks/chat/status` sem chamador; status nunca saía de `NOVO` | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` transiciona via `ChatService` |
+| 05-4 | Cenário A não tem caminho de fechamento: vai a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **ABERTO** → [07](07-frontend.md) |
+| 05-5 | CRUD da base de conhecimento não sincronizava o Qdrant | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** |
+| 05-6 | Falha de RAG degradava para "nenhum artigo" (Cenário C falso) | `services/ai_pipeline.py:101-109` | **Alta** | **CORRIGIDO** — falha de embedding/busca responde 503 |
+| 05-7 | `/ai/solucionar` furava a máquina de estados; `except: pass` engolia falha | `services/ai_pipeline.py` | **Alta** | **CORRIGIDO** |
+| 05-8 | Resultado da LLM sem validação de shape | `services/ai_pipeline.py:137-143` | Média | **CORRIGIDO** — `SolucaoLLM` (Pydantic) |
+| 05-9 | `/ai/*` sem resposta Pydantic: `/ai/solucionar` tem `WebhookSolucaoResponse`; `classificar`/`analisar` devolvem dict cru | `ai/router.py:34-68` | Média | **ABERTO** |
+| 05-10 | `/ai/classificar` e `/ai/analisar` usam query param (conteúdo do cliente na URL) | `ai/router.py:34-54` | **Alta** | **ABERTO** |
+| 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536) | `services/qdrant_service.py`; `ai/provider.py` | **Alta** | **CORRIGIDO** → [ADR-0005](adr/0005-dimensao-de-embedding.md) |
+| 05-12 | `get_llm` caía em Ollama silenciosamente se `LLM_PROVIDER=openai` sem chave | `ai/provider.py:10-20` | Média | **CORRIGIDO** — falha rápido com `LLMIndisponivelError` |
+| 05-13 | `except: pass` engolia falha de embedding | `services/ai_pipeline.py` | Média | **CORRIGIDO** — propaga e responde 503 |
+| 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **ABERTO** |
+| 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado | `ai/ai_cache.py` | Média | **ABERTO** |
+| 05-16 | `prompt.format` quebrava com `{`/`}` de artigo | `ai/prompts.py` | **Alta** | **CORRIGIDO** — prompts constantes + conteúdo como valor de f-string |
+| 05-17 | Categoria `multiempresa` reconhecida pela IA mas ausente do schema | `ai/prompts.py:16` vs `appwrite/schema.py:52` | **Alta** | **ABERTO** → [02](02-data-model.md) |
+| 05-18 | `IADiagnosticoRepository.get_by_chat` sem chamador | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **ABERTO** |
+| 05-19 | Dependência `openai` declarada e nunca importada (clients usam `httpx`) | `pyproject.toml:18` | Baixa | **ABERTO** |
+| 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` | `tests/` | **Alta** | **ABERTO** (parcial) → [14](14-test-strategy.md) |
+| 05-21 | Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria | `ai/prompts.py` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 05-22 | Resolução determinística de regras de roteamento inexistente | `services/` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 05-23 | Diagnóstico não persiste intenção/departamento/artigos consultados/razão | `services/ai_pipeline.py`; `appwrite/schema.py` | **Alta** | **ABERTO** → 02, 10 |
+| 05-24 | Sem dataset rotulado nem regressão de intenção/roteamento | `tests/` | Média | **ABERTO** → [14](14-test-strategy.md) |

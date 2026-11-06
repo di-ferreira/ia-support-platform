@@ -71,3 +71,28 @@ Não configurar credencial Emsoft no n8n. Não usar credencial Ollama no n8n; o 
 ## Configuração da Evolution
 
 Webhook deve receber apenas o evento necessário (`MESSAGES_UPSERT`) para o escopo desta versão. Não incluir `MESSAGE_UPDATE` como nova mensagem, pois edição/revogação não deve iniciar novo atendimento.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06. O workflow ativo tem 10 nós e delega a decisão de IA ao backend.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 06-1 | Path do webhook divergente entre workflow e Evolution | `workflow-support-ai.json`; `api/routes/evolution.py` | **Alta** | **CORRIGIDO** — ambos usam `emsoft-whatsapp` |
+| 06-2 | `RESOLVIDO → IA_ANALISANDO` ausente da máquina de estados | `services/chat_service.py:28` | **Alta** | **CORRIGIDO** |
+| 06-3 | Sem deduplicação; reconexão persistia a mensagem duas vezes | `workflow-support-ai.json`; `services/webhook_service.py:56-62` | **Alta** | **CORRIGIDO** — dedup por `whatsapp_message_id` + nó "É duplicada?" |
+| 06-4 | URL do backend hardcoded no workflow | `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — usa `{{ $env.BACKEND_URL }}` |
+| 06-5 | `N8N_BLOCK_ENV_ACCESS_IN_NODE=false` ausente de compose/.env | `infra/docker-compose.*.yml` | **Crítica** | **CORRIGIDO** |
+| 06-6 | Nome da instância hardcoded no nó | `workflow-support-ai.json` | Média | **CORRIGIDO** — usa `{{ $env.EVOLUTION_INSTANCE }}` |
+| 06-7 | Só `message.conversation` era lido | `workflow-support-ai.json` | **Alta** | **CORRIGIDO** — extrai `extendedTextMessage` e caption de mídia |
+| 06-8 | AI Agent sem tools alucinava | `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — workflow chama o backend |
+| 06-9 | `N8N_ENCRYPTION_KEY`/`N8N_SECURE_COOKIE` ausentes | `infra/docker-compose.dev.yml` | Média | **CORRIGIDO** |
+| 06-10 | Nenhum nó com `onError` | `workflow-support-ai.json` | **Alta** | **CORRIGIDO** — todos com `onError: continue` |
+| 06-11 | `docs/n8n-workflow.md` desatualizado (12 nós/RAG no n8n) | `docs/n8n-workflow.md` | Média | **CORRIGIDO** — doc marcado como arquivado/substituído |
+| 06-12 | Doc descrevia chunking 500/50 com embedding OpenAI | `docs/n8n-workflow.md` | Média | **CORRIGIDO** — doc arquivado; decisão em ADR-0005 |
+| 06-13 | Workflow `active: false` no arquivo versionado | `workflow-support-ai.json` | Baixa | **CORRIGIDO** — `active: true` |
+| 06-14 | `pinData` do webhook com `fromMe: true` | `workflow-support-ai.json` | Baixa | **CORRIGIDO** — `fromMe: false` |
+| 06-15 | `extra_hosts: host.docker.internal` ausente | `infra/docker-compose.dev.yml` | Média | **CORRIGIDO** |
+| 06-16 | `remoteJid` cru usado em pontos sensíveis | `workflow-support-ai.json`; backend normaliza | Média | **CORRIGIDO** |
+| 06-17 | Mídia não é preservada (URL/arquivo): apenas caption é extraída | `workflow-support-ai.json`; `services/webhook_service.py` | **Alta** | **ABERTO** → 02-6 |
+| 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado | `workflow-support-ai.json` | Média | **ABERTO** → [12](12-confiabilidade-integracoes.md) |

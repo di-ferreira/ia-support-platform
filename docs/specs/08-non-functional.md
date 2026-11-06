@@ -76,3 +76,22 @@ Alertar quando fila pendente superar limite configurável, quando houver falha p
 - Exportar workflows n8n versionados.
 - Proteger configurações de integração e segredos em canal distinto dos dados exportados.
 - Testar restauração de dados e reprocessamento de outbox em ambiente não produtivo.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 08-1 | `CORS_ORIGINS` default só `localhost:3000` | `core/config.py:39` | **Alta** | **ABERTO** → [09](09-infra-deploy.md) |
+| 08-2 | Comportamento de `verify_webhook` sem segredo não fixado | `api/routes/webhooks.py:32-44` | **Alta** | **CORRIGIDO** — fail-closed (401) e comparação em tempo constante |
+| 08-3 | `/health` não checa dependências; sem readiness | `main.py:90-92` | Média | **ABERTO** |
+| 08-4 | Sem rate limiting em login/webhooks | `core/rate_limit.py` | **Alta** | **CORRIGIDO** — limiter in-memory (login 60/60s, webhooks 120/60s) |
+| 08-5 | Sem logging estruturado nem request-id/correlação | `app/**` | Média | **ABERTO** |
+| 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO** |
+| 08-7 | `DATABASE_URL` default com credenciais em claro | `core/config.py:10` | Baixa | **ABERTO** |
+| 08-8 | WebSocket aceitava token por query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** → 07-1 |
+| 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **ABERTO** → 00-10 |
+| 08-10 | Degradação da integração Emsoft/outbox não implementada (outbox não existe) | `app/` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
+| 08-11 | Timeout/retry/backoff explícitos de integrações externas não implementados | `services/evolution_service.py` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
+| 08-12 | Health check degradado do bootstrap não implementado | `appwrite/bootstrap.py` | Média | **ABERTO** → 02-10 |

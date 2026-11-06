@@ -204,3 +204,17 @@ Se API não permitir pesquisa por `source_chat_id`, negociar com o responsável 
 - Falha externa gera estado pendente/erro, sem perder chat.
 - Logs e UI não exibem credenciais.
 - Testes usam mock da API e nunca produção.
+
+## Registro de Gaps
+
+Verificado contra o código em 2026-11-06. A integração não existe; o gate de contrato (11-1) bloqueia a implementação real.
+
+| # | Gap | Onde | Severidade | Status |
+|---|---|---|---|---|
+| 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (endpoint retornou 502 no ambiente de pesquisa) | — | **Bloqueante** | **ABERTO** |
+| 11-2 | Adapter/client `app/integrations/emsoft_chamados/` inexistente | `app/` | **Alta** | **ABERTO** |
+| 11-3 | Coleção `integracao_chamados` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
+| 11-4 | Config `EMSOFT_CHAMADOS_*` inexistente | `core/config.py` | **Alta** | **ABERTO** |
+| 11-5 | Identidade IA (`EMSOFT_CHAMADOS_AI_USER_ID`) e mapeamento de atendentes/departamentos ausente | `core/config.py`; `app/` | **Alta** | **ABERTO** |
+| 11-6 | Endpoints `/integracoes/chamados/*` (consulta/reprocessamento) inexistentes | `api/routes/` | **Alta** | **ABERTO** |
+| 11-7 | Reconciliação de timeout ambíguo e idempotência externa inexistentes | `app/` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
