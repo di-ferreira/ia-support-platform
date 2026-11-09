@@ -13,6 +13,7 @@ class CategoriaConhecimento(enum.StrEnum):
     compras = "compras"
     vendas = "vendas"
     financeiro = "financeiro"
+    multiempresa = "multiempresa"
 
 
 class KnowledgeBase(Base):

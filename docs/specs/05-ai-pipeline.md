@@ -130,7 +130,7 @@ Verificado contra o código em 2026-11-06.
 | 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **ABERTO** |
 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado | `ai/ai_cache.py` | Média | **ABERTO** |
 | 05-16 | `prompt.format` quebrava com `{`/`}` de artigo | `ai/prompts.py` | **Alta** | **CORRIGIDO** — prompts constantes + conteúdo como valor de f-string |
-| 05-17 | Categoria `multiempresa` reconhecida pela IA mas ausente do schema | `ai/prompts.py:16` vs `appwrite/schema.py:52` | **Alta** | **ABERTO** → [02](02-data-model.md) |
+| 05-17 | Categoria `multiempresa` reconhecida pela IA mas ausente do schema | `ai/prompts.py:16` vs `appwrite/schema.py:52` | **Alta** | **CORRIGIDO** — `CATEGORIA_CONHECIMENTO` inclui `multiempresa` e espelha `CategoriaERP` (teste `test_categorias_do_schema_espelham_os_enums`) |
 | 05-18 | `IADiagnosticoRepository.get_by_chat` sem chamador | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **ABERTO** |
 | 05-19 | Dependência `openai` declarada e nunca importada (clients usam `httpx`) | `pyproject.toml:18` | Baixa | **ABERTO** |
 | 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` | `tests/` | **Alta** | **ABERTO** (parcial) → [14](14-test-strategy.md) |

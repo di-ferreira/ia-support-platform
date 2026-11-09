@@ -15,6 +15,9 @@ A unicidade (ex.: `atendentes.email`, `clientes.documento`) continua garantida p
 aplicação (os services checam duplicidade antes de inserir), não por índice de banco.
 """
 
+from app.models.departamento import CategoriaERP, Intencao
+from app.models.knowledge_base import CategoriaConhecimento
+
 DB_ID = "chatbot"
 DB_NAME = "Chatbot IA"
 
@@ -49,7 +52,9 @@ TIPO_MENSAGEM = ["texto", "audio", "documento", "imagem"]
 
 STATUS_IA = ["RESOLVIDO_PELA_IA", "TRANSFERIR_COM_SOLUCAO", "TRANSFERIR_SEM_SOLUCAO"]
 
-CATEGORIA_CONHECIMENTO = ["fiscal", "estoque", "compras", "vendas", "financeiro"]
+INTENCAO = [i.value for i in Intencao]
+CATEGORIA_ERP = [c.value for c in CategoriaERP]
+CATEGORIA_CONHECIMENTO = [c.value for c in CategoriaConhecimento]
 
 
 def str_attr(key: str, size: int = 255, required: bool = True) -> dict:
