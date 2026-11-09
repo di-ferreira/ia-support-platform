@@ -105,7 +105,7 @@ Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec ex
 | 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **ABERTO** |
 | 10-7 | `/chats/{id}/roteamento` (resolver determinístico) inexistente | `api/routes/` | **Alta** | **ABERTO** |
 | 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **ABERTO** |
-| 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **ABERTO** |
+| 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **CORRIGIDO** — `services/departamento_seed.py` (`semear`) + `scripts/seed_departamentos.py`, idempotente |
 | 10-10 | Migração de `setor`/`setor_alvo` para `departamento_id` inexistente | `scripts/`; `appwrite/` | **Alta** | **ABERTO** |
 | 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **ABERTO** |
 | 10-12 | Sem auditoria de transferência/atribuição | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |
