@@ -936,7 +936,7 @@ git commit -m "feat(rag): filtro por categoria ERP e limiar minimo de relevancia
 
 **Regra:** o chat recebe `departamento_id` **somente** quando o resultado é transferência (`TRANSFERIR_COM_SOLUCAO`/`TRANSFERIR_SEM_SOLUCAO`). No cenário A o chat segue com a IA e o departamento não é preenchido. O `departamento_sugerido_codigo` do LLM é registrado mas **nunca** usado como destino (C8).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `backend/tests/test_ai_pipeline_roteamento.py`:
 
@@ -1160,12 +1160,12 @@ async def test_intencao_sem_regra_usa_atendimento_geral(
     assert (await fake_repos.chats.get(chat["id"]))["departamento_id"] == geral["id"]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd backend && pytest tests/test_ai_pipeline_roteamento.py -v`
 Expected: FAIL — `KeyError: 'intencao'` na resposta e `chats.departamento_id` permanece `None`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Em `backend/app/services/ai_pipeline.py`, atualizar as três chamadas de `_finalizar` para passar contexto:
 
@@ -1330,16 +1330,16 @@ class WebhookSolucaoResponse(BaseModel):
     precisa_esclarecimento: bool = False
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd backend && pytest tests/test_ai_pipeline_roteamento.py tests/test_ai_pipeline.py tests/test_ai_pipeline_intencao.py -v`
 Expected: PASS (4 novos + os existentes)
 
-- [ ] **Step 5: Run the full suite + ruff**
+- [x] **Step 5: Run the full suite + ruff**
 
 Run: `cd backend && pytest tests/ -q && ruff check app tests`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/services/ai_pipeline.py backend/app/schemas/webhook.py backend/tests/test_ai_pipeline_roteamento.py
@@ -1351,7 +1351,7 @@ git commit -m "feat(diagnostico): snapshot completo e destino aplicado ao chat
 - resposta do webhook expoe intencao, departamento e esclarecimento"
 ```
 
-- [ ] **Step 7: Atualizar o Registro de Gaps (specs 05, 10, 02 e 00)**
+- [x] **Step 7: Atualizar o Registro de Gaps (specs 05, 10, 02 e 00)**
 
 ```
 | 05-23 | Diagnóstico não persiste intenção/departamento/artigos consultados/razão | `services/ai_pipeline.py`; `appwrite/schema.py` | **Alta** | **CORRIGIDO** — `_finalizar` grava intenção, categoria ERP, destino sugerido/final, motivo e artigos (`services/ai_pipeline.py`) |
