@@ -3,6 +3,10 @@ from appwrite.services.databases import Databases
 from app.appwrite.repositories.atendente import AtendenteRepository
 from app.appwrite.repositories.chat import ChatRepository
 from app.appwrite.repositories.cliente import ClienteRepository
+from app.appwrite.repositories.departamento import (
+    DepartamentoRepository,
+    RegraRoteamentoRepository,
+)
 from app.appwrite.repositories.ia_diagnostico import IADiagnosticoRepository
 from app.appwrite.repositories.knowledge_base import KnowledgeBaseRepository
 from app.appwrite.repositories.loja import LojaRepository
@@ -27,6 +31,8 @@ class Repositories:
         self.mensagens = MensagemRepository(databases)
         self.ia_diagnosticos = IADiagnosticoRepository(databases)
         self.knowledge_bases = KnowledgeBaseRepository(databases)
+        self.departamentos = DepartamentoRepository(databases)
+        self.regras_roteamento = RegraRoteamentoRepository(databases)
 
     def __getattr__(self, name):
         raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")

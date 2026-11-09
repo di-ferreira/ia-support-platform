@@ -97,6 +97,20 @@ class FakeIADiagnosticos(FakeStore):
         return await self.get_by("chat_id", chat_id)
 
 
+class FakeDepartamentos(FakeStore):
+    async def get_by_codigo(self, codigo: str) -> dict | None:
+        return await self.get_by("codigo", codigo)
+
+    async def list_ativos(self) -> list[dict]:
+        return [d for d in await self.list_all() if d.get("ativo")]
+
+
+class FakeRegrasRoteamento(FakeStore):
+    async def list_ativas_ordenadas(self) -> list[dict]:
+        regras = [r for r in await self.list_all() if r.get("ativo")]
+        return sorted(regras, key=lambda r: r.get("prioridade_regra") or 0)
+
+
 class FakeRepositories:
     def __init__(self) -> None:
         self.databases = None
@@ -107,6 +121,8 @@ class FakeRepositories:
         self.mensagens = FakeMensagens("mensagens")
         self.ia_diagnosticos = FakeIADiagnosticos("ia_diagnosticos")
         self.knowledge_bases = FakeStore("knowledge_bases")
+        self.departamentos = FakeDepartamentos("departamentos")
+        self.regras_roteamento = FakeRegrasRoteamento("regras_roteamento")
 
 
 @pytest.fixture
