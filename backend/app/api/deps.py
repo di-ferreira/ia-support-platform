@@ -17,6 +17,14 @@ def get_repositories(request: Request) -> Repositories:
     return request.app.state.repositories
 
 
+def get_emsoft_service(request: Request):
+    """Service de sincronização com a API de chamados Emsoft (spec 11).
+
+    `None` quando a integração está desabilitada; as rotas respondem 503.
+    """
+    return request.app.state.emsoft_chamados_service
+
+
 async def _get_user_from_token(
     credentials: HTTPAuthorizationCredentials | None,
     repos: Repositories,

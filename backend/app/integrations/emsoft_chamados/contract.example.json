@@ -1,0 +1,61 @@
+{
+  "_leia-me": "MODELO ILLUSTRATIVO, não é um contrato válido. Todos os valores com PREENCHER devem ser substituídos pelos valores REAIS confirmados com o responsável pela API (Swagger/OpenAPI, Postman, documentação interna ou exemplos sanitizados — spec 11 §Gate obrigatório). Enquanto validado for false (ou o arquivo não existir), a integração permanece desligada e nenhuma suposição de rota/campo/auth é usada.",
+  "validado": false,
+  "evidencia": {
+    "origem": "PREENCHER: ex. 'Swagger https://emsoft.ddns.net/portal-api/openapi.json' ou 'Postman exportado em 2026-11'",
+    "data": "PREENCHER: AAAA-MM-DD",
+    "descrito_por": "PREENCHER: nome do responsável que confirmou",
+    "detalhes": "PREENCHER: versão da API, ambiente, observações"
+  },
+  "base_url": "https://emsoft.ddns.net/portal-api",
+  "autenticacao": {
+    "esquema": "PREENCHER: bearer | basic | apikey | cookie | outro",
+    "header": "PREENCHER: nome exato do header (ex. observado no CORS: Authorization ou X-Auth-Token)",
+    "prefixo": "PREENCHER: prefixo exato antes do token (ex. 'Bearer '), vazio se não houver",
+    "token_source": "config:emsoft_chamados_token"
+  },
+  "endpoints": {
+    "listar": {
+      "method": "GET",
+      "path": "PREENCHER: rota de listagem (ex. /v1/chamados)"
+    },
+    "criar": {
+      "method": "POST",
+      "path": "PREENCHER: rota de criação"
+    },
+    "editar": {
+      "method": "PREENCHER: PATCH ou PUT",
+      "path": "PREENCHER: rota de edição com o placeholder {ticket_id}"
+    }
+  },
+  "campos_criacao": {
+    "campo_externo_assunto": "subject",
+    "campo_externo_descricao": "description",
+    "campo_externo_referencia": "source_chat_id",
+    "campo_externo_cliente": "customer.name",
+    "campo_externo_documento": "customer.document",
+    "campo_externo_contato": "contact.whatsapp_number",
+    "campo_externo_responsavel": "assignee.external_id",
+    "campo_externo_departamento": "department_code",
+    "campo_externo_status": "external_status_intent"
+  },
+  "campos_edicao": {
+    "campo_externo_assunto": "subject",
+    "campo_externo_descricao": "description",
+    "campo_externo_responsavel": "assignee.external_id",
+    "campo_externo_status": "external_status_intent"
+  },
+  "campos_obrigatorios": [
+    "campo_externo_assunto",
+    "campo_externo_referencia"
+  ],
+  "campo_id_resposta": "PREENCHER: dot path do ID na resposta (ex. 'id' ou 'data.id')",
+  "campo_referencia_externa": "PREENCHER: campo externo que recebe a referência única do chat (ex. campo_externo_referencia); null se a API não oferecer",
+  "filtro_referencia": "PREENCHER: nome do parâmetro de query da listagem para buscar pela referência; null se a API não permitir (reconciliação fica manual)",
+  "lista_em": "PREENCHER: dot path até a matriz na resposta de listagem (ex. 'items' ou 'data.chamados'); null se a resposta for a própria lista",
+  "status_externos": {
+    "IN_PROGRESS": "PREENCHER: valor externo de andamento",
+    "WAITING_CUSTOMER": "PREENCHER: valor externo de aguardando cliente",
+    "RESOLVED": "PREENCHER: valor externo de resolvido/concluído"
+  }
+}

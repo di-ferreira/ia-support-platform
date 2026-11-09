@@ -109,6 +109,14 @@ class FakeDepartamentos(FakeStore):
         return [d for d in await self.list_all() if d.get("ativo")]
 
 
+class FakeIntegracaoChamados(FakeStore):
+    async def get_by_chat(self, chat_id: str) -> dict | None:
+        registros = await self.list_by("chat_id", chat_id)
+        if not registros:
+            return None
+        return max(registros, key=lambda d: d.get("created_at") or "")
+
+
 class FakeRegrasRoteamento(FakeStore):
     async def list_ativas_ordenadas(self) -> list[dict]:
         regras = [r for r in await self.list_all() if r.get("ativo")]
@@ -127,6 +135,7 @@ class FakeRepositories:
         self.knowledge_bases = FakeStore("knowledge_bases")
         self.departamentos = FakeDepartamentos("departamentos")
         self.regras_roteamento = FakeRegrasRoteamento("regras_roteamento")
+        self.integracao_chamados = FakeIntegracaoChamados("integracao_chamados")
 
 
 @pytest.fixture
@@ -153,6 +162,7 @@ async def client(fake_repos: FakeRepositories) -> AsyncGenerator[AsyncClient, No
     app.dependency_overrides[get_repositories] = lambda: fake_repos
     app.state.repositories = fake_repos
     app.state.appwrite = None
+    app.state.emsoft_chamados_service = None
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac

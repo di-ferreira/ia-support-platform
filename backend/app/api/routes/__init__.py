@@ -5,6 +5,7 @@ from app.api.routes.clientes import router as clientes_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.departamentos import router as departamentos_router
 from app.api.routes.evolution import router as evolution_router
+from app.api.routes.integracoes import router as integracoes_router
 from app.api.routes.kanban import router as kanban_router
 from app.api.routes.knowledge_base import router as knowledge_base_router
 from app.api.routes.mensagens import router as mensagens_router
@@ -21,6 +22,7 @@ __all__ = [
     "dashboard_router",
     "departamentos_router",
     "evolution_router",
+    "integracoes_router",
     "kanban_router",
     "knowledge_base_router",
     "mensagens_router",

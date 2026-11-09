@@ -13,6 +13,7 @@ from app.api.routes import (
     dashboard_router,
     departamentos_router,
     evolution_router,
+    integracoes_router,
     kanban_router,
     knowledge_base_router,
     mensagens_router,
@@ -26,6 +27,8 @@ from app.appwrite.bootstrap import ensure_appwrite_schema
 from app.appwrite.repositories import Repositories
 from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
+from app.integrations.emsoft_chamados import build_emsoft_chamados_service
+from app.integrations.emsoft_chamados.exceptions import ContractNotValidatedError
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +44,23 @@ async def lifespan(app: FastAPI):
     except Exception:
         # Best-effort: a API sobe mesmo com Appwrite fora; o schema é criado no próximo boot.
         logger.exception("Appwrite: falha ao garantir o schema (verifique o serviço)")
+    # Integração com a API de chamados Emsoft (spec 11): nasce desabilitada.
+    # Habilitada sem contrato válido/token é erro de configuração; em vez de
+    # derrubar a API inteira, a integração fica off (rotas 503, /status expõe
+    # `ativa:false`) e o erro é registrado em evidência.
+    app.state.emsoft_chamados_service = None
+    if settings.emsoft_chamados_enabled:
+        try:
+            app.state.emsoft_chamados_service = build_emsoft_chamados_service(
+                settings, app.state.repositories
+            )
+        except ContractNotValidatedError as exc:
+            logger.warning(
+                "Integração Emsoft habilitada mas inválida — ficando OFF: %s", exc,
+                extra={"event": "emsoft_integracao_off"},
+            )
+        if app.state.emsoft_chamados_service is not None:
+            logger.info("Integração com a API de chamados Emsoft habilitada")
     yield
 
 
@@ -70,6 +90,7 @@ app.include_router(kanban_router)
 app.include_router(knowledge_base_router)
 app.include_router(evolution_router)
 app.include_router(webhooks_router)
+app.include_router(integracoes_router)
 app.include_router(ai_router)
 app.include_router(usuarios_router)
 app.include_router(whatsapp_router)

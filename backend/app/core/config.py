@@ -42,6 +42,16 @@ class Settings(BaseSettings):
     # RAG tecnico (docs/specs/05-ai-pipeline.md §Pipeline RAG tecnico)
     rag_min_score: float = Field(default=0.35, ge=0.0, le=1.0)
 
+    # Integracao com a API de chamados Emsoft (docs/specs/11-integracao-api-emsoft.md).
+    # Nasce desabilitada; rotas, metodos e campos externos vem do artefato de
+    # contrato validado (emsoft_chamados_contract_file), nunca de config.
+    emsoft_chamados_enabled: bool = False
+    emsoft_chamados_token: str = ""
+    emsoft_chamados_contract_file: str = ""
+    emsoft_chamados_ai_user_id: str = ""
+    emsoft_chamados_timeout_s: float = Field(default=15.0, gt=0.0)
+    emsoft_chamados_verify_tls: bool = True
+
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None
 
@@ -68,6 +78,11 @@ class Settings(BaseSettings):
             raise ValueError(
                 "WEBHOOK_SECRET ausente; defina um segredo forte antes de "
                 "subir para produção"
+            )
+        if self.emsoft_chamados_enabled and not self.emsoft_chamados_verify_tls:
+            raise ValueError(
+                "EMSOFT_CHAMADOS_VERIFY_TLS não pode ser false em produção "
+                "quando a integração está habilitada"
             )
 
 

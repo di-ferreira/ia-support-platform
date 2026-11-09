@@ -47,6 +47,10 @@ PRIORIDADE_CHAT = ["baixa", "media", "alta", "urgente"]
 
 PERFIL_ATENDENTE = ["admin", "supervisor", "atendente"]
 
+STATUS_INTEGRACAO_CHAMADO = ["PENDENTE", "SINCRONIZADO", "ERRO", "RECONCILIACAO"]
+
+ASSIGNEE_KIND = ["AI", "HUMANO"]
+
 REMETENTE_MENSAGEM = ["cliente", "ia", "atendente", "sistema"]
 
 TIPO_MENSAGEM = ["texto", "audio", "documento", "imagem"]
@@ -71,8 +75,11 @@ def text_attr(key: str, required: bool = False) -> dict:
     return {"type": STRING, "key": key, "size": TEXT_SIZE, "required": required}
 
 
-def int_attr(key: str, required: bool = False) -> dict:
-    return {"type": INTEGER, "key": key, "required": required}
+def int_attr(key: str, required: bool = False, default: int | None = None) -> dict:
+    dados = {"type": INTEGER, "key": key, "required": required}
+    if default is not None:
+        dados["default"] = default
+    return dados
 
 
 def float_attr(key: str, required: bool = False) -> dict:
@@ -112,6 +119,9 @@ COLLECTIONS: dict[str, dict] = {
             enum_attr("perfil", PERFIL_ATENDENTE, required=False, default="atendente"),
             str_attr("setor", 50, required=False),
             fk_attr("departamento_id", required=False),
+            # ID do atendente na API de chamados Emsoft (spec 11): só é
+            # usado quando o contrato validado define o campo de responsável.
+            str_attr("emsoft_usuario_id", 100, required=False),
             bool_attr("ativo", default=True),
         ],
     },
@@ -233,6 +243,25 @@ COLLECTIONS: dict[str, dict] = {
             fk_attr("departamento_id"),
             int_attr("prioridade_regra", required=True),
             bool_attr("ativo", required=True, default=True),
+        ],
+    },
+    # Spec 11 §Persistência: um registro por chat (cardinalidade 1:1),
+    # rastro da sincronização com o chamado Emsoft.
+    "integracao_chamados": {
+        "name": "IntegracaoChamados",
+        "attributes": [
+            fk_attr("chat_id"),
+            str_attr("external_ticket_id", 100, required=False),
+            str_attr("external_url", 500, required=False),
+            enum_attr("status", STATUS_INTEGRACAO_CHAMADO, default="PENDENTE"),
+            enum_attr("assignee_kind", ASSIGNEE_KIND, required=False),
+            str_attr("external_assignee_id", 100, required=False),
+            str_attr("department_code", 80, required=False),
+            str_attr("external_status", 100, required=False),
+            str_attr("external_status_intent", 100, required=False),
+            int_attr("tentativas", required=False, default=0),
+            str_attr("ultimo_erro", 1000, required=False),
+            datetime_attr("ultima_tentativa_em", required=False),
         ],
     },
 }
