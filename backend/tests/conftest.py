@@ -8,6 +8,7 @@ from httpx import ASGITransport, AsyncClient
 
 from app.api.deps import get_repositories
 from app.appwrite import schema as appwrite_schema
+from app.core import rate_limit
 from app.core.config import settings
 from app.core.security import hash_password
 from app.main import app
@@ -138,6 +139,13 @@ def webhook_secret():
     settings.webhook_secret = "test-webhook-secret"
     yield
     settings.webhook_secret = None
+
+
+@pytest.fixture(autouse=True)
+def _rate_limite_reset():
+    rate_limit.reset_all()
+    yield
+    rate_limit.reset_all()
 
 
 @pytest_asyncio.fixture

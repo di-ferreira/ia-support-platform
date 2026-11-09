@@ -28,8 +28,18 @@ class _InMemoryLimiter:
         bucket.append(now)
 
 
+_LIMITERS: list[_InMemoryLimiter] = []
+
+
+def reset_all() -> None:
+    """Zera o estado de todos os limitadores (útil para isolar testes)."""
+    for limiter in _LIMITERS:
+        limiter._hits.clear()
+
+
 def rate_limit(limit: int, window_seconds: int):
     limiter = _InMemoryLimiter(limit, window_seconds)
+    _LIMITERS.append(limiter)
 
     async def dependency(request: Request) -> None:
         client = request.client.host if request.client else "unknown"
