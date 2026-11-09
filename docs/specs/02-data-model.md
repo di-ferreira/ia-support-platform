@@ -233,7 +233,7 @@ Verificado contra o código em 2026-11-06.
 | 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | `scripts/seed_qdrant.py` | **Alta** | **ABERTO** |
 | 02-15 | `dashboard_service.py` chama `clientes.get` dentro do loop de recentes | `services/dashboard_service.py:73-74` | Média | **ABERTO** → [08](08-non-functional.md) |
 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente | `appwrite/schema.py` | Média | **ABERTO** |
-| 02-17 | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | `appwrite/schema.py` | **Alta** | **ABERTO** → 10, 11, 12 |
-| 02-18 | `departamento_id` ausente em `atendentes`/`chats` | `appwrite/schema.py` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 02-17 | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | `appwrite/schema.py` | **Alta** | **ABERTO (parcial)** — `departamentos`/`regras_roteamento` criadas; `integracao_chamados`/`integration_outbox` bloqueadas pelo gap 11-1 |
+| 02-18 | `departamento_id` ausente em `atendentes`/`chats` | `appwrite/schema.py` | **Alta** | **CORRIGIDO** — `departamento_id` em `atendentes`/`chats` |
 | 02-19 | `ia_diagnosticos` não guarda intenção, categoria ERP, departamento destino, artigos consultados nem razão | `appwrite/schema.py:174-186` | **Alta** | **ABERTO** → 05, 10 |
 | 02-20 | Sem trilha de auditoria de atribuição/transferência (exigida em 04) | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |
