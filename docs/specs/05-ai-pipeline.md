@@ -137,4 +137,4 @@ Verificado contra o código em 2026-11-06.
 | 05-21 | Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria | `ai/prompts.py` | **Alta** | **CORRIGIDO** — `INTENT_SYSTEM` + `ClassificacaoIntencao` separam intenção, categoria ERP e departamento sugerido |
 | 05-22 | Resolução determinística de regras de roteamento inexistente | `services/` | **Alta** | **CORRIGIDO** — `services/routing_service.py` (`resolver`), determinístico e sem LLM na decisão |
 | 05-23 | Diagnóstico não persiste intenção/departamento/artigos consultados/razão | `services/ai_pipeline.py`; `appwrite/schema.py` | **Alta** | **ABERTO** → 02, 10 |
-| 05-24 | Sem dataset rotulado nem regressão de intenção/roteamento | `tests/` | Média | **ABERTO** → [14](14-test-strategy.md) |
+| 05-24 | Sem dataset rotulado nem regressão de intenção/roteamento | `tests/` | Média | **CORRIGIDO** — dataset rotulado e regressão de intenção/roteamento em CI |
