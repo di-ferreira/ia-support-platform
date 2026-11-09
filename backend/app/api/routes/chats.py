@@ -25,11 +25,20 @@ async def listar_chats(
     status: StatusChat | None = Query(None),
     cliente_id: str | None = Query(None),
     prioridade: PrioridadeChat | None = Query(None),
+    departamento_id: str | None = Query(None),
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    chats, _ = await service.listar(skip, limit, status, cliente_id, prioridade, user)
+    chats, _ = await service.listar(
+        skip=skip,
+        limit=limit,
+        status=status,
+        cliente_id=cliente_id,
+        prioridade=prioridade,
+        departamento_id=departamento_id,
+        user=user,
+    )
     return chats
 
 

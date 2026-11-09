@@ -41,20 +41,31 @@ class ChatService:
         status: StatusChat | None = None,
         cliente_id: str | None = None,
         prioridade: PrioridadeChat | None = None,
+        departamento_id: str | None = None,
         user: dict | None = None,
     ) -> tuple[list[dict], int]:
         chats = await self.repos.chats.list_all()
 
         if user and user["perfil"] == "atendente":
+            departamento_id_user = user.get("departamento_id")
+
             def pode_ver(c: dict) -> bool:
                 if c["atendente_id"] == user["id"]:
                     return True
+                if c["atendente_id"] is not None:
+                    return False
+                if departamento_id_user:
+                    return c.get("departamento_id") == departamento_id_user
+                # Sem departamento: fail-closed no legado (nada de fila global).
                 return (
-                    c["atendente_id"] is None
-                    and (c["setor_alvo"] is None or c["setor_alvo"] == user["setor"])
+                    c.get("departamento_id") is None
+                    and c.get("setor_alvo") is not None
+                    and c.get("setor_alvo") == user.get("setor")
                 )
 
             chats = [c for c in chats if pode_ver(c)]
+        if departamento_id:
+            chats = [c for c in chats if c.get("departamento_id") == departamento_id]
         if status:
             chats = [c for c in chats if c["status"] == status.value]
         if cliente_id:

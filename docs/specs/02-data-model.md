@@ -231,7 +231,7 @@ Verificado contra o código em 2026-11-06.
 | 02-12 | Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida | `appwrite/schema.py:14-15` | Média | **CORRIGIDO (departamentos)** — `DepartamentoService.criar` centraliza o check-then-insert de `codigo` com 409; demais entidades seguem pendentes |
 | 02-13 | `scripts/seed_knowledge_base.py` importava `async_session` inexistente | `scripts/seed_knowledge_base.py` | **Alta** | **CORRIGIDO** — o script cria o próprio engine; há `seed_knowledge_base_appwrite.py` |
 | 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | `scripts/seed_qdrant.py` | **Alta** | **ABERTO** |
-| 02-15 | `dashboard_service.py` chama `clientes.get` dentro do loop de recentes | `services/dashboard_service.py:73-74` | Média | **ABERTO** → [08](08-non-functional.md) |
+| 02-15 | `dashboard_service.py` chama `clientes.get` dentro do loop de recentes | `services/dashboard_service.py:73-74` | Média | **CORRIGIDO** — `clientes.list_all()` fora do loop em `DashboardService` |
 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente | `appwrite/schema.py` | Média | **ABERTO** |
 | 02-17 | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | `appwrite/schema.py` | **Alta** | **ABERTO (parcial)** — `departamentos`/`regras_roteamento` criadas; `integracao_chamados`/`integration_outbox` bloqueadas pelo gap 11-1 |
 | 02-18 | `departamento_id` ausente em `atendentes`/`chats` | `appwrite/schema.py` | **Alta** | **CORRIGIDO** — `departamento_id` em `atendentes`/`chats` |

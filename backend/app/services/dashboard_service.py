@@ -24,8 +24,26 @@ class DashboardService:
     def __init__(self, repos: Repositories):
         self.repos = repos
 
-    async def obter_dashboard(self) -> dict:
+    async def obter_dashboard(self, user: dict | None = None) -> dict:
         todos = await self.repos.chats.list_all()
+
+        if user and user["perfil"] == "atendente":
+            departamento_id = user.get("departamento_id")
+
+            def no_escopo(c: dict) -> bool:
+                if c.get("atendente_id") == user["id"]:
+                    return True
+                if c.get("atendente_id") is not None:
+                    return False
+                if departamento_id:
+                    return c.get("departamento_id") == departamento_id
+                return (
+                    c.get("departamento_id") is None
+                    and c.get("setor_alvo") is not None
+                    and c.get("setor_alvo") == user.get("setor")
+                )
+
+            todos = [c for c in todos if no_escopo(c)]
 
         total = len(todos)
         ia_resolvidos = sum(1 for c in todos if c["status"] == StatusChat.resolvido.value)
@@ -43,8 +61,12 @@ class DashboardService:
 
         # tempo médio de resposta (atendente)
         mensagens = await self.repos.mensagens.list_all()
+        chats_no_escopo = {c["id"] for c in todos}
         atendente_msgs = [
-            m for m in mensagens if m["remetente"] == RemetenteMensagem.atendente.value
+            m
+            for m in mensagens
+            if m["remetente"] == RemetenteMensagem.atendente.value
+            and m["chat_id"] in chats_no_escopo
         ]
         atendente_msgs.sort(key=lambda m: m["created_at"] or "", reverse=True)
         rows = [_parse_dt(m["created_at"]) for m in atendente_msgs[:100]]
@@ -70,8 +92,9 @@ class DashboardService:
 
         # recentes
         recentes = []
+        clientes_por_id = {c["id"]: c for c in await self.repos.clientes.list_all()}
         for c in sorted(todos, key=lambda c: c["created_at"] or "", reverse=True)[:10]:
-            cliente = await self.repos.clientes.get(c["cliente_id"])
+            cliente = clientes_por_id.get(c["cliente_id"])
             recentes.append({
                 "id": c["id"],
                 "cliente_nome": cliente["nome"] if cliente else None,

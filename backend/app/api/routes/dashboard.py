@@ -14,4 +14,4 @@ async def obter_dashboard(
     user: dict = Depends(get_current_user),
 ):
     service = DashboardService(repos)
-    return await service.obter_dashboard()
+    return await service.obter_dashboard(user=user)
