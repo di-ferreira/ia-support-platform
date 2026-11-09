@@ -8,4 +8,8 @@ class IADiagnosticoRepository(BaseRepository):
         super().__init__(databases, "ia_diagnosticos")
 
     async def get_by_chat(self, chat_id: str) -> dict | None:
-        return await self.get_by("chat_id", chat_id)
+        """Última execução do pipeline para o chat (snapshot mais recente)."""
+        execucoes = await self.list_by("chat_id", chat_id)
+        if not execucoes:
+            return None
+        return max(execucoes, key=lambda d: d.get("created_at") or "")

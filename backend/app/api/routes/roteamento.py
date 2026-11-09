@@ -9,6 +9,7 @@ from app.schemas.chat import (
     ChatDetailResponse,
     ChatTransferirDepartamento,
 )
+from app.schemas.routing import RoteamentoChatResponse
 from app.services.chat_service import ChatService
 
 logger = logging.getLogger("app.roteamento")
@@ -56,4 +57,32 @@ async def atribuir_atendente(
     service = ChatService(repos)
     return await service.atribuir_atendente(
         chat_id, body.atendente_id, user, motivo=body.motivo
+    )
+
+
+@router.get("/{chat_id}/roteamento", response_model=RoteamentoChatResponse)
+async def obter_roteamento(
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    chat = await ChatService(repos).obter_com_escopo(chat_id, user)
+    departamento = (
+        await repos.departamentos.get(chat["departamento_id"])
+        if chat.get("departamento_id")
+        else None
+    )
+    diagnostico = await repos.ia_diagnosticos.get_by_chat(chat_id) or {}
+    return RoteamentoChatResponse(
+        chat_id=chat_id,
+        departamento_id=chat.get("departamento_id"),
+        departamento_codigo=(departamento or {}).get("codigo"),
+        intencao=diagnostico.get("intencao"),
+        subintencao=diagnostico.get("subintencao"),
+        categoria_erp=diagnostico.get("categoria_erp"),
+        departamento_sugerido_codigo=diagnostico.get("departamento_sugerido_codigo"),
+        motivo=diagnostico.get("motivo"),
+        confianca=diagnostico.get("confianca"),
+        artigos_consultados=diagnostico.get("artigos_consultados"),
+        tem_diagnostico=bool(diagnostico),
     )
