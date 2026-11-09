@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 _INSECURE_DEFAULT_SECRET = "change-me-in-production"
@@ -32,6 +33,11 @@ class Settings(BaseSettings):
     ollama_embed_model: str = "nomic-embed-text"
 
     ia_name: str = "EMSoft IA"
+
+    # Roteamento deterministico (docs/specs/05-ai-pipeline.md §Roteamento)
+    ai_intent_confidence_threshold: float = Field(default=0.80, ge=0.0, le=1.0)
+    routing_max_clarification_attempts: int = Field(default=2, ge=0, le=10)
+    routing_fallback_departamento_codigo: str = "atendimento_geral"
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None
