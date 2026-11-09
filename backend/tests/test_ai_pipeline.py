@@ -3,6 +3,7 @@ import pytest
 from app.core.config import settings
 from app.services import qdrant_service
 from app.services.ai_pipeline import NO_HIT_MENSAGEM
+from app.services.departamento_seed import semear
 
 
 def _auth() -> dict:
@@ -23,8 +24,10 @@ class FakeLLM:
 class FakeEmbedder:
     def __init__(self, falha: bool = False):
         self.falha = falha
+        self.chamadas = 0
 
     async def embed(self, texto: str):
+        self.chamadas += 1
         if self.falha:
             raise RuntimeError("embedding indisponível")
         return [0.1] * 768
@@ -41,10 +44,28 @@ HITS = [
 ]
 
 
+CLASSIFICACAO_TECNICA = {
+    "intencao": "problema_tecnico",
+    "subintencao": "emissao_nfe",
+    "categoria_erp": "fiscal",
+    "departamento_sugerido_codigo": "suporte_tecnico",
+    "confianca": 0.94,
+    "precisa_esclarecimento": False,
+    "pergunta_esclarecimento": None,
+    "motivo": "Falha ao emitir NF-e.",
+}
+
+
 @pytest.fixture
 async def chat_com_mensagem(fake_repos):
+    await semear(fake_repos)
+    suporte = await fake_repos.departamentos.get_by_codigo("suporte_tecnico")
     chat = await fake_repos.chats.create(
-        {"whatsapp_number": "5511999990000", "status": "NOVO"}
+        {
+            "whatsapp_number": "5511999990000",
+            "status": "NOVO",
+            "departamento_id": suporte["id"],
+        }
     )
     await fake_repos.mensagens.create(
         {
@@ -60,6 +81,10 @@ async def chat_com_mensagem(fake_repos):
 def _stub_ai(monkeypatch, llm: FakeLLM, embedder: FakeEmbedder, hits: list[dict]):
     monkeypatch.setattr("app.services.ai_pipeline.get_llm", lambda: llm)
     monkeypatch.setattr("app.services.ai_pipeline.get_embedder", lambda: embedder)
+    monkeypatch.setattr(
+        "app.ai.intent_classifier.get_llm",
+        lambda: FakeLLM(CLASSIFICACAO_TECNICA),
+    )
 
     async def _search(embedding, limit: int = 5):
         return hits
@@ -228,6 +253,10 @@ async def test_qdrant_indisponivel_503(client, chat_com_mensagem, monkeypatch):
     llm = FakeLLM({"solucao": "x"})
     monkeypatch.setattr("app.services.ai_pipeline.get_llm", lambda: llm)
     monkeypatch.setattr("app.services.ai_pipeline.get_embedder", lambda: FakeEmbedder())
+    monkeypatch.setattr(
+        "app.ai.intent_classifier.get_llm",
+        lambda: FakeLLM(CLASSIFICACAO_TECNICA),
+    )
 
     async def _falha(embedding, limit: int = 5):
         raise RuntimeError("qdrant fora do ar")
@@ -247,6 +276,10 @@ async def test_llm_indisponivel_502(client, fake_repos, chat_com_mensagem, monke
         lambda: (_ for _ in ()).throw(LLMIndisponivelError("OPENAI_API_KEY ausente")),
     )
     monkeypatch.setattr("app.services.ai_pipeline.get_embedder", lambda: FakeEmbedder())
+    monkeypatch.setattr(
+        "app.ai.intent_classifier.get_llm",
+        lambda: FakeLLM(CLASSIFICACAO_TECNICA),
+    )
 
     async def _search(embedding, limit: int = 5):
         return HITS

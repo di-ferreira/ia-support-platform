@@ -3,18 +3,27 @@ import json
 from fastapi import HTTPException, status
 from pydantic import BaseModel, Field, ValidationError
 
+from app.ai.intent_classifier import IntentClassifier
 from app.ai.prompts import build_solution_messages
 from app.ai.provider import LLMIndisponivelError, get_embedder, get_llm
 from app.appwrite.repositories import Repositories
 from app.models.chat import StatusChat
+from app.models.departamento import Intencao
 from app.models.ia_diagnostico import StatusIA
+from app.schemas.ai import PERGUNTA_ESCLARECIMENTO
 from app.services import qdrant_service
 from app.services.chat_service import ChatService
+from app.services.routing_service import RoutingService
 
 NO_HIT_MENSAGEM = (
     "Não encontrei um artigo relevante na base de conhecimento para o seu problema. "
     "Poderia me enviar mais detalhes (print do erro, número do documento ou "
     "mensagem exata da tela)? Assim consigo te ajudar melhor."
+)
+
+MSG_ENCAMINHAMENTO = (
+    "Entendi a sua solicitação e já encaminhei para a equipe responsável. "
+    "Em breve alguém falará com você por aqui."
 )
 
 _STATUS_INICIAIS = (
@@ -24,11 +33,18 @@ _STATUS_INICIAIS = (
     StatusChat.resolvido,
 )
 
+_INTENCOES_COM_RAG = frozenset({Intencao.problema_tecnico, Intencao.duvida_uso_erp})
+
 _STATUS_FINAL = {
     StatusIA.resolvido_pela_ia: StatusChat.aguardando_cliente,
     StatusIA.transferir_com_solucao: StatusChat.aguardando_humano_com_solucao,
     StatusIA.transferir_sem_solucao: StatusChat.aguardando_humano_sem_solucao,
+    StatusIA.esclarecimento: StatusChat.aguardando_cliente,
 }
+
+_NAO_PRECISA_HUMANO = frozenset(
+    {StatusIA.resolvido_pela_ia, StatusIA.esclarecimento}
+)
 
 
 class SolucaoLLM(BaseModel):
@@ -69,6 +85,29 @@ class AIPipelineService:
                 detail="Chat não possui mensagens do cliente",
             )
         ultima = client_msgs[-1]
+        classificacao = await self._classificar(ultima["conteudo"])
+        roteamento = await self._rotear(classificacao, chat)
+
+        if roteamento.precisa_esclarecimento:
+            return await self._finalizar(
+                chat_id,
+                StatusIA.esclarecimento,
+                campos_ia=None,
+                categoria=None,
+                mensagem_cliente=(
+                    roteamento.pergunta_esclarecimento or PERGUNTA_ESCLARECIMENTO
+                ),
+            )
+
+        if classificacao.intencao not in _INTENCOES_COM_RAG:
+            return await self._finalizar(
+                chat_id,
+                StatusIA.transferir_sem_solucao,
+                campos_ia=None,
+                categoria=None,
+                mensagem_cliente=MSG_ENCAMINHAMENTO,
+            )
+
         hits = await self._buscar_base(ultima["conteudo"])
         if not hits:
             return await self._finalizar(
@@ -80,6 +119,16 @@ class AIPipelineService:
             )
 
         return await self._resolver_llm(chat_id, hits, ultima["conteudo"], historico)
+
+    async def _classificar(self, texto: str):
+        """Classificação é sugestão; falha de contrato vira inconclusiva."""
+        return await IntentClassifier().classificar(texto)
+
+    async def _rotear(self, classificacao, chat: dict):
+        return await RoutingService(self.repos).resolver(
+            classificacao,
+            departamento_atual_id=chat.get("departamento_id"),
+        )
 
     async def _historico(self, chat_id: str) -> list[dict]:
         mensagens = await self.repos.mensagens.list_by_chat(chat_id)
@@ -212,7 +261,7 @@ class AIPipelineService:
         espelho = {
             "solucao_sugerida_ia": (campos_ia or {}).get("solucao"),
             "nivel_confianca_ia": (campos_ia or {}).get("confianca"),
-            "necessita_humano": status_ia != StatusIA.resolvido_pela_ia,
+            "necessita_humano": status_ia not in _NAO_PRECISA_HUMANO,
         }
         await self.repos.chats.update(chat_id, espelho)
 
@@ -222,7 +271,7 @@ class AIPipelineService:
             "categoria": categoria,
             "solucao": (campos_ia or {}).get("solucao"),
             "instrucoes_cliente": instrucoes_cliente,
-            "precisa_humano": status_ia != StatusIA.resolvido_pela_ia,
+            "precisa_humano": status_ia not in _NAO_PRECISA_HUMANO,
             "referencia": referencia,
             "confianca": (campos_ia or {}).get("confianca"),
             "mensagem_cliente": mensagem_cliente,
