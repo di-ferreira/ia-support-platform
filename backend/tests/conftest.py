@@ -117,6 +117,17 @@ class FakeIntegracaoChamados(FakeStore):
         return max(registros, key=lambda d: d.get("created_at") or "")
 
 
+class FakeIntegrationOutbox(FakeStore):
+    async def get_by_event_key(self, event_key: str) -> dict | None:
+        registros = await self.list_by("event_key", event_key)
+        if not registros:
+            return None
+        return max(registros, key=lambda d: d.get("created_at") or "")
+
+    async def list_by_status(self, status: str) -> list[dict]:
+        return await self.list_by("status", status)
+
+
 class FakeRegrasRoteamento(FakeStore):
     async def list_ativas_ordenadas(self) -> list[dict]:
         regras = [r for r in await self.list_all() if r.get("ativo")]
@@ -136,6 +147,7 @@ class FakeRepositories:
         self.departamentos = FakeDepartamentos("departamentos")
         self.regras_roteamento = FakeRegrasRoteamento("regras_roteamento")
         self.integracao_chamados = FakeIntegracaoChamados("integracao_chamados")
+        self.integration_outbox = FakeIntegrationOutbox("integration_outbox")
 
 
 @pytest.fixture

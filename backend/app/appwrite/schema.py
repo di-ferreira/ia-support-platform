@@ -49,6 +49,20 @@ PERFIL_ATENDENTE = ["admin", "supervisor", "atendente"]
 
 STATUS_INTEGRACAO_CHAMADO = ["PENDENTE", "SINCRONIZADO", "ERRO", "RECONCILIACAO"]
 
+# Spec 12: estados da fila outbox. `PROCESSANDO` só existe enquanto um
+# worker mantém o lease; lease expirado volta a ser elegível (reconciliação).
+STATUS_OUTBOX = ["PENDENTE", "PROCESSANDO", "CONCLUIDO", "FALHA_PERMANENTE"]
+
+# Spec 12 §Tipos de evento. Não há evento por mensagem comum sem mudança
+# relevante; repetições idênticas deduplicam pela `event_key`.
+TIPO_EVENTO_OUTBOX = [
+    "TICKET_CREATE_REQUESTED",
+    "TICKET_UPDATE_REQUESTED",
+    "TICKET_ASSIGNMENT_CHANGED",
+    "TICKET_RESOLUTION_REQUESTED",
+    "TICKET_REOPEN_REQUESTED",
+]
+
 ASSIGNEE_KIND = ["AI", "HUMANO"]
 
 REMETENTE_MENSAGEM = ["cliente", "ia", "atendente", "sistema"]
@@ -262,6 +276,37 @@ COLLECTIONS: dict[str, dict] = {
             int_attr("tentativas", required=False, default=0),
             str_attr("ultimo_erro", 1000, required=False),
             datetime_attr("ultima_tentativa_em", required=False),
+        ],
+    },
+    # Spec 12 §Outbox pattern: transições locais persistem o evento aqui com
+    # `event_key` determinística e seguem o atendimento sem aguardar a API
+    # Emsoft; o worker processa com lock/lease e retry com backoff.
+    # Unicidade da `event_key` garantida pela aplicação (Appwrite sem índice
+    # único): deduplicar por list_all + comparação antes de criar.
+    "integration_outbox": {
+        "name": "IntegrationOutbox",
+        "attributes": [
+            str_attr("event_key", 255),
+            fk_attr("chat_id"),
+            enum_attr("event_type", TIPO_EVENTO_OUTBOX),
+            enum_attr("status", STATUS_OUTBOX, default="PENDENTE"),
+            # Versão sequencial do agregado embutida na key
+            # (ex.: emsoft:update:{chat_id}:{versão}); usada para descartar
+            # eventos obsoletos (spec 12 §Concorrência).
+            int_attr("event_version", required=False, default=0),
+            int_attr("tentativas", required=False, default=0),
+            # Snapshot serializado (JSON) dos dados a enviar; nunca cabeçalhos
+            # nem credenciais (spec 12 §Retenção e auditoria).
+            text_attr("payload"),
+            str_attr("ultimo_erro", 1000, required=False),
+            datetime_attr("ultima_tentativa_em", required=False),
+            datetime_attr("next_attempt_at", required=False),
+            str_attr("lease_owner", 100, required=False),
+            datetime_attr("lease_expires_at", required=False),
+            # Reprocessamento manual (spec 12): ator e motivo em auditoria;
+            # a data é o `created_at` nativo do evento.
+            str_attr("ator", 100, required=False),
+            text_attr("motivo"),
         ],
     },
 }

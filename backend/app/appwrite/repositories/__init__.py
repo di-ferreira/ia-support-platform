@@ -9,6 +9,7 @@ from app.appwrite.repositories.departamento import (
 )
 from app.appwrite.repositories.ia_diagnostico import IADiagnosticoRepository
 from app.appwrite.repositories.integracao_chamados import IntegracaoChamadosRepository
+from app.appwrite.repositories.integration_outbox import IntegrationOutboxRepository
 from app.appwrite.repositories.knowledge_base import KnowledgeBaseRepository
 from app.appwrite.repositories.loja import LojaRepository
 from app.appwrite.repositories.mensagem import MensagemRepository
@@ -35,6 +36,7 @@ class Repositories:
         self.departamentos = DepartamentoRepository(databases)
         self.regras_roteamento = RegraRoteamentoRepository(databases)
         self.integracao_chamados = IntegracaoChamadosRepository(databases)
+        self.integration_outbox = IntegrationOutboxRepository(databases)
 
     def __getattr__(self, name):
         raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
