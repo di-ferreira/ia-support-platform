@@ -83,6 +83,7 @@ class ChatService:
                     "nivel_confianca_ia": c["nivel_confianca_ia"],
                     "necessita_humano": c["necessita_humano"],
                     "atendente_id": c["atendente_id"],
+                    "departamento_id": c["departamento_id"],
                     "setor_alvo": c["setor_alvo"],
                     "ultima_mensagem_em": c["ultima_mensagem_em"],
                     "ultima_mensagem": ultima["conteudo"] if ultima else None,
@@ -104,11 +105,25 @@ class ChatService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado"
             )
+        departamento_id = data.get("departamento_id")
+        if departamento_id:
+            depto = await self.repos.departamentos.get(departamento_id)
+            if not depto:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Departamento não encontrado",
+                )
+            if not depto.get("ativo"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Departamento inativo não aceita novos chats",
+                )
         return await self.repos.chats.create(
             {
                 "cliente_id": data["cliente_id"],
                 "loja_id": data.get("loja_id"),
                 "whatsapp_number": data.get("whatsapp_number"),
+                "departamento_id": departamento_id,
                 "status": StatusChat.novo.value,
                 "prioridade": PrioridadeChat.media.value,
             }
@@ -164,9 +179,9 @@ class ChatService:
             )
         data = {"atendente_id": novo_atendente_id, "setor_alvo": None}
         if chat["status"] in (
-            "AGUARDANDO_HUMANO_COM_SOLUCAO",
-            "AGUARDANDO_HUMANO_SEM_SOLUCAO",
-            "NOVO",
+            StatusChat.aguardando_humano_com_solucao.value,
+            StatusChat.aguardando_humano_sem_solucao.value,
+            StatusChat.novo.value,
         ):
             data["status"] = StatusChat.em_atendimento.value
         return await self.repos.chats.update(chat_id, data)
@@ -178,7 +193,17 @@ class ChatService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Você só pode transferir chamados seus",
             )
-        data = {"atendente_id": None, "setor_alvo": setor}
-        if chat["status"] == StatusChat.em_atendimento:
+        depto = await self.repos.departamentos.get_by_codigo(setor)
+        if not depto or not depto.get("ativo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Departamento '{setor}' inválido ou inativo",
+            )
+        data = {
+            "atendente_id": None,
+            "departamento_id": depto["id"],
+            "setor_alvo": setor,
+        }
+        if chat["status"] == StatusChat.em_atendimento.value:
             data["status"] = StatusChat.novo.value
         return await self.repos.chats.update(chat_id, data)

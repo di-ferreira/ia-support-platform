@@ -42,6 +42,7 @@ class ChatListResponse(BaseModel):
     nivel_confianca_ia: float | None = None
     necessita_humano: bool | None = None
     atendente_id: str | None = None
+    departamento_id: str | None = None
     setor_alvo: str | None = None
     ultima_mensagem_em: datetime | None = None
     ultima_mensagem: str | None = None
@@ -55,6 +56,7 @@ class ChatDetailResponse(BaseModel):
     cliente_id: str
     loja_id: str | None = None
     atendente_id: str | None = None
+    departamento_id: str | None = None
     setor_alvo: str | None = None
     status: StatusChat
     prioridade: PrioridadeChat
