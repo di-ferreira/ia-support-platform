@@ -59,6 +59,19 @@ class EmsoftChamadosService:
         self._client = client
         self._repos = repos
         self._settings = settings
+        self._ultimo_erro: Exception | None = None
+
+    @property
+    def ultimo_erro(self) -> Exception | None:
+        """Exceção que impediu a última `sincronizar` (spec 12).
+
+        O worker do outbox usa o tipo (e o `status_code` de
+        `ExternalRequestError`) para classificar a falha: transitória
+        (retry com backoff) ou permanente (`FALHA_PERMANENTE` + alerta).
+        Em sucesso a classificação não é usada: o status do resultado
+        (`SINCRONIZADO`) basta.
+        """
+        return self._ultimo_erro
 
     async def sincronizar(self, chat_id: str) -> dict:
         """Sincroniza o chamado externo do chat e devolve o resumo:
@@ -77,6 +90,7 @@ class EmsoftChamadosService:
                 chat_id, exc,
                 extra={"event": "emsoft_mapping_error", "chat_id": chat_id},
             )
+            self._ultimo_erro = exc
             registro = await self._salvar_registro(
                 registro, None, chat_id=chat_id,
                 status=STATUS_ERRO, ultimo_erro=str(exc),
@@ -230,6 +244,7 @@ class EmsoftChamadosService:
                 extra={"event": "emsoft_mapping_error",
                        "chat_id": chamado.source_chat_id},
             )
+            self._ultimo_erro = exc
             return await self._salvar_registro(
                 registro, chamado, status=STATUS_ERRO, ultimo_erro=str(exc)
             )
@@ -237,10 +252,12 @@ class EmsoftChamadosService:
             corpo = await self._client.criar(payload)
         except AmbiguousResultError as exc:
             # O POST pode ter sido aplicado: reconciliar, nunca re-POST.
+            self._ultimo_erro = exc
             return await self._reconciliar(
                 chamado, registro, motivo=str(exc)
             )
         except ExternalRequestError as exc:
+            self._ultimo_erro = exc
             return await self._salvar_registro(
                 registro, chamado,
                 status=STATUS_ERRO, ultimo_erro=str(exc),
@@ -252,6 +269,9 @@ class EmsoftChamadosService:
             else None
         )
         if not ticket_id:
+            self._ultimo_erro = AmbiguousResultError(
+                "Criação respondeu sem o ID do chamado extraível"
+            )
             return await self._reconciliar(
                 chamado, registro,
                 motivo="Criação respondeu sem o ID do chamado extraível",
@@ -271,12 +291,14 @@ class EmsoftChamadosService:
                 chamado, self._contract, "editar", ticket_id=ticket_id
             )
         except MappingError as exc:
+            self._ultimo_erro = exc
             return await self._salvar_registro(
                 registro, chamado, status=STATUS_ERRO, ultimo_erro=str(exc)
             )
         try:
             await self._client.editar(ticket_id, payload)
         except ExternalRequestError as exc:
+            self._ultimo_erro = exc
             if exc.status_code is None:
                 # Timeout/transporte: a edição pode ter sido aplicada.
                 # Mantém o ID; a próxima sync re-PATCHa o mesmo ticket.
@@ -309,6 +331,10 @@ class EmsoftChamadosService:
                 extra={"event": "emsoft_reconcile_pending",
                        "chat_id": chamado.source_chat_id},
             )
+            self._ultimo_erro = MappingError(
+                "Reconciliação automática indisponível: "
+                "campo_referencia_externa/filtro_referencia ausentes no contrato"
+            )
             return await self._salvar_registro(
                 registro, chamado,
                 status=STATUS_RECONCILIACAO,
@@ -317,6 +343,7 @@ class EmsoftChamadosService:
         try:
             itens = await self._client.listar(referencia=chamado.source_chat_id)
         except ExternalRequestError as exc:
+            self._ultimo_erro = exc
             return await self._salvar_registro(
                 registro, chamado,
                 status=STATUS_RECONCILIACAO,
@@ -337,6 +364,9 @@ class EmsoftChamadosService:
                     tentativas_incremento=1,
                 )
         # Conservador: ticket não localizado na listagem -> nunca re-POST.
+        self._ultimo_erro = AmbiguousResultError(
+            "Ticket não localizado na listagem; reconciliação manual necessária"
+        )
         return await self._salvar_registro(
             registro, chamado,
             status=STATUS_RECONCILIACAO,
