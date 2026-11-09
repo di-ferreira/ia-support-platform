@@ -30,7 +30,7 @@ services:
       WEBHOOK_URL: http://${N8N_HOST:-localhost}:${N8N_PORT:-5678}
       EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://evolution-api:8080}
       EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-emsoft-support}
-      BACKEND_URL: ${BACKEND_URL:-http://host.docker.internal:8001}
+      BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -71,6 +71,50 @@ services:
       redis:
         condition: service_started
       evolution-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Aplicações (mesma rede dos servicos acima; Appwrite e Ollama ficam no host)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      # Rede interna do compose (sobrepoe os valores do .env local)
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      EVOLUTION_API_URL: http://evolution-api:8080
+      # Servicos do host (fora do compose)
+      APPWRITE_ENDPOINT: http://host.docker.internal:8020/v1
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    volumes:
+      # Config local do backend (pydantic-settings lê .env do CWD)
+      - ../backend/.env:/app/.env:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_started
+      qdrant:
+        condition: service_started
+      evolution-api:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        # Injetados no build do Next.js (valores vistos pelo navegador)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8001}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
         condition: service_healthy
     restart: unless-stopped
 

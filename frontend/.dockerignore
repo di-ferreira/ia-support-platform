@@ -1,0 +1,18 @@
+# Dependências e builds do host (o container instala/gera por conta)
+node_modules
+.next
+out
+
+# Ambiente local (valores vêm dos build args do compose)
+.env
+.env.*
+
+# Caches e artefatos
+*.tsbuildinfo
+
+# Versionamento / IDE / SO
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
