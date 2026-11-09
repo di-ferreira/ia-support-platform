@@ -18,7 +18,7 @@ class ConnectionManager:
                 first = await asyncio.wait_for(websocket.receive_json(), timeout=10)
                 if isinstance(first, dict):
                     token = first.get("token")
-            except (asyncio.TimeoutError, Exception):
+            except (TimeoutError, Exception):
                 token = None
 
         payload = decode_token(token or "")

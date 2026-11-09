@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.deps import get_current_user, get_repositories
 from app.appwrite.repositories import Repositories
+from app.core.rate_limit import rate_limit
 from app.schemas.auth import (
     AlterarSenhaRequest,
     AtendenteResponse,
@@ -9,7 +10,6 @@ from app.schemas.auth import (
     RefreshRequest,
     TokenResponse,
 )
-from app.core.rate_limit import rate_limit
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])

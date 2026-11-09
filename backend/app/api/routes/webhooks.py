@@ -7,6 +7,7 @@ from app.api.deps import get_repositories
 from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
 from app.core.config import settings
+from app.core.rate_limit import rate_limit
 from app.models.mensagem import TipoMensagem
 from app.schemas.webhook import (
     WebhookClienteUpdate,
@@ -19,8 +20,6 @@ from app.schemas.webhook import (
 )
 from app.services.ai_pipeline import AIPipelineService
 from app.services.webhook_service import WebhookService
-
-from app.core.rate_limit import rate_limit
 
 router = APIRouter(
     prefix="/webhooks",
