@@ -228,7 +228,7 @@ Verificado contra o código em 2026-11-06.
 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) | `appwrite/schema.py:160-173` | Baixa | **ABERTO** |
 | 02-10 | Bootstrap aditivo **não propaga mudança de enum**; health degradado não implementado | `appwrite/bootstrap.py` | **Alta** | **ABERTO** |
 | 02-11 | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | `backend/alembic/`; `scripts/migrate.sh` | **Alta** | **ABERTO** |
-| 02-12 | Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida | `appwrite/schema.py:14-15` | Média | **ABERTO** |
+| 02-12 | Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida | `appwrite/schema.py:14-15` | Média | **CORRIGIDO (departamentos)** — `DepartamentoService.criar` centraliza o check-then-insert de `codigo` com 409; demais entidades seguem pendentes |
 | 02-13 | `scripts/seed_knowledge_base.py` importava `async_session` inexistente | `scripts/seed_knowledge_base.py` | **Alta** | **CORRIGIDO** — o script cria o próprio engine; há `seed_knowledge_base_appwrite.py` |
 | 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | `scripts/seed_qdrant.py` | **Alta** | **ABERTO** |
 | 02-15 | `dashboard_service.py` chama `clientes.get` dentro do loop de recentes | `services/dashboard_service.py:73-74` | Média | **ABERTO** → [08](08-non-functional.md) |
