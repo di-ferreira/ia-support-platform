@@ -10,7 +10,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] Fase 0 — Auditoria e baseline
 - [x] Fase 1 — Departamentos e migração
-- [x] Fase 2 — Classificação e roteamento (restam auditoria 10-12 e rotas 03-19)
+- [x] Fase 2 — Classificação e roteamento (restam auditoria 10-12 e rota 03-19)
 - [x] Fase 3 — Diagnóstico e ciclo de resolução
 - [ ] Fase 4 — Frontend operacional (telas de departamento, filtros, painéis)
 - [ ] Fase 5 — Integração Emsoft em modo mock (scaffold do contrato feito; faltam outbox/worker e artefato real)
@@ -32,7 +32,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média)
 - [ ] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**)
 - [ ] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
-- [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**)
+- [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**) *(parcial)*
 - [ ] **00-15** — Sem outbox/idempotência para chamados externos (**Alta**)
 - [ ] **00-16** — Indicadores de sucesso por departamento/duplicidade sem instrumentação (Média)
 
@@ -183,7 +183,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **08-7** — `DATABASE_URL` default com credenciais em claro (Baixa)
 - [x] **08-8** — WebSocket aceitava token por query string (**Alta**)
 - [ ] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
-- [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**)
+- [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
 - [ ] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**)
 - [ ] **08-12** — Health check degradado do bootstrap não implementado (Média)
 
@@ -205,7 +205,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
 - [ ] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)
 - [ ] **09-16** — `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic (Baixa)
-- [ ] **09-17** — Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração (**Alta**)
+- [ ] **09-17** — Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração (**Alta**) *(parcial)*
 - [ ] **09-18** — Sem runbook de rollout/rollback da integração Emsoft (Média)
 
 ## SPEC 10 — Departamentos, Classificação de Intenção e Roteamento
@@ -256,4 +256,4 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
 - [ ] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
 - [x] **14-11** — Sem testes de classificação de intenção, separação categoria ERP × departamento e resolução de roteamento (**Alta**)
-- [ ] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**)
+- [ ] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**) *(parcial)*
