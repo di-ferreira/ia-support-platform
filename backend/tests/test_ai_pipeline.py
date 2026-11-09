@@ -86,7 +86,7 @@ def _stub_ai(monkeypatch, llm: FakeLLM, embedder: FakeEmbedder, hits: list[dict]
         lambda: FakeLLM(CLASSIFICACAO_TECNICA),
     )
 
-    async def _search(embedding, limit: int = 5):
+    async def _search(embedding, limit: int = 5, categoria: str | None = None):
         return hits
 
     monkeypatch.setattr(qdrant_service, "search_similar", _search)
@@ -258,7 +258,7 @@ async def test_qdrant_indisponivel_503(client, chat_com_mensagem, monkeypatch):
         lambda: FakeLLM(CLASSIFICACAO_TECNICA),
     )
 
-    async def _falha(embedding, limit: int = 5):
+    async def _falha(embedding, limit: int = 5, categoria: str | None = None):
         raise RuntimeError("qdrant fora do ar")
 
     monkeypatch.setattr(qdrant_service, "search_similar", _falha)
@@ -281,7 +281,7 @@ async def test_llm_indisponivel_502(client, fake_repos, chat_com_mensagem, monke
         lambda: FakeLLM(CLASSIFICACAO_TECNICA),
     )
 
-    async def _search(embedding, limit: int = 5):
+    async def _search(embedding, limit: int = 5, categoria: str | None = None):
         return HITS
 
     monkeypatch.setattr(qdrant_service, "search_similar", _search)

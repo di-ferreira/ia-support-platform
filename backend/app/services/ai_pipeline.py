@@ -7,6 +7,7 @@ from app.ai.intent_classifier import IntentClassifier
 from app.ai.prompts import build_solution_messages
 from app.ai.provider import LLMIndisponivelError, get_embedder, get_llm
 from app.appwrite.repositories import Repositories
+from app.core.config import settings
 from app.models.chat import StatusChat
 from app.models.departamento import Intencao
 from app.models.ia_diagnostico import StatusIA
@@ -108,7 +109,10 @@ class AIPipelineService:
                 mensagem_cliente=MSG_ENCAMINHAMENTO,
             )
 
-        hits = await self._buscar_base(ultima["conteudo"])
+        categoria_erp = (
+            classificacao.categoria_erp.value if classificacao.categoria_erp else None
+        )
+        hits = await self._buscar_base(ultima["conteudo"], categoria_erp)
         if not hits:
             return await self._finalizar(
                 chat_id,
@@ -147,15 +151,20 @@ class AIPipelineService:
         historico.sort(key=lambda m: m["created_at"])
         return historico
 
-    async def _buscar_base(self, texto: str) -> list[dict]:
+    async def _buscar_base(
+        self, texto: str, categoria: str | None = None
+    ) -> list[dict]:
         try:
             embedding = await get_embedder().embed(texto)
-            return await qdrant_service.search_similar(embedding, limit=5)
+            hits = await qdrant_service.search_similar(
+                embedding, limit=5, categoria=categoria
+            )
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Busca na base de conhecimento indisponível",
             )
+        return [h for h in hits if (h.get("score") or 0) >= settings.rag_min_score]
 
     async def _resolver_llm(
         self, chat_id: str, hits: list[dict], mensagem: str, historico: list[dict]

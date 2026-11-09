@@ -88,7 +88,7 @@ Verificado contra o código em 2026-11-06.
 | 08-3 | `/health` não checa dependências; sem readiness | `main.py:90-92` | Média | **ABERTO** |
 | 08-4 | Sem rate limiting em login/webhooks | `core/rate_limit.py` | **Alta** | **CORRIGIDO** — limiter in-memory (login 60/60s, webhooks 120/60s) |
 | 08-5 | Sem logging estruturado nem request-id/correlação | `app/**` | Média | **ABERTO** |
-| 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO** |
+| 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO (parcial)** — limiar de relevância do RAG é configurável e testado; APM/SLO seguem na Trilha R1 |
 | 08-7 | `DATABASE_URL` default com credenciais em claro | `core/config.py:10` | Baixa | **ABERTO** |
 | 08-8 | WebSocket aceitava token por query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** → 07-1 |
 | 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **ABERTO** → 00-10 |

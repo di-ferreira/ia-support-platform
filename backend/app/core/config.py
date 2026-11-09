@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     routing_max_clarification_attempts: int = Field(default=2, ge=0, le=10)
     routing_fallback_departamento_codigo: str = "atendimento_geral"
 
+    # RAG tecnico (docs/specs/05-ai-pipeline.md §Pipeline RAG tecnico)
+    rag_min_score: float = Field(default=0.35, ge=0.0, le=1.0)
+
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None
 

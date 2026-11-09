@@ -88,7 +88,7 @@ def _stub(monkeypatch, classificacao: dict, embedder: ContadorEmbedder, hits: li
     )
     monkeypatch.setattr("app.services.ai_pipeline.get_embedder", lambda: embedder)
 
-    async def _search(embedding, limit: int = 5):
+    async def _search(embedding, limit: int = 5, categoria: str | None = None):
         return hits
 
     monkeypatch.setattr(qdrant_service, "search_similar", _search)

@@ -34,12 +34,26 @@ async def ensure_collection():
         )
 
 
-async def search_similar(query_embedding: list[float], limit: int = 5) -> list[dict]:
+async def search_similar(
+    query_embedding: list[float],
+    limit: int = 5,
+    categoria: str | None = None,
+) -> list[dict]:
     client = get_qdrant()
+    query_filter = None
+    if categoria:
+        query_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="categoria", match=models.MatchValue(value=categoria)
+                )
+            ]
+        )
     response = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_embedding,
         limit=limit,
+        query_filter=query_filter,
         with_payload=True,
     )
     hits = response.points
