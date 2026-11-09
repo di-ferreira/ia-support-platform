@@ -17,6 +17,7 @@ aplicação (os services checam duplicidade antes de inserir), não por índice 
 
 from app.models.departamento import CategoriaERP, Intencao
 from app.models.ia_diagnostico import StatusIA
+from app.models.outbox import StatusOutbox, TipoEventoOutbox
 from app.models.knowledge_base import CategoriaConhecimento
 
 DB_ID = "chatbot"
@@ -51,17 +52,11 @@ STATUS_INTEGRACAO_CHAMADO = ["PENDENTE", "SINCRONIZADO", "ERRO", "RECONCILIACAO"
 
 # Spec 12: estados da fila outbox. `PROCESSANDO` só existe enquanto um
 # worker mantém o lease; lease expirado volta a ser elegível (reconciliação).
-STATUS_OUTBOX = ["PENDENTE", "PROCESSANDO", "CONCLUIDO", "FALHA_PERMANENTE"]
+STATUS_OUTBOX = [s.value for s in StatusOutbox]
 
 # Spec 12 §Tipos de evento. Não há evento por mensagem comum sem mudança
 # relevante; repetições idênticas deduplicam pela `event_key`.
-TIPO_EVENTO_OUTBOX = [
-    "TICKET_CREATE_REQUESTED",
-    "TICKET_UPDATE_REQUESTED",
-    "TICKET_ASSIGNMENT_CHANGED",
-    "TICKET_RESOLUTION_REQUESTED",
-    "TICKET_REOPEN_REQUESTED",
-]
+TIPO_EVENTO_OUTBOX = [t.value for t in TipoEventoOutbox]
 
 ASSIGNEE_KIND = ["AI", "HUMANO"]
 
