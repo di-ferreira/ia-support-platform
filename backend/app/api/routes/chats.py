@@ -124,4 +124,5 @@ async def transferir_chat_grupo(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    return await service.transferir_grupo(chat_id, body.setor, user)
+    destino = body.departamento_id or body.setor
+    return await service.transferir_grupo(chat_id, destino, user, motivo=body.motivo)

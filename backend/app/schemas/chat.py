@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.models.chat import PrioridadeChat, StatusChat
 
@@ -28,7 +28,20 @@ class ChatTransferir(BaseModel):
 
 
 class ChatTransferirGrupo(BaseModel):
-    setor: str
+    """Alias de compatibilidade de `/transferir-departamento` (spec 03).
+
+    Preferir `departamento_id`. `setor` é aceito apenas para clientes antigos.
+    """
+
+    departamento_id: str | None = None
+    setor: str | None = None
+    motivo: str | None = Field(default=None, max_length=500)
+
+    @model_validator(mode="after")
+    def _exatamente_um_destino(self):
+        if int(bool(self.departamento_id)) + int(bool(self.setor)) != 1:
+            raise ValueError("Informe exatamente um: departamento_id ou setor")
+        return self
 
 
 class ChatTransferirDepartamento(BaseModel):

@@ -135,7 +135,7 @@ Verificado contra o código em 2026-11-06.
 | 01-3 | Urgência da IA (`critica`) não tem coluna; existe só no prompt | `ai/prompts.py` vs `PRIORIDADE_CHAT` | Média | **ABERTO** → [02](02-data-model.md) |
 | 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
 | 01-5 | `chats.loja_id` nunca é populado; nenhum endpoint define a loja | `appwrite/schema.py:135` | Média | **ABERTO** → [02](02-data-model.md) |
-| 01-6 | `transferir` usa literais de string; `transferir_grupo` usa o enum | `services/chat_service.py:166-171` | Baixa | **CORRIGIDO** — `transferir` usa `StatusChat.*.value`; `transferir_grupo` resolve departamento por código |
+| 01-6 | `transferir` usa literais de string; `transferir_grupo` usa o enum | `services/chat_service.py:166-171` | Baixa | **CORRIGIDO** — alias resolve código→ID e usa `StatusChat.*.value` |
 | 01-7 | `chat["status"] == StatusChat.em_atendimento` compara string com membro de `StrEnum` | `services/chat_service.py:182` | Baixa | **CORRIGIDO** — comparações via `StatusChat.em_atendimento.value` |
 | 01-8 | Sem tabela de auditoria; não há como saber quem mudou status/atribuição | `historico` removido | Média | **ABERTO** → [04](04-rbac-matrix.md) |
 | 01-9 | Sem entidade departamento nem atribuição por departamento na máquina de estados | `appwrite/schema.py`; `services/chat_service.py` | **Alta** | **CORRIGIDO** — departamento participa da visibilidade e da atribuição em `ChatService` |

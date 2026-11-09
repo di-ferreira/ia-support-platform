@@ -208,27 +208,22 @@ class ChatService:
             data["status"] = StatusChat.em_atendimento.value
         return await self.repos.chats.update(chat_id, data)
 
-    async def transferir_grupo(self, chat_id: str, setor: str, user: dict) -> dict:
-        chat = await self.obter(chat_id)
-        if user["perfil"] == "atendente" and chat["atendente_id"] != user["id"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Você só pode transferir chamados seus",
-            )
-        depto = await self.repos.departamentos.get_by_codigo(setor)
-        if not depto or not depto.get("ativo"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Departamento '{setor}' inválido ou inativo",
-            )
-        data = {
-            "atendente_id": None,
-            "departamento_id": depto["id"],
-            "setor_alvo": setor,
-        }
-        if chat["status"] == StatusChat.em_atendimento.value:
-            data["status"] = StatusChat.novo.value
-        return await self.repos.chats.update(chat_id, data)
+    async def transferir_grupo(
+        self, chat_id: str, destino, user: dict, motivo: str | None = None
+    ) -> dict:
+        """Alias legado: aceita `departamento_id` ou o código em `setor`."""
+        departamento_id = destino
+        if not await self.repos.departamentos.get(departamento_id):
+            depto = await self.repos.departamentos.get_by_codigo(str(destino))
+            if not depto:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Departamento '{destino}' inválido",
+                )
+            departamento_id = depto["id"]
+        return await self.transferir_departamento(
+            chat_id, departamento_id, user, motivo=motivo
+        )
 
     async def transferir_departamento(
         self,
