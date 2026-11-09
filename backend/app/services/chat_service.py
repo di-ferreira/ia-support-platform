@@ -34,6 +34,24 @@ class ChatService:
     def __init__(self, repos: Repositories):
         self.repos = repos
 
+    def pode_ver_chat(self, chat: dict, user: dict) -> bool:
+        """Regra única de posse/escopo reutilizada por listar e endpoints de detalhe."""
+        if user["perfil"] in ("admin", "supervisor"):
+            return True
+        if chat.get("atendente_id") == user["id"]:
+            return True
+        if chat.get("atendente_id") is not None:
+            return False
+        departamento_id = user.get("departamento_id")
+        if departamento_id:
+            return chat.get("departamento_id") == departamento_id
+        # Sem departamento: fail-closed no legado (nada de fila global).
+        return (
+            chat.get("departamento_id") is None
+            and chat.get("setor_alvo") is not None
+            and chat.get("setor_alvo") == user.get("setor")
+        )
+
     async def listar(
         self,
         skip: int = 0,
@@ -46,24 +64,8 @@ class ChatService:
     ) -> tuple[list[dict], int]:
         chats = await self.repos.chats.list_all()
 
-        if user and user["perfil"] == "atendente":
-            departamento_id_user = user.get("departamento_id")
-
-            def pode_ver(c: dict) -> bool:
-                if c["atendente_id"] == user["id"]:
-                    return True
-                if c["atendente_id"] is not None:
-                    return False
-                if departamento_id_user:
-                    return c.get("departamento_id") == departamento_id_user
-                # Sem departamento: fail-closed no legado (nada de fila global).
-                return (
-                    c.get("departamento_id") is None
-                    and c.get("setor_alvo") is not None
-                    and c.get("setor_alvo") == user.get("setor")
-                )
-
-            chats = [c for c in chats if pode_ver(c)]
+        if user and user["perfil"] not in ("admin", "supervisor"):
+            chats = [c for c in chats if self.pode_ver_chat(c, user)]
         if departamento_id:
             chats = [c for c in chats if c.get("departamento_id") == departamento_id]
         if status:
@@ -108,6 +110,15 @@ class ChatService:
         if not chat:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
+            )
+        return chat
+
+    async def obter_com_escopo(self, chat_id: str, user: dict) -> dict:
+        chat = await self.obter(chat_id)
+        if not self.pode_ver_chat(chat, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Chat fora do seu escopo de acesso",
             )
         return chat
 

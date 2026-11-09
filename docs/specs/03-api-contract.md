@@ -157,7 +157,7 @@ Verificado contra o código em 2026-11-06.
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
 | 03-1 | `GET /dashboard` não aplica filtro de visibilidade | `api/routes/dashboard.py:11-17` | **Alta** | **CORRIGIDO** — `routes/dashboard.py` passa `user` (mesma correção de 04-1) |
-| 03-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py:36-43`; `mensagens.py`; `clientes.py` | **Alta** | **ABERTO** |
+| 03-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py:36-43`; `mensagens.py`; `clientes.py` | **Alta** | **CORRIGIDO** — mesma correção de 04-2 |
 | 03-3 | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | `services/webhook_service.py:79-86` | **Alta** | **ABERTO** → [01](01-domain-glossary.md) |
 | 03-4 | `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) | `ai/router.py:34-54` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
 | 03-5 | `/ai/solucionar` escrevia no chat furando a máquina de estados | `ai/router.py` | **Alta** | **CORRIGIDO** — delega a `AIPipelineService`/`ChatService` |

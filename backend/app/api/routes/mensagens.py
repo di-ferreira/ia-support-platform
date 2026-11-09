@@ -11,6 +11,7 @@ from app.schemas.mensagem import (
     MensagemCreate,
     MensagemResponse,
 )
+from app.services.chat_service import ChatService
 from app.services.evolution_service import EvolutionService
 from app.services.mensagem_service import MensagemService
 
@@ -26,6 +27,7 @@ async def listar_mensagens(
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(get_current_user),
 ):
+    await ChatService(repos).obter_com_escopo(chat_id, user)
     service = MensagemService(repos)
     return await service.listar(chat_id, skip, limit)
 

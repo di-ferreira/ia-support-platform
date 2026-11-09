@@ -60,7 +60,7 @@ Verificado contra o código em 2026-11-06.
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
 | 04-1 | `GET /dashboard` não aplica filtro de visibilidade; atendente lê KPIs globais e nomes de clientes | `api/routes/dashboard.py`; `services/dashboard_service.py` | **Alta** | **CORRIGIDO** — `DashboardService.obter_dashboard(user=...)` aplica escopo por departamento |
-| 04-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py`; `mensagens.py`; `clientes.py` | **Alta** | **ABERTO** |
+| 04-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py`; `mensagens.py`; `clientes.py` | **Alta** | **CORRIGIDO** — `ChatService.pode_ver_chat` + `obter_com_escopo` em `/chats/{id}`, `/chats/{id}/mensagens`, `/clientes/{id}` |
 | 04-3 | Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` | `components/layout/sidebar.tsx`; `(app)/layout.tsx` | Média | **ABERTO** → [07](07-frontend.md) |
 | 04-4 | Regra "supervisor só cria `atendente`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
 | 04-5 | Regra "só admin altera `perfil`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |

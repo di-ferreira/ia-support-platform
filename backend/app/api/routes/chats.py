@@ -49,7 +49,7 @@ async def obter_chat(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    return await service.obter(chat_id)
+    return await service.obter_com_escopo(chat_id, user)
 
 
 @router.post("", response_model=ChatDetailResponse, status_code=201)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import get_current_user, get_repositories, require_perfil
 from app.appwrite.repositories import Repositories
@@ -10,6 +10,7 @@ from app.schemas.cliente import (
     LojaBase,
     LojaResponse,
 )
+from app.services.chat_service import ChatService
 from app.services.cliente_service import ClienteService
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
@@ -35,7 +36,15 @@ async def obter_cliente(
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(get_current_user),
 ):
+    chat_service = ChatService(repos)
     service = ClienteService(repos)
+    if user["perfil"] not in ("admin", "supervisor"):
+        chats_do_cliente = await repos.chats.list_by("cliente_id", cliente_id)
+        if not any(chat_service.pode_ver_chat(c, user) for c in chats_do_cliente):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cliente fora do seu escopo de acesso",
+            )
     return await service.obter(cliente_id)
 
 
