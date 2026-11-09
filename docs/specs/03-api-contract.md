@@ -159,7 +159,7 @@ Verificado contra o código em 2026-11-06.
 | 03-1 | `GET /dashboard` não aplica filtro de visibilidade | `api/routes/dashboard.py:11-17` | **Alta** | **CORRIGIDO** — `routes/dashboard.py` passa `user` (mesma correção de 04-1) |
 | 03-2 | `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse | `api/routes/chats.py:36-43`; `mensagens.py`; `clientes.py` | **Alta** | **CORRIGIDO** — mesma correção de 04-2 |
 | 03-3 | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | `services/webhook_service.py:79-86` | **Alta** | **ABERTO** → [01](01-domain-glossary.md) |
-| 03-4 | `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) | `ai/router.py:34-54` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
+| 03-4 | `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) | `ai/router.py:34-54` | **Alta** | **CORRIGIDO (rota nova)** — `/ai/classificar-intencao` usa body JSON; `/ai/classificar` e `/ai/analisar` legados seguem com query param |
 | 03-5 | `/ai/solucionar` escrevia no chat furando a máquina de estados | `ai/router.py` | **Alta** | **CORRIGIDO** — delega a `AIPipelineService`/`ChatService` |
 | 03-6 | JWT do WebSocket viajava em query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** — token na 1ª mensagem (fallback legado ainda aceito) |
 | 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution | `api/routes/mensagens.py:55-59,111-115`; `evolution.py` | Média | **ABERTO** |

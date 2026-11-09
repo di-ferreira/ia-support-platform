@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.ai.ai_cache import ai_cache
+from app.ai.intent_classifier import IntentClassifier
 from app.ai.openai_service import Message
 from app.ai.prompts import CLASSIFY_SYSTEM, DIAGNOSE_SYSTEM, SUMMARIZE_SYSTEM
 from app.ai.provider import LLMIndisponivelError, get_llm
 from app.api.deps import get_current_user, get_repositories
 from app.appwrite.repositories import Repositories
+from app.schemas.ai import ClassificacaoIntencao, ClassificarIntencaoRequest
 from app.schemas.webhook import WebhookSolucaoResponse
 from app.services.ai_pipeline import AIPipelineService
+from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/ai", tags=["IA"])
 
@@ -76,3 +79,40 @@ async def solucionar(
 ):
     service = AIPipelineService(repos)
     return await service.solucionar(chat_id)
+
+
+def _texto_do_chat(mensagens: list[dict]) -> str:
+    ordenadas = sorted(mensagens, key=lambda m: m["created_at"] or "")
+    linhas = [
+        f"[{m['remetente']}] {m['conteudo']}"
+        for m in ordenadas[-10:]
+        if m.get("conteudo")
+    ]
+    return "\n".join(linhas)
+
+
+@router.post("/classificar-intencao", response_model=ClassificacaoIntencao)
+async def classificar_intencao(
+    body: ClassificarIntencaoRequest,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Classifica a intenção SEM transferir e SEM gravar diagnóstico (spec 03)."""
+    if body.chat_id:
+        await ChatService(repos).obter_com_escopo(body.chat_id, user)
+        texto = _texto_do_chat(await repos.mensagens.list_by_chat(body.chat_id))
+    else:
+        texto = body.mensagem or ""
+
+    try:
+        return await IntentClassifier().classificar(texto)
+    except LLMIndisponivelError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"LLM indisponível: {exc}",
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Falha na comunicação com o LLM",
+        ) from exc
