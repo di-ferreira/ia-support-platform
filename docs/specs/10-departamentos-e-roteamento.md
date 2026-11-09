@@ -104,7 +104,7 @@ Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec ex
 | 10-5 | Endpoints de CRUD `/departamentos*` inexistentes | `api/routes/` | **Alta** | **CORRIGIDO** — `api/routes/departamentos.py` (6 endpoints) + `DepartamentoService` |
 | 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **ABERTO** |
 | 10-7 | `/chats/{id}/roteamento` (resolver determinístico) inexistente | `api/routes/` | **Alta** | **ABERTO** |
-| 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **ABERTO** |
+| 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **CORRIGIDO** — DTO + `IntentClassifier` + rota (Tasks F2.1/F2.2/F2.5) |
 | 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **CORRIGIDO** — `services/departamento_seed.py` (`semear`) + `scripts/seed_departamentos.py`, idempotente |
 | 10-10 | Migração de `setor`/`setor_alvo` para `departamento_id` inexistente | `scripts/`; `appwrite/` | **Alta** | **CORRIGIDO** — `services/migracao_setor_service.py` (`migrar`) + `scripts/migrate_setor_departamento.py` |
 | 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **ABERTO** |

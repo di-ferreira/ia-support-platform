@@ -122,7 +122,7 @@ Verificado contra o código em 2026-11-06.
 | 05-6 | Falha de RAG degradava para "nenhum artigo" (Cenário C falso) | `services/ai_pipeline.py:101-109` | **Alta** | **CORRIGIDO** — falha de embedding/busca responde 503 |
 | 05-7 | `/ai/solucionar` furava a máquina de estados; `except: pass` engolia falha | `services/ai_pipeline.py` | **Alta** | **CORRIGIDO** |
 | 05-8 | Resultado da LLM sem validação de shape | `services/ai_pipeline.py:137-143` | Média | **CORRIGIDO** — `SolucaoLLM` (Pydantic) |
-| 05-9 | `/ai/*` sem resposta Pydantic: `/ai/solucionar` tem `WebhookSolucaoResponse`; `classificar`/`analisar` devolvem dict cru | `ai/router.py:34-68` | Média | **ABERTO** |
+| 05-9 | `/ai/*` sem resposta Pydantic: `/ai/solucionar` tem `WebhookSolucaoResponse`; `classificar`/`analisar` devolvem dict cru | `ai/router.py:34-68` | Média | **CORRIGIDO** — `ClassificacaoIntencao` (Pydantic) responde `/ai/classificar-intencao`; `classificar`/`analisar` legados seguem dict cru (coberto por 05-10) |
 | 05-10 | `/ai/classificar` e `/ai/analisar` usam query param (conteúdo do cliente na URL) | `ai/router.py:34-54` | **Alta** | **ABERTO** |
 | 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536) | `services/qdrant_service.py`; `ai/provider.py` | **Alta** | **CORRIGIDO** → [ADR-0005](adr/0005-dimensao-de-embedding.md) |
 | 05-12 | `get_llm` caía em Ollama silenciosamente se `LLM_PROVIDER=openai` sem chave | `ai/provider.py:10-20` | Média | **CORRIGIDO** — falha rápido com `LLMIndisponivelError` |
