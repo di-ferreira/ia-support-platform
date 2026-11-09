@@ -37,6 +37,11 @@ class ChatTransferirDepartamento(BaseModel):
     preservar_atendente_se_compativel: bool = False
 
 
+class ChatAtribuirAtendente(BaseModel):
+    atendente_id: str
+    motivo: str | None = Field(default=None, max_length=500)
+
+
 class ChatListResponse(BaseModel):
     id: str
     cliente_id: str

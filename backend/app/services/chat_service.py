@@ -285,3 +285,60 @@ class ChatService:
         # declara `motivo_transferencia` (gap 02-10) e o fake aceitaria algo que
         # producao rejeita. O chamador registra o motivo no log (correlacao da R1.1).
         return await self.repos.chats.update(chat_id, data)
+
+    async def atribuir_atendente(
+        self,
+        chat_id: str,
+        atendente_id: str,
+        user: dict,
+        motivo: str | None = None,
+    ) -> dict:
+        """Assunção/atribuição (spec 10 §Processo de assunção).
+
+        Admin/supervisor podem atribuir a qualquer atendente ativo; o atendente
+        só pode assumir para si. Compatibilidade de departamento é exigida,
+        salvo override de admin/supervisor com motivo (auditável).
+        """
+        chat = await self.obter(chat_id)
+        if user["perfil"] == "atendente" and atendente_id != user["id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Atendente só pode assumir chamados para si",
+            )
+        atendente = await self.repos.atendentes.get(atendente_id)
+        if not atendente:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Atendente não encontrado",
+            )
+        if not atendente.get("ativo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Atendente inativo não pode receber chamados",
+            )
+        if chat["atendente_id"] is not None and chat["atendente_id"] != atendente_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Chamado já assumido por outro atendente",
+            )
+
+        compativel = (
+            chat.get("departamento_id") is None
+            or atendente.get("departamento_id") == chat.get("departamento_id")
+        )
+        if not compativel:
+            if user["perfil"] not in ("admin", "supervisor"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Atendente não pertence ao departamento do chamado",
+                )
+            if not motivo:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="Override de departamento exige motivo",
+                )
+
+        data: dict = {"atendente_id": atendente_id}
+        if chat["status"] == StatusChat.novo.value:
+            data["status"] = StatusChat.em_atendimento.value
+        return await self.repos.chats.update(chat_id, data)
