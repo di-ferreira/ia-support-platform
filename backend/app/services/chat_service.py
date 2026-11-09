@@ -229,3 +229,59 @@ class ChatService:
         if chat["status"] == StatusChat.em_atendimento.value:
             data["status"] = StatusChat.novo.value
         return await self.repos.chats.update(chat_id, data)
+
+    async def transferir_departamento(
+        self,
+        chat_id: str,
+        departamento_id: str,
+        user: dict,
+        motivo: str | None = None,
+        preservar_atendente_se_compativel: bool = False,
+    ) -> dict:
+        """Transferência interdepartamental (spec 10, regras 10-12).
+
+        Limpa o atendente atual, salvo quando ele já pertence ao destino e a
+        preservação foi pedida. Volta o chat à fila (`NOVO`) se estava em
+        atendimento.
+        """
+        chat = await self.obter(chat_id)
+        if user["perfil"] == "atendente" and chat["atendente_id"] != user["id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você só pode transferir chamados seus",
+            )
+        depto = await self.repos.departamentos.get(departamento_id)
+        if not depto:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Departamento não encontrado",
+            )
+        if not depto.get("ativo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Departamento inativo não recebe transferências",
+            )
+        if not depto.get("recebe_transferencias"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Departamento não recebe transferências",
+            )
+
+        data: dict = {"departamento_id": departamento_id, "setor_alvo": None}
+        atendente_id = chat["atendente_id"]
+        if atendente_id and preservar_atendente_se_compativel:
+            atendente = await self.repos.atendentes.get(atendente_id)
+            if atendente and atendente.get("departamento_id") == departamento_id:
+                data["atendente_id"] = atendente_id
+            else:
+                data["atendente_id"] = None
+        else:
+            data["atendente_id"] = None
+
+        if data["atendente_id"] is None and chat["status"] == StatusChat.em_atendimento.value:
+            data["status"] = StatusChat.novo.value
+
+        # `motivo` NAO vai para o documento: o schema Appwrite de producao nao
+        # declara `motivo_transferencia` (gap 02-10) e o fake aceitaria algo que
+        # producao rejeita. O chamador registra o motivo no log (correlacao da R1.1).
+        return await self.repos.chats.update(chat_id, data)

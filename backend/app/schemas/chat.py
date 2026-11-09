@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.chat import PrioridadeChat, StatusChat
 
@@ -29,6 +29,12 @@ class ChatTransferir(BaseModel):
 
 class ChatTransferirGrupo(BaseModel):
     setor: str
+
+
+class ChatTransferirDepartamento(BaseModel):
+    departamento_id: str
+    motivo: str | None = Field(default=None, max_length=500)
+    preservar_atendente_se_compativel: bool = False
 
 
 class ChatListResponse(BaseModel):

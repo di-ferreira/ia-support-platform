@@ -16,6 +16,7 @@ from app.api.routes import (
     kanban_router,
     knowledge_base_router,
     mensagens_router,
+    roteamento_router,
     usuarios_router,
     webhooks_router,
     whatsapp_router,
@@ -62,6 +63,7 @@ app.include_router(auth_router)
 app.include_router(atendentes_router)
 app.include_router(clientes_router)
 app.include_router(chats_router)
+app.include_router(roteamento_router)
 app.include_router(mensagens_router)
 app.include_router(dashboard_router)
 app.include_router(kanban_router)

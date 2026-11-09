@@ -102,10 +102,10 @@ Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec ex
 | 10-3 | `atendentes.departamento_id` ausente; `setor` legado é string livre | `appwrite/schema.py:107` | **Alta** | **CORRIGIDO** — `departamento_id` no schema e gravado por `ChatService.criar` |
 | 10-4 | `chats.departamento_id` ausente; `setor_alvo` legado é string livre | `appwrite/schema.py:144` | **Alta** | **CORRIGIDO** — `departamento_id` no schema e gravado por `ChatService.criar`/`transferir_grupo` |
 | 10-5 | Endpoints de CRUD `/departamentos*` inexistentes | `api/routes/` | **Alta** | **CORRIGIDO** — `api/routes/departamentos.py` (6 endpoints) + `DepartamentoService` |
-| 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **ABERTO** |
+| 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **CORRIGIDO** — `/chats/{id}/transferir-departamento` e `/atribuir-atendente` (Tasks F2.6/F2.7) |
 | 10-7 | `/chats/{id}/roteamento` (resolver determinístico) inexistente | `api/routes/` | **Alta** | **CORRIGIDO** — `RoutingService.resolver` + `GET /chats/{id}/roteamento` (Task F2.8) |
 | 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **CORRIGIDO** — `POST /ai/classificar-intencao` + `IntentClassifier` + `ClassificacaoIntencao` |
 | 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **CORRIGIDO** — `services/departamento_seed.py` (`semear`) + `scripts/seed_departamentos.py`, idempotente |
 | 10-10 | Migração de `setor`/`setor_alvo` para `departamento_id` inexistente | `scripts/`; `appwrite/` | **Alta** | **CORRIGIDO** — `services/migracao_setor_service.py` (`migrar`) + `scripts/migrate_setor_departamento.py` |
-| 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **ABERTO** |
+| 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **CORRIGIDO** — destino e atendente validados por atividade/departamento nas transferências |
 | 10-12 | Sem auditoria de transferência/atribuição | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |
