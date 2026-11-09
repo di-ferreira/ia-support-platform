@@ -207,14 +207,14 @@ Se API não permitir pesquisa por `source_chat_id`, negociar com o responsável 
 
 ## Registro de Gaps
 
-Verificado contra o código em 2026-11-06. A integração não existe; o gate de contrato (11-1) bloqueia a implementação real.
+Verificado contra o código em 2026-11-09. O scaffold da integração (contrato, adapter, coleção, config, rotas e reconciliação) existe e nasce desabilitado; falta apenas o artefato de contrato real (11-1) para uso em produção.
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (endpoint retornou 502 no ambiente de pesquisa) | — | **Bloqueante** | **ABERTO** |
-| 11-2 | Adapter/client `app/integrations/emsoft_chamados/` inexistente | `app/` | **Alta** | **ABERTO** |
-| 11-3 | Coleção `integracao_chamados` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
-| 11-4 | Config `EMSOFT_CHAMADOS_*` inexistente | `core/config.py` | **Alta** | **ABERTO** |
-| 11-5 | Identidade IA (`EMSOFT_CHAMADOS_AI_USER_ID`) e mapeamento de atendentes/departamentos ausente | `core/config.py`; `app/` | **Alta** | **ABERTO** |
-| 11-6 | Endpoints `/integracoes/chamados/*` (consulta/reprocessamento) inexistentes | `api/routes/` | **Alta** | **ABERTO** |
-| 11-7 | Reconciliação de timeout ambíguo e idempotência externa inexistentes | `app/` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
+| 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (probe de 2026-11-09 confirmou endpoint vivo: envelope 401 `{"success":false,...}`, CORS expõe `Authorization`, sem Swagger público) | — | **Bloqueante** | **ABERTO (parcial)** — mecanismo do artefato implementado (`contract.py` valida `validado`+`evidencia`, `contract.example.json` de referência, base só via contrato); falta o artefato real preenchido e confirmado pelo responsável pela API |
+| 11-2 | Adapter/client `app/integrations/emsoft_chamados/` inexistente | `app/` | **Alta** | **CORRIGIDO** — contrato, client (timeout no POST → ambíguo, sem log de `Authorization`), mapper canônico e service |
+| 11-3 | Coleção `integracao_chamados` inexistente | `appwrite/schema.py` | **Alta** | **CORRIGIDO** |
+| 11-4 | Config `EMSOFT_CHAMADOS_*` inexistente | `core/config.py` | **Alta** | **CORRIGIDO** — enabled off por padrão; guard `verify_tls` em produção |
+| 11-5 | Identidade IA (`EMSOFT_CHAMADOS_AI_USER_ID`) e mapeamento de atendentes/departamentos ausente | `core/config.py`; `app/` | **Alta** | **CORRIGIDO** — config + responsável canônico (atendente do chat ou IA) em `service._responsavel` |
+| 11-6 | Endpoints `/integracoes/chamados/*` (consulta/reprocessamento) inexistentes | `api/routes/` | **Alta** | **CORRIGIDO** — `/status`, `/tickets`, `/{chat_id}/sincronizar` (503 quando off, 403 para atendente) |
+| 11-7 | Reconciliação de timeout ambíguo e idempotência externa inexistentes | `app/` | **Alta** | **CORRIGIDO (escopo 11)** — reconciliação por listagem + re-PATCH pelo ID, nunca re-POST cego; confiabilidade mais ampla segue em [12](12-confiabilidade-integracoes.md) |
