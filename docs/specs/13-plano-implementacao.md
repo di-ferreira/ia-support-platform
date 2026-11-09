@@ -94,3 +94,10 @@
 - Atualização de specs/ADR quando decisão mudar.
 - Logs sanitizados e métricas quando fluxo externo for envolvido.
 - Nenhum token ou segredo commitado.
+
+## Onde estão os gaps desta fase
+
+Esta spec é um **plano de execução**, não um estado-alvo: por isso não tem Registro de Gaps
+próprio. Os gaps que cada fase endereça estão registrados nas specs de domínio —
+[00](00-escopo.md) a [12](12-confiabilidade-integracoes.md) e
+[14](14-test-strategy.md). O que muda aqui é o **status de execução** das fases.

@@ -27,3 +27,9 @@
 ## Atenção
 
 O contrato real da API Emsoft não foi acessível/publicamente verificável durante a preparação. A SPEC 11 registra o endpoint fornecido e lista todas as informações que precisam ser confirmadas. A integração deve permanecer desabilitada até essa validação.
+
+## Revisões posteriores
+
+- `docs/specs/10-test-strategy.md` → `docs/specs/14-test-strategy.md`: a estratégia de testes deixa de disputar a numeração com as specs novas. Os gaps passaram de `10-x` para `14-x` e as referências cruzadas foram atualizadas.
+- Registros de Gaps reconstruídos nas specs 00–14, com status verificado contra o código atual (`backend/app/`, `frontend/`, `infra/`, `backend/tests/`) em 2026-11-06. Cada gap cita arquivo e linha; gaps resolvidos após o pacote v2 (rate limiting, token do WebSocket, deduplicação no n8n, falha de RAG, validação de segredo no startup, `ia_diagnosticos`, sincronização Qdrant) estão marcados como `CORRIGIDO`.
+- `docs/specs/README.md` atualizado: índice com as specs 10–14, tabela de ADRs, Mapa "onde eu vou para saber sobre X?" e lista de documentos derivados (`IMPLEMENTATION-PROMPT.md`, `CHANGELOG.md`, `PACKAGE-README.md`, `docs/specs.backup/`).

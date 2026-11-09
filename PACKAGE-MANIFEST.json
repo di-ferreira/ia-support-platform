@@ -16,6 +16,7 @@
     "docs/specs/11-integracao-api-emsoft.md",
     "docs/specs/12-confiabilidade-integracoes.md",
     "docs/specs/13-plano-implementacao.md",
+    "docs/specs/14-test-strategy.md",
     "docs/specs/adr/0004-backend-dono-da-ia.md",
     "docs/specs/adr/0005-dimensao-de-embedding.md",
     "docs/specs/adr/0006-departamentos-e-roteamento.md",
