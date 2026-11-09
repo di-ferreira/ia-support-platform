@@ -1382,7 +1382,7 @@ git commit -m "feat(diagnostico): snapshot completo e destino aplicado ao chat
 
 **Regra (spec 04):** atendente só confirma/reabre chats em que é o responsável; admin e supervisor podem em qualquer chat do escopo.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `backend/tests/test_ciclo_resolucao.py`:
 
@@ -1507,12 +1507,12 @@ async def test_mensagem_do_atendente_nao_reabre(client, fake_repos):
     assert (await fake_repos.chats.get(chat["id"]))["status"] == "RESOLVIDO"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd backend && pytest tests/test_ciclo_resolucao.py -v`
 Expected: FAIL com 404 nas rotas `confirmar-resolucao`/`reabrir` e status `RESOLVIDO` mantido após a mensagem do cliente
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Em `backend/app/services/chat_service.py`:
 
@@ -1605,16 +1605,16 @@ async def reabrir_chat(
     return await service.reabrir(chat_id, user, motivo=body.motivo)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd backend && pytest tests/test_ciclo_resolucao.py -v`
 Expected: PASS (8 testes)
 
-- [ ] **Step 5: Run the full suite + ruff**
+- [x] **Step 5: Run the full suite + ruff**
 
 Run: `cd backend && pytest tests/ -q && ruff check app tests`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/services/chat_service.py backend/app/services/webhook_service.py backend/app/api/routes/chats.py backend/app/schemas/chat.py backend/tests/test_ciclo_resolucao.py
@@ -1626,7 +1626,7 @@ git commit -m "feat(chats): confirmacao de resolucao e reabertura do cenario A
 - atendente so age em chat proprio; admin/supervisor em qualquer um"
 ```
 
-- [ ] **Step 7: Atualizar o Registro de Gaps (specs 01 e 05)**
+- [x] **Step 7: Atualizar o Registro de Gaps (specs 01 e 05)**
 
 ```
 | 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **CORRIGIDO (backend)** — `ChatService.confirmar_resolucao` fecha o ciclo A; botão na Task F4.11 |
