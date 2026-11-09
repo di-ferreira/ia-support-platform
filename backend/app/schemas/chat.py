@@ -23,6 +23,10 @@ class ChatPrioridade(BaseModel):
     prioridade: PrioridadeChat
 
 
+class ChatReabrir(BaseModel):
+    motivo: str | None = Field(default=None, max_length=500)
+
+
 class ChatTransferir(BaseModel):
     atendente_id: str
 

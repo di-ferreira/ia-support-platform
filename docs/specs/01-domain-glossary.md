@@ -133,11 +133,11 @@ Verificado contra o código em 2026-11-06.
 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) | `.ai/AGENT.md`, `.ai/PROJECT_CONTEXT.md` | Baixa | **ABERTO** |
 | 01-2 | `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | `api/routes/webhooks.py`; `services/webhook_service.py:79-86` | **Alta** | **ABERTO** → [03](03-api-contract.md) |
 | 01-3 | Urgência da IA (`critica`) não tem coluna; existe só no prompt | `ai/prompts.py` vs `PRIORIDADE_CHAT` | Média | **ABERTO** → [02](02-data-model.md) |
-| 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **ABERTO** → [05](05-ai-pipeline.md) |
+| 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **CORRIGIDO (backend)** — `ChatService.confirmar_resolucao` fecha o ciclo A; botão na Task F4.11 |
 | 01-5 | `chats.loja_id` nunca é populado; nenhum endpoint define a loja | `appwrite/schema.py:135` | Média | **ABERTO** → [02](02-data-model.md) |
 | 01-6 | `transferir` usa literais de string; `transferir_grupo` usa o enum | `services/chat_service.py:166-171` | Baixa | **CORRIGIDO** — alias resolve código→ID e usa `StatusChat.*.value` |
 | 01-7 | `chat["status"] == StatusChat.em_atendimento` compara string com membro de `StrEnum` | `services/chat_service.py:182` | Baixa | **CORRIGIDO** — comparações via `StatusChat.em_atendimento.value` |
 | 01-8 | Sem tabela de auditoria; não há como saber quem mudou status/atribuição | `historico` removido | Média | **ABERTO** → [04](04-rbac-matrix.md) |
 | 01-9 | Sem entidade departamento nem atribuição por departamento na máquina de estados | `appwrite/schema.py`; `services/chat_service.py` | **Alta** | **CORRIGIDO** — departamento participa da visibilidade e da atribuição em `ChatService` |
 | 01-10 | Domínio não separa categoria ERP de departamento; intenção não é modelada | `ai/prompts.py`; `appwrite/schema.py` | **Alta** | **CORRIGIDO** — domínio modela `Intencao`, `CategoriaERP` e departamento como dimensões distintas |
-| 01-11 | Sem distinção de reabertura/confirmação de resolução pelo cliente além de `RESOLVIDO → IA_ANALISANDO` | `services/chat_service.py:28` | Média | **ABERTO** → [05](05-ai-pipeline.md) |
+| 01-11 | Sem distinção de reabertura/confirmação de resolução pelo cliente além de `RESOLVIDO → IA_ANALISANDO` | `services/chat_service.py:28` | Média | **CORRIGIDO** — `confirmar_resolucao`/`reabrir` explícitos e reabertura automática na mensagem do cliente |

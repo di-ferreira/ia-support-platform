@@ -117,7 +117,7 @@ Verificado contra o código em 2026-11-06.
 | 05-1 | Pipeline de IA não conectado ao fluxo produtivo do n8n | `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — n8n chama `POST /webhooks/ai/solucionar` |
 | 05-2 | `/webhooks/chat/diagnostico` sem chamador; `ia_diagnosticos` não populado | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` grava o diagnóstico |
 | 05-3 | `PATCH /webhooks/chat/status` sem chamador; status nunca saía de `NOVO` | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` transiciona via `ChatService` |
-| 05-4 | Cenário A não tem caminho de fechamento: vai a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **ABERTO** → [07](07-frontend.md) |
+| 05-4 | Cenário A não tem caminho de fechamento: vai a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **CORRIGIDO (backend)** — `PATCH /chats/{id}/confirmar-resolucao` + reabertura; UI na Task F4.11 |
 | 05-5 | CRUD da base de conhecimento não sincronizava o Qdrant | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** |
 | 05-6 | Falha de RAG degradava para "nenhum artigo" (Cenário C falso) | `services/ai_pipeline.py:101-109` | **Alta** | **CORRIGIDO** — falha de embedding/busca responde 503 |
 | 05-7 | `/ai/solucionar` furava a máquina de estados; `except: pass` engolia falha | `services/ai_pipeline.py` | **Alta** | **CORRIGIDO** |

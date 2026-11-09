@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from app.appwrite.repositories import Repositories
 from app.models.chat import StatusChat
 from app.models.mensagem import RemetenteMensagem
+from app.services.chat_service import ChatService
 
 
 def _val(x):
@@ -74,6 +75,12 @@ class WebhookService:
         await self.repos.chats.update(
             chat_id, {"ultima_mensagem_em": datetime.now(UTC).isoformat()}
         )
+        if remetente.value == "cliente":
+            chat = await self.repos.chats.get(chat_id)
+            if chat and chat["status"] == StatusChat.resolvido.value:
+                await ChatService(self.repos).atualizar_status(
+                    chat_id, StatusChat.ia_analisando
+                )
         return mensagem
 
     async def atualizar_status(self, chat_id: str, novo_status: StatusChat) -> dict:

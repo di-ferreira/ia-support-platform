@@ -163,6 +163,47 @@ class ChatService:
             data["ultima_mensagem_em"] = datetime.now(UTC).isoformat()
         return await self.repos.chats.update(chat_id, data)
 
+    async def confirmar_resolucao(self, chat_id: str, user: dict) -> dict:
+        """Cenário A: o cliente confirma que a solução da IA funcionou."""
+        chat = await self.obter(chat_id)
+        if chat["status"] != StatusChat.aguardando_cliente.value:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Só é possível confirmar chats aguardando o cliente",
+            )
+        if user["perfil"] == "atendente" and chat.get("atendente_id") not in (
+            None,
+            user["id"],
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Chat pertence a outro atendente",
+            )
+        return await self.atualizar_status(chat_id, StatusChat.resolvido)
+
+    async def reabrir(
+        self, chat_id: str, user: dict, motivo: str | None = None
+    ) -> dict:
+        """Cliente informou que não resolveu: volta para a análise da IA."""
+        chat = await self.obter(chat_id)
+        if chat["status"] not in (
+            StatusChat.resolvido.value,
+            StatusChat.aguardando_cliente.value,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Só é possível reabrir chats resolvidos ou aguardando o cliente",
+            )
+        if user["perfil"] == "atendente" and chat.get("atendente_id") not in (
+            None,
+            user["id"],
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Chat pertence a outro atendente",
+            )
+        return await self.atualizar_status(chat_id, StatusChat.ia_analisando)
+
     async def assinar(self, chat_id: str, atendente_id: str) -> dict:
         chat = await self.obter(chat_id)
         data = {"atendente_id": atendente_id}

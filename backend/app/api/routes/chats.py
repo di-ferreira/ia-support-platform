@@ -9,6 +9,7 @@ from app.schemas.chat import (
     ChatDetailResponse,
     ChatListResponse,
     ChatPrioridade,
+    ChatReabrir,
     ChatTransferir,
     ChatTransferirGrupo,
     ChatUpdateStatus,
@@ -71,6 +72,27 @@ async def atualizar_status(
 ):
     service = ChatService(repos)
     return await service.atualizar_status(chat_id, body.status)
+
+
+@router.patch("/{chat_id}/confirmar-resolucao", response_model=ChatDetailResponse)
+async def confirmar_resolucao(
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    service = ChatService(repos)
+    return await service.confirmar_resolucao(chat_id, user)
+
+
+@router.patch("/{chat_id}/reabrir", response_model=ChatDetailResponse)
+async def reabrir_chat(
+    chat_id: str,
+    body: ChatReabrir = ChatReabrir(),
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    service = ChatService(repos)
+    return await service.reabrir(chat_id, user, motivo=body.motivo)
 
 
 @router.patch("/{chat_id}/assinar", response_model=ChatDetailResponse)
