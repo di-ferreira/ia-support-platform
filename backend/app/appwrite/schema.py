@@ -16,6 +16,7 @@ aplicação (os services checam duplicidade antes de inserir), não por índice 
 """
 
 from app.models.departamento import CategoriaERP, Intencao
+from app.models.ia_diagnostico import StatusIA
 from app.models.knowledge_base import CategoriaConhecimento
 
 DB_ID = "chatbot"
@@ -50,7 +51,7 @@ REMETENTE_MENSAGEM = ["cliente", "ia", "atendente", "sistema"]
 
 TIPO_MENSAGEM = ["texto", "audio", "documento", "imagem"]
 
-STATUS_IA = ["RESOLVIDO_PELA_IA", "TRANSFERIR_COM_SOLUCAO", "TRANSFERIR_SEM_SOLUCAO"]
+STATUS_IA = [s.value for s in StatusIA]
 
 INTENCAO = [i.value for i in Intencao]
 CATEGORIA_ERP = [c.value for c in CategoriaERP]
@@ -189,6 +190,15 @@ COLLECTIONS: dict[str, dict] = {
             float_attr("confianca"),
             str_attr("modelo_usado", 100, required=False),
             int_attr("tokens_usados"),
+            # Snapshot de roteamento (spec 05 §Persistência e eventos).
+            # `artigos_consultados` é JSON serializado: Appwrite não tem tipo JSON.
+            str_attr("intencao", 80, required=False),
+            str_attr("subintencao", 100, required=False),
+            str_attr("categoria_erp", 50, required=False),
+            str_attr("departamento_sugerido_codigo", 80, required=False),
+            fk_attr("departamento_id", required=False),
+            text_attr("motivo"),
+            text_attr("artigos_consultados"),
         ],
     },
     "knowledge_bases": {

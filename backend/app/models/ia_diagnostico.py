@@ -11,6 +11,7 @@ class StatusIA(enum.StrEnum):
     resolvido_pela_ia = "RESOLVIDO_PELA_IA"
     transferir_com_solucao = "TRANSFERIR_COM_SOLUCAO"
     transferir_sem_solucao = "TRANSFERIR_SEM_SOLUCAO"
+    esclarecimento = "ESCLARECIMENTO"
 
 
 class IADiagnostico(Base):
