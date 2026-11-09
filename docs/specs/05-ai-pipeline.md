@@ -135,6 +135,6 @@ Verificado contra o código em 2026-11-06.
 | 05-19 | Dependência `openai` declarada e nunca importada (clients usam `httpx`) | `pyproject.toml:18` | Baixa | **ABERTO** |
 | 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` | `tests/` | **Alta** | **ABERTO** (parcial) → [14](14-test-strategy.md) |
 | 05-21 | Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria | `ai/prompts.py` | **Alta** | **CORRIGIDO** — `INTENT_SYSTEM` + `ClassificacaoIntencao` separam intenção, categoria ERP e departamento sugerido |
-| 05-22 | Resolução determinística de regras de roteamento inexistente | `services/` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
+| 05-22 | Resolução determinística de regras de roteamento inexistente | `services/` | **Alta** | **CORRIGIDO** — `services/routing_service.py` (`resolver`), determinístico e sem LLM na decisão |
 | 05-23 | Diagnóstico não persiste intenção/departamento/artigos consultados/razão | `services/ai_pipeline.py`; `appwrite/schema.py` | **Alta** | **ABERTO** → 02, 10 |
 | 05-24 | Sem dataset rotulado nem regressão de intenção/roteamento | `tests/` | Média | **ABERTO** → [14](14-test-strategy.md) |
