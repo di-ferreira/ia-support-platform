@@ -101,7 +101,7 @@ Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec ex
 | 10-2 | Coleção `regras_roteamento` inexistente | `appwrite/schema.py` | **Alta** | **CORRIGIDO** — `COLLECTIONS["regras_roteamento"]` + `RegraRoteamentoRepository` (Task F1.3) |
 | 10-3 | `atendentes.departamento_id` ausente; `setor` legado é string livre | `appwrite/schema.py:107` | **Alta** | **CORRIGIDO** — `atendentes.departamento_id` (`appwrite/schema.py`) |
 | 10-4 | `chats.departamento_id` ausente; `setor_alvo` legado é string livre | `appwrite/schema.py:144` | **Alta** | **CORRIGIDO** — `chats.departamento_id` (`appwrite/schema.py`) |
-| 10-5 | Endpoints de CRUD `/departamentos*` inexistentes | `api/routes/` | **Alta** | **ABERTO** |
+| 10-5 | Endpoints de CRUD `/departamentos*` inexistentes | `api/routes/` | **Alta** | **CORRIGIDO** — `api/routes/departamentos.py` (6 endpoints) + `DepartamentoService` |
 | 10-6 | `/chats/{id}/transferir-departamento` e `/chats/{id}/atribuir-atendente` inexistentes (existe `transferir-grupo` por `setor` livre) | `api/routes/chats.py:110-118` | **Alta** | **ABERTO** |
 | 10-7 | `/chats/{id}/roteamento` (resolver determinístico) inexistente | `api/routes/` | **Alta** | **ABERTO** |
 | 10-8 | `/ai/classificar-intencao` inexistente; classifier só devolve categoria ERP | `ai/router.py`; `ai/prompts.py` | **Alta** | **ABERTO** |

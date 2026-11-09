@@ -11,6 +11,7 @@ from app.api.routes import (
     chats_router,
     clientes_router,
     dashboard_router,
+    departamentos_router,
     evolution_router,
     kanban_router,
     knowledge_base_router,
@@ -56,6 +57,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(departamentos_router)
 app.include_router(auth_router)
 app.include_router(atendentes_router)
 app.include_router(clientes_router)
