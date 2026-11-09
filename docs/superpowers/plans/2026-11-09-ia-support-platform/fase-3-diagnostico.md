@@ -51,7 +51,7 @@ Vale `README.md` §Global Constraints (C1–C12). Em especial: **C7** (status s�
 
 **Decisão de armazenamento:** Appwrite não tem atributo JSON. `artigos_consultados` é `text` (string) contendo JSON serializado; o pipeline grava com `json.dumps` e quem lê desserializa. Documentado no docstring da coleção.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `backend/tests/test_ia_diagnostico_schema.py`:
 
@@ -114,12 +114,12 @@ def test_status_ia_do_schema_espelha_o_enum():
     assert schema.STATUS_IA == [s.value for s in StatusIA]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd backend && pytest tests/test_ia_diagnostico_schema.py -v`
 Expected: FAIL — `AttributeError: type object 'StatusIA' has no attribute 'esclarecimento'` (e atributos ausentes)
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Em `backend/app/models/ia_diagnostico.py`:
 
@@ -166,17 +166,17 @@ STATUS_IA = [s.value for s in StatusIA]
     },
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd backend && pytest tests/test_ia_diagnostico_schema.py -v`
 Expected: PASS (6 testes)
 
-- [ ] **Step 5: Run the full suite + ruff**
+- [x] **Step 5: Run the full suite + ruff**
 
 Run: `cd backend && pytest tests/ -q && ruff check app tests`
 Expected: mesmo total do baseline de F0.1 + as tasks anteriores + 6.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/appwrite/schema.py backend/app/models/ia_diagnostico.py backend/tests/test_ia_diagnostico_schema.py
@@ -189,7 +189,7 @@ git commit -m "feat(diagnostico): snapshot de intencao e roteamento no schema
 - ATENCAO: mudanca de enum exige atualizacao manual no Appwrite (gap 02-10)"
 ```
 
-- [ ] **Step 7: Atualizar o Registro de Gaps (specs 02 e 05)**
+- [x] **Step 7: Atualizar o Registro de Gaps (specs 02 e 05)**
 
 Em `docs/specs/02-data-model.md`:
 
@@ -225,7 +225,7 @@ Em `docs/specs/05-ai-pipeline.md` (linha 05-23 fica **CORRIGIDO** só após F3.4
 
 **Regra de esclarecimento:** quando o resolver devolve `precisa_esclarecimento=True`, o chat vai para `AGUARDANDO_CLIENTE` (a IA está esperando a resposta) e a mensagem é a pergunta do classificador. Não há transferência e nenhum diagnóstico conclusivo é registrado.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `backend/tests/test_ai_pipeline_intencao.py`:
 
@@ -443,12 +443,12 @@ async def test_no_hit_continua_respondendo_sem_llm(
     assert resp.json()["status_ia"] == "TRANSFERIR_SEM_SOLUCAO"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd backend && pytest tests/test_ai_pipeline_intencao.py -v`
 Expected: FAIL — `ImportError: cannot import name 'MSG_ENCAMINHAMENTO' from 'app.services.ai_pipeline'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Em `backend/app/services/ai_pipeline.py`, imports e constantes:
 
@@ -619,16 +619,16 @@ async def chat_com_mensagem(fake_repos):
     return chat
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd backend && pytest tests/test_ai_pipeline_intencao.py tests/test_ai_pipeline.py -v`
 Expected: PASS (6 testes novos + os 8 existentes)
 
-- [ ] **Step 5: Run the full suite + ruff**
+- [x] **Step 5: Run the full suite + ruff**
 
 Run: `cd backend && pytest tests/ -q && ruff check app tests`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/services/ai_pipeline.py backend/tests/test_ai_pipeline.py backend/tests/test_ai_pipeline_intencao.py
@@ -640,7 +640,7 @@ git commit -m "feat(diagnostico): pipeline classifica a intencao antes do RAG
 - testes injetam o classificador via monkeypatch, sem rede"
 ```
 
-- [ ] **Step 7: Atualizar o Registro de Gaps (spec 05 e 01)**
+- [x] **Step 7: Atualizar o Registro de Gaps (spec 05 e 01)**
 
 ```
 | 05-21 | Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria | `ai/prompts.py` | **Alta** | **CORRIGIDO** — pipeline usa `IntentClassifier` (intenção, categoria ERP) e `RoutingService` (departamento) como dimensões distintas |
@@ -666,7 +666,7 @@ git commit -m "feat(diagnostico): pipeline classifica a intencao antes do RAG
 
 **Regra da spec 05 §RAG 1–3:** filtrar artigos ativos e, quando possível, pela `categoria_erp`; não assumir que top-k significa evidência — aplicar limiar configurável.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `backend/tests/test_rag_categoria.py`:
 
@@ -804,12 +804,12 @@ async def test_hit_abaixo_do_limiar_vira_sem_solucao(
     assert chamadas["llm"] == 0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd backend && pytest tests/test_rag_categoria.py -v`
 Expected: FAIL — `TypeError: search_similar() got an unexpected keyword argument 'categoria'` e `AttributeError: 'Settings' object has no attribute 'rag_min_score'`
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Em `backend/app/core/config.py`:
 
@@ -891,16 +891,16 @@ Em `backend/tests/test_ai_pipeline.py`, `_search` ganha o parâmetro:
         return hits
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd backend && pytest tests/test_rag_categoria.py tests/test_ai_pipeline.py -v`
 Expected: PASS (5 testes novos + os existentes)
 
-- [ ] **Step 5: Run the full suite + ruff**
+- [x] **Step 5: Run the full suite + ruff**
 
 Run: `cd backend && pytest tests/ -q && ruff check app tests`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/services/qdrant_service.py backend/app/core/config.py backend/app/services/ai_pipeline.py backend/tests/test_ai_pipeline.py backend/tests/test_rag_categoria.py
@@ -911,7 +911,7 @@ git commit -m "feat(rag): filtro por categoria ERP e limiar minimo de relevancia
 - pipeline sem hit confiavel cai no cenario C sem chamar o LLM"
 ```
 
-- [ ] **Step 7: Atualizar o Registro de Gaps (specs 05 e 08)**
+- [x] **Step 7: Atualizar o Registro de Gaps (specs 05 e 08)**
 
 ```
 | 05-23 | Diagnóstico não persiste intenção/departamento/artigos consultados/razão | `services/ai_pipeline.py`; `appwrite/schema.py` | **Alta** | **CORRIGIDO (parcial)** — categoria ERP filtra o RAG e o limiar de relevância é aplicado; snapshot completo na Task F3.4 |
