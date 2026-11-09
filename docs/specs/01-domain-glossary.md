@@ -139,5 +139,5 @@ Verificado contra o código em 2026-11-06.
 | 01-7 | `chat["status"] == StatusChat.em_atendimento` compara string com membro de `StrEnum` | `services/chat_service.py:182` | Baixa | **CORRIGIDO** — comparações via `StatusChat.em_atendimento.value` |
 | 01-8 | Sem tabela de auditoria; não há como saber quem mudou status/atribuição | `historico` removido | Média | **ABERTO** → [04](04-rbac-matrix.md) |
 | 01-9 | Sem entidade departamento nem atribuição por departamento na máquina de estados | `appwrite/schema.py`; `services/chat_service.py` | **Alta** | **CORRIGIDO** — departamento participa da visibilidade e da atribuição em `ChatService` |
-| 01-10 | Domínio não separa categoria ERP de departamento; intenção não é modelada | `ai/prompts.py`; `appwrite/schema.py` | **Alta** | **ABERTO** → 05, 10 |
+| 01-10 | Domínio não separa categoria ERP de departamento; intenção não é modelada | `ai/prompts.py`; `appwrite/schema.py` | **Alta** | **CORRIGIDO** — `Intencao` modelada em `app/models/departamento.py`; `CategoriaERP` separado de `Departamento` (F1.1/F1.2) |
 | 01-11 | Sem distinção de reabertura/confirmação de resolução pelo cliente além de `RESOLVIDO → IA_ANALISANDO` | `services/chat_service.py:28` | Média | **ABERTO** → [05](05-ai-pipeline.md) |
