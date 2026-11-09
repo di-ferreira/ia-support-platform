@@ -65,3 +65,7 @@ class WebhookSolucaoResponse(BaseModel):
     confianca: float | None = None
     mensagem_cliente: str
     chat_status: StatusChat
+    intencao: str | None = None
+    departamento_id: str | None = None
+    departamento_codigo: str | None = None
+    precisa_esclarecimento: bool = False

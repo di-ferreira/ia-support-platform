@@ -43,11 +43,6 @@ _STATUS_FINAL = {
     StatusIA.esclarecimento: StatusChat.aguardando_cliente,
 }
 
-_NAO_PRECISA_HUMANO = frozenset(
-    {StatusIA.resolvido_pela_ia, StatusIA.esclarecimento}
-)
-
-
 class SolucaoLLM(BaseModel):
     """Contrato JSON esperado do LLM para o prompt de solução."""
 
@@ -98,6 +93,8 @@ class AIPipelineService:
                 mensagem_cliente=(
                     roteamento.pergunta_esclarecimento or PERGUNTA_ESCLARECIMENTO
                 ),
+                classificacao=classificacao,
+                roteamento=roteamento,
             )
 
         if classificacao.intencao not in _INTENCOES_COM_RAG:
@@ -107,6 +104,8 @@ class AIPipelineService:
                 campos_ia=None,
                 categoria=None,
                 mensagem_cliente=MSG_ENCAMINHAMENTO,
+                classificacao=classificacao,
+                roteamento=roteamento,
             )
 
         categoria_erp = (
@@ -120,9 +119,13 @@ class AIPipelineService:
                 campos_ia=None,
                 categoria=None,
                 mensagem_cliente=NO_HIT_MENSAGEM,
+                classificacao=classificacao,
+                roteamento=roteamento,
             )
 
-        return await self._resolver_llm(chat_id, hits, ultima["conteudo"], historico)
+        return await self._resolver_llm(
+            chat_id, hits, ultima["conteudo"], historico, classificacao, roteamento
+        )
 
     async def _classificar(self, texto: str):
         """Classificação é sugestão; falha de contrato vira inconclusiva."""
@@ -167,7 +170,13 @@ class AIPipelineService:
         return [h for h in hits if (h.get("score") or 0) >= settings.rag_min_score]
 
     async def _resolver_llm(
-        self, chat_id: str, hits: list[dict], mensagem: str, historico: list[dict]
+        self,
+        chat_id: str,
+        hits: list[dict],
+        mensagem: str,
+        historico: list[dict],
+        classificacao=None,
+        roteamento=None,
     ) -> dict:
         try:
             llm = get_llm()
@@ -237,6 +246,9 @@ class AIPipelineService:
             campos_ia=campos_ia,
             categoria=hits[0].get("categoria") or None,
             mensagem_cliente=mensagem_cliente.strip(),
+            classificacao=classificacao,
+            roteamento=roteamento,
+            artigos=hits,
             modelo_usado=llm.model,
             referencia=solucao.referencia,
             instrucoes_cliente=solucao.instrucoes_cliente,
@@ -249,10 +261,22 @@ class AIPipelineService:
         campos_ia: dict | None,
         categoria: str | None,
         mensagem_cliente: str,
+        classificacao=None,
+        roteamento=None,
+        artigos: list[dict] | None = None,
         modelo_usado: str | None = None,
         referencia: str | None = None,
         instrucoes_cliente: str | None = None,
     ) -> dict:
+        departamento_id = (
+            roteamento.departamento_id if roteamento is not None else None
+        )
+        intencao = classificacao.intencao.value if classificacao else None
+        categoria_erp = (
+            classificacao.categoria_erp.value
+            if classificacao and classificacao.categoria_erp
+            else None
+        )
         await self.repos.ia_diagnosticos.create(
             {
                 "chat_id": chat_id,
@@ -263,15 +287,47 @@ class AIPipelineService:
                 "confianca": (campos_ia or {}).get("confianca"),
                 "modelo_usado": modelo_usado,
                 "tokens_usados": None,
+                "intencao": intencao,
+                "subintencao": classificacao.subintencao if classificacao else None,
+                "categoria_erp": categoria_erp,
+                "departamento_sugerido_codigo": (
+                    classificacao.departamento_sugerido_codigo
+                    if classificacao
+                    else None
+                ),
+                "departamento_id": departamento_id,
+                "motivo": roteamento.motivo if roteamento is not None else None,
+                "artigos_consultados": (
+                    json.dumps(
+                        [
+                            {
+                                "id": h.get("id"),
+                                "titulo": h.get("titulo"),
+                                "score": h.get("score"),
+                                "categoria": h.get("categoria"),
+                            }
+                            for h in artigos
+                        ],
+                        ensure_ascii=False,
+                    )
+                    if artigos
+                    else None
+                ),
             }
         )
 
         chat = await self.chats.atualizar_status(chat_id, _STATUS_FINAL[status_ia])
+        aplica_destino = bool(departamento_id) and status_ia != StatusIA.resolvido_pela_ia
         espelho = {
             "solucao_sugerida_ia": (campos_ia or {}).get("solucao"),
             "nivel_confianca_ia": (campos_ia or {}).get("confianca"),
-            "necessita_humano": status_ia not in _NAO_PRECISA_HUMANO,
+            "necessita_humano": status_ia
+            in (StatusIA.transferir_com_solucao, StatusIA.transferir_sem_solucao),
+            "resumo_problema": (campos_ia or {}).get("resumo"),
+            "causa_provavel": (campos_ia or {}).get("causa_provavel"),
         }
+        if aplica_destino:
+            espelho["departamento_id"] = departamento_id
         await self.repos.chats.update(chat_id, espelho)
 
         return {
@@ -280,9 +336,20 @@ class AIPipelineService:
             "categoria": categoria,
             "solucao": (campos_ia or {}).get("solucao"),
             "instrucoes_cliente": instrucoes_cliente,
-            "precisa_humano": status_ia not in _NAO_PRECISA_HUMANO,
+            "precisa_humano": status_ia
+            in (StatusIA.transferir_com_solucao, StatusIA.transferir_sem_solucao),
             "referencia": referencia,
             "confianca": (campos_ia or {}).get("confianca"),
             "mensagem_cliente": mensagem_cliente,
             "chat_status": chat["status"],
+            "intencao": intencao,
+            "departamento_id": departamento_id if aplica_destino else None,
+            "departamento_codigo": (
+                roteamento.departamento_codigo
+                if aplica_destino and roteamento is not None
+                else None
+            ),
+            "precisa_esclarecimento": (
+                roteamento.precisa_esclarecimento if roteamento is not None else False
+            ),
         }
