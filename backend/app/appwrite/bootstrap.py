@@ -61,9 +61,21 @@ def _create_attribute(databases: Databases, collection_id: str, spec: dict) -> N
             DB_ID, collection_id, key, spec.get("size", 255), spec.get("required", True)
         )
     elif typ == "integer":
-        databases.create_integer_attribute(DB_ID, collection_id, key, spec.get("required", True))
+        databases.create_integer_attribute(
+            DB_ID,
+            collection_id,
+            key,
+            spec.get("required", True),
+            default=spec.get("default"),
+        )
     elif typ == "float":
-        databases.create_float_attribute(DB_ID, collection_id, key, spec.get("required", True))
+        databases.create_float_attribute(
+            DB_ID,
+            collection_id,
+            key,
+            spec.get("required", True),
+            default=spec.get("default"),
+        )
     elif typ == "boolean":
         databases.create_boolean_attribute(
             DB_ID, collection_id, key, spec.get("required", True), default=spec.get("default")

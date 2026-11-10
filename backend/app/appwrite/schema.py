@@ -17,8 +17,8 @@ aplicação (os services checam duplicidade antes de inserir), não por índice 
 
 from app.models.departamento import CategoriaERP, Intencao
 from app.models.ia_diagnostico import StatusIA
-from app.models.outbox import StatusOutbox, TipoEventoOutbox
 from app.models.knowledge_base import CategoriaConhecimento
+from app.models.outbox import StatusOutbox, TipoEventoOutbox
 
 DB_ID = "chatbot"
 DB_NAME = "Chatbot IA"
@@ -237,10 +237,10 @@ COLLECTIONS: dict[str, dict] = {
             str_attr("codigo", 80),
             str_attr("nome", 255),
             str_attr("descricao", 1000, required=False),
-            bool_attr("ativo", required=True, default=True),
+            bool_attr("ativo", default=True),
             int_attr("ordem"),
-            bool_attr("recebe_transferencias", required=True, default=True),
-            bool_attr("permite_atribuicao_automatica", required=True, default=False),
+            bool_attr("recebe_transferencias", default=True),
+            bool_attr("permite_atribuicao_automatica", default=False),
         ],
     },
     "regras_roteamento": {
@@ -251,7 +251,7 @@ COLLECTIONS: dict[str, dict] = {
             str_attr("categoria_erp", 50, required=False),
             fk_attr("departamento_id"),
             int_attr("prioridade_regra", required=True),
-            bool_attr("ativo", required=True, default=True),
+            bool_attr("ativo", default=True),
         ],
     },
     # Spec 11 §Persistência: um registro por chat (cardinalidade 1:1),
@@ -262,7 +262,7 @@ COLLECTIONS: dict[str, dict] = {
             fk_attr("chat_id"),
             str_attr("external_ticket_id", 100, required=False),
             str_attr("external_url", 500, required=False),
-            enum_attr("status", STATUS_INTEGRACAO_CHAMADO, default="PENDENTE"),
+            enum_attr("status", STATUS_INTEGRACAO_CHAMADO, required=False, default="PENDENTE"),
             enum_attr("assignee_kind", ASSIGNEE_KIND, required=False),
             str_attr("external_assignee_id", 100, required=False),
             str_attr("department_code", 80, required=False),
@@ -284,7 +284,7 @@ COLLECTIONS: dict[str, dict] = {
             str_attr("event_key", 255),
             fk_attr("chat_id"),
             enum_attr("event_type", TIPO_EVENTO_OUTBOX),
-            enum_attr("status", STATUS_OUTBOX, default="PENDENTE"),
+            enum_attr("status", STATUS_OUTBOX, required=False, default="PENDENTE"),
             # Versão sequencial do agregado embutida na key
             # (ex.: emsoft:update:{chat_id}:{versão}); usada para descartar
             # eventos obsoletos (spec 12 §Concorrência).
