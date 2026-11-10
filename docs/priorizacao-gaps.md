@@ -46,7 +46,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 9 | 08-1 (CORRIGIDO) | `CORS_ORIGINS` default só `localhost:3000` | Origem de prod bloqueada em produção; config aberta vira risco |
 | 10 | 03-10 (CORRIGIDO) | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | Fluxo de renovação de sessão inexistente na prática |
 | 11 | 07-2 (CORRIGIDO) | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
-| 12 | 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | Instância mal configurada envia dados para alvo errado em prod |
+| 12 | 03-14 (CORRIGIDO) | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | Instância mal configurada envia dados para alvo errado em prod |
 | 13 | 02-10 | Bootstrap aditivo não propaga mudança de enum; health degradado não implementado | Drift de schema silencioso quebra validações da máquina de estados |
 
 ### T3 — Integração Emsoft e escopo (7)

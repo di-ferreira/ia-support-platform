@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import require_perfil
+from app.core.config import settings
 from app.schemas.evolution import (
     InstanceCreate,
     SendTextRequest,
@@ -83,7 +84,8 @@ async def configurar_webhook_default(
     instance_name: str,
     service: EvolutionService = Depends(get_evolution_service),
 ):
-    webhook_url = "http://n8n:5678/webhook/emsoft-whatsapp"
+    # URL padrão configurável via EVOLUTION_DEFAULT_WEBHOOK_URL (spec 06).
+    webhook_url = settings.evolution_default_webhook_url
     try:
         return await service.configurar_webhook(instance_name, webhook_url)
     except Exception as e:

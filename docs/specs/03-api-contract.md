@@ -169,7 +169,7 @@ Verificado contra o código em 2026-11-06.
 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota | `api/routes/mensagens.py:69-122` | Média | **ABERTO** |
 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota | `api/routes/atendentes.py` | Baixa | **ABERTO** |
 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |
-| 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | `api/routes/evolution.py:86` | **Alta** | **ABERTO** → [06](06-n8n-workflow.md) |
+| 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | `api/routes/evolution.py:86` | **Alta** | **CORRIGIDO** (2026-11-10) — URL do webhook padrão configurável via `EVOLUTION_DEFAULT_WEBHOOK_URL` (default `http://n8n:5678/webhook/emsoft-whatsapp`) → [06](06-n8n-workflow.md) |
 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution | `api/routes/mensagens.py:51,107`; `evolution_service.py:25` | Média | **ABERTO** |
 | 03-16 | `WEBHOOK_SECRET` sem validação no startup | `core/config.py:50-62` | Média | **CORRIGIDO** — `validate_production_secrets` exige segredo em produção |
 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação | `main.py:85-87` | Baixa | **ABERTO** |

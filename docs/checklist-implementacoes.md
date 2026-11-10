@@ -88,7 +88,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média)
 - [ ] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa)
 - [ ] **03-13** — `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR (Média)
-- [ ] **03-14** — Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` (**Alta**)
+- [x] **03-14** — Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` (**Alta**)
 - [ ] **03-15** — Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution (Média)
 - [x] **03-16** — `WEBHOOK_SECRET` sem validação no startup (Média)
 - [ ] **03-17** — `GET /settings/ia-name` é público e não requer autenticação (Baixa)

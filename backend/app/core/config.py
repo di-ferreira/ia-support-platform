@@ -54,6 +54,9 @@ class Settings(BaseSettings):
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None
+    # Spec 06 §Webhooks: URL padrão do webhook n8n configurável (documentada em
+    # compose/env), nunca hardcode no código.
+    evolution_default_webhook_url: str = "http://n8n:5678/webhook/emsoft-whatsapp"
 
     cors_origins: list[str] = ["http://localhost:3000"]
     environment: str = "development"
