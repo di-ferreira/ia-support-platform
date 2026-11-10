@@ -34,6 +34,13 @@ export default function LoginPage() {
               const email = String(form.get("email"));
               const senha = String(form.get("senha"));
               const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/login", { email, senha });
+              // O client só injeta o header Authorization a partir do
+              // localStorage (api.ts): persiste os tokens antes do
+              // /auth/me, senão a request sai sem token (401).
+              localStorage.setItem("token", res.access_token);
+              if (res.refresh_token) {
+                localStorage.setItem("refresh_token", res.refresh_token);
+              }
               const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
               setAuth(res.access_token, me, res.refresh_token);
               router.push("/dashboard");
