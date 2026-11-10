@@ -238,6 +238,52 @@ async def test_ambiguo_exaure_tentativas_e_fica_permanente(fake_repos):
     assert service.chamadas == 2
 
 
+async def test_ambiguo_reconcilia_no_retry_e_conclui(fake_repos):
+    """Ciclo ambíguo (spec 12, 12-5): timeout na escrita -> o retry vai por
+    reconciliação (service devolve RECONCILIACAO, nunca re-POST cego) e o
+    evento só conclui quando a sincronização confirma; nunca vira
+    FALHA_PERMANENTE."""
+    await _seme_evento(fake_repos)
+    estado, agora = _relogio()
+    worker, service = _worker(
+        fake_repos,
+        [
+            {"status": "RECONCILIACAO", "mensagem": "pendente",
+             "exc_erro": AmbiguousResultError("timeout no POST")},
+            {"status": "SINCRONIZADO", "mensagem": "ok"},
+        ],
+        agora,
+    )
+    assert await worker.processar_vaga() == 1
+    evento = await fake_repos.integration_outbox.get_by_event_key(CHAVE)
+    assert evento["status"] == StatusOutbox.pendente.value
+    assert evento["tentativas"] == 1
+    assert "ambíguo" in evento["ultimo_erro"].lower()
+    estado["now"] = _iso(evento["next_attempt_at"]) + timedelta(seconds=1)
+    assert await worker.processar_vaga() == 1
+    evento = await fake_repos.integration_outbox.get_by_event_key(CHAVE)
+    assert evento["status"] == StatusOutbox.concluido.value
+    assert evento["next_attempt_at"] is None
+    assert evento["lease_owner"] is None
+    # `tentativas` conta só as falhas; o retry bem-sucedido não incrementa.
+    assert evento["tentativas"] == 1
+    assert service.chamadas == 2
+
+
+async def test_rodar_processa_ate_parar(fake_repos):
+    """Loop contínuo `rodar` (ligado no boot, spec 12): processa passadas
+    até `parar` pedir; `intervalo_s=0` mantém o teste rápido."""
+    await _seme_evento(fake_repos)
+    _, agora = _relogio()
+    worker, service = _worker(
+        fake_repos, [{"status": "SINCRONIZADO", "mensagem": "ok"}], agora
+    )
+    await worker.rodar(intervalo_s=0.0, parar=lambda: service.chamadas >= 1)
+    assert service.chamadas == 1
+    evento = await fake_repos.integration_outbox.get_by_event_key(CHAVE)
+    assert evento["status"] == StatusOutbox.concluido.value
+
+
 async def test_pendente_com_next_futuro_nao_e_elegivel(fake_repos):
     await _seme_evento(
         fake_repos, next_attempt_at=(BASE + timedelta(hours=1)).isoformat()

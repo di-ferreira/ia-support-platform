@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -29,8 +30,13 @@ from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
 from app.integrations.emsoft_chamados import build_emsoft_chamados_service
 from app.integrations.emsoft_chamados.exceptions import ContractNotValidatedError
+from app.integrations.outbox import OutboxWorker
 
 logger = logging.getLogger(__name__)
+
+# Intervalo de polling do worker do outbox (spec 12). Cada passada é barata:
+# com a integração off (`service is None`) `processar_vaga` devolve 0.
+OUTBOX_WORKER_INTERVAL_S = 10.0
 
 
 @asynccontextmanager
@@ -61,7 +67,26 @@ async def lifespan(app: FastAPI):
             )
         if app.state.emsoft_chamados_service is not None:
             logger.info("Integração com a API de chamados Emsoft habilitada")
+            # Worker do outbox (spec 12): fila durável com lease, retry com
+            # backoff+jitter e reconciliação ambígua (retry vai por
+            # reconciliação, nunca re-POST cego). Só é iniciado com a
+            # integração ativa; com service None não há eventos a processar.
+            app.state.outbox_worker = OutboxWorker(
+                app.state.repositories, app.state.emsoft_chamados_service
+            )
+            app.state.outbox_worker_task = asyncio.create_task(
+                app.state.outbox_worker.rodar(intervalo_s=OUTBOX_WORKER_INTERVAL_S)
+            )
+            logger.info("Outbox worker iniciado (spec 12)")
     yield
+    # Encerramento: para o worker de forma limpa antes de soltar recursos.
+    worker_task = getattr(app.state, "outbox_worker_task", None)
+    if worker_task is not None:
+        worker_task.cancel()
+        try:
+            await worker_task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(
@@ -101,7 +126,7 @@ async def websocket_chat(websocket: WebSocket, chat_id: str, token: str | None =
     await manager.connect(chat_id, websocket, token)
     try:
         while True:
-            data = await websocket.receive_json()
+            data = await manager.receive_json()
             await manager.broadcast(chat_id, data)
     except WebSocketDisconnect:
         manager.disconnect(chat_id, websocket)

@@ -251,6 +251,9 @@ class OutboxWorker:
                 "status": StatusOutbox.concluido.value,
                 "lease_owner": None,
                 "lease_expires_at": None,
+                # Evento concluído não tem retry pendente: limpa o agendamento
+                # de tentativas anteriores (ciclo ambíguo: fail -> success).
+                "next_attempt_at": None,
                 "ultima_tentativa_em": agora.isoformat(),
             },
         )
