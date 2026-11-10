@@ -2,8 +2,9 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.ai.router import router as ai_router
 from app.api.routes import (
@@ -24,7 +25,7 @@ from app.api.routes import (
     whatsapp_router,
 )
 from app.api.websocket_manager import manager
-from app.appwrite.bootstrap import ensure_appwrite_schema
+from app.appwrite.bootstrap import SchemaDriftError, ensure_appwrite_schema
 from app.appwrite.repositories import Repositories
 from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
@@ -47,8 +48,19 @@ async def lifespan(app: FastAPI):
     app.state.repositories = Repositories(app.state.appwrite_databases)
     try:
         ensure_appwrite_schema(app.state.appwrite_databases)
+        # Schema coerente com o declarativo: nenhum drift (spec 08).
+        app.state.schema_drifts = []
+    except SchemaDriftError as exc:
+        # Degradado (spec 08): a API sobe e o /health passa a responder 503
+        # com o detalhe dos drifts; só normaliza quando o schema é reconciliado.
+        app.state.schema_drifts = exc.drifts
+        logger.error(
+            "Appwrite: drift de enum no schema (app em estado degradado)",
+            extra={"event": "appwrite_schema_drift", "drifts": exc.drifts},
+        )
     except Exception:
         # Best-effort: a API sobe mesmo com Appwrite fora; o schema é criado no próximo boot.
+        app.state.schema_drifts = None
         logger.exception("Appwrite: falha ao garantir o schema (verifique o serviço)")
     # Integração com a API de chamados Emsoft (spec 11): nasce desabilitada.
     # Habilitada sem contrato válido/token é erro de configuração; em vez de
@@ -138,5 +150,14 @@ async def get_ia_name():
 
 
 @app.get("/health")
-async def health():
+async def health(request: Request):
+    # Spec 08: drift de schema => app degradado (503 com o detalhe). `None`
+    # (Appwrite fora no boot) não é degradado por definição aqui — o health de
+    # dependências é outra camada (gap 08-3, fora de escopo).
+    drifts = getattr(request.app.state, "schema_drifts", None)
+    if drifts:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "degradado", "schema_drifts": drifts},
+        )
     return {"status": "ok"}
