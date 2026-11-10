@@ -26,6 +26,8 @@ dist/
 # IDE
 .vscode/
 .idea/
+# Config local do OpenCode (contem credencial MCP do n8n - nao versionar)
+.opencode/
 *.swp
 *.swo
 *~
