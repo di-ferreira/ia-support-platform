@@ -79,6 +79,17 @@ class Settings(BaseSettings):
                 "WEBHOOK_SECRET ausente; defina um segredo forte antes de "
                 "subir para produção"
             )
+        # Spec 08: CORS aberto (origin "*") ou sem origens é inseguro em produção.
+        if not self.cors_origins:
+            raise ValueError(
+                "CORS_ORIGINS vazio em produção; defina as origens permitidas "
+                "explícitas"
+            )
+        if "*" in self.cors_origins:
+            raise ValueError(
+                "CORS_ORIGINS com '*' não é permitido em produção; liste as "
+                "origens explícitas"
+            )
         if self.emsoft_chamados_enabled and not self.emsoft_chamados_verify_tls:
             raise ValueError(
                 "EMSOFT_CHAMADOS_VERIFY_TLS não pode ser false em produção "

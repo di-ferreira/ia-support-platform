@@ -358,6 +358,9 @@ async def test_sincronizar_chat_ausente_404(client, admin_token, service_ativo):
 def test_guard_tls_desligado_falha_em_producao(monkeypatch):
     monkeypatch.setattr(settings, "environment", "production")
     monkeypatch.setattr(settings, "secret_key", "chave-forte-de-teste-0123456789")
+    # Origens explícitas: o .env de dev carrega CORS_ORIGINS=["*"], rejeitado
+    # pela validação de produção (spec 08).
+    monkeypatch.setattr(settings, "cors_origins", ["https://app.emsoft.app"])
     monkeypatch.setattr(settings, "emsoft_chamados_enabled", True)
     monkeypatch.setattr(settings, "emsoft_chamados_verify_tls", False)
     with pytest.raises(ValueError, match="EMSOFT_CHAMADOS_VERIFY_TLS"):

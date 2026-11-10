@@ -174,7 +174,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 08 — Requisitos Não Funcionais, Segurança e Observabilidade
 
-- [ ] **08-1** — `CORS_ORIGINS` default só `localhost:3000` (**Alta**)
+- [x] **08-1** — `CORS_ORIGINS` default só `localhost:3000` (**Alta**)
 - [x] **08-2** — Comportamento de `verify_webhook` sem segredo não fixado (**Alta**)
 - [ ] **08-3** — `/health` não checa dependências; sem readiness (Média)
 - [x] **08-4** — Sem rate limiting em login/webhooks (**Alta**)

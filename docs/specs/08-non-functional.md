@@ -83,7 +83,7 @@ Verificado contra o código em 2026-11-06.
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 08-1 | `CORS_ORIGINS` default só `localhost:3000` | `core/config.py:39` | **Alta** | **ABERTO** → [09](09-infra-deploy.md) |
+| 08-1 | `CORS_ORIGINS` default só `localhost:3000` | `core/config.py:39` | **Alta** | **CORRIGIDO** (2026-11-10) — validação de produção rejeita `CORS_ORIGINS` vazio ou com `*` (origens explícitas obrigatórias) → [09](09-infra-deploy.md) |
 | 08-2 | Comportamento de `verify_webhook` sem segredo não fixado | `api/routes/webhooks.py:32-44` | **Alta** | **CORRIGIDO** — fail-closed (401) e comparação em tempo constante |
 | 08-3 | `/health` não checa dependências; sem readiness | `main.py:90-92` | Média | **ABERTO** |
 | 08-4 | Sem rate limiting em login/webhooks | `core/rate_limit.py` | **Alta** | **CORRIGIDO** — limiter in-memory (login 60/60s, webhooks 120/60s) |
