@@ -4,6 +4,7 @@ Cobre o incremento 12-3 da spec 12 (fila durável, concorrência via
 lease e retry com backoff exponencial + jitter).
 """
 
+import logging
 import random
 from datetime import UTC, datetime, timedelta
 
@@ -331,3 +332,78 @@ async def test_chat_apagado_torna_evento_permanente(fake_repos):
     evento = await fake_repos.integration_outbox.get_by_event_key(CHAVE)
     assert evento["status"] == StatusOutbox.falha_permanente.value
     assert "ChatNotFoundError" in evento["ultimo_erro"]
+
+
+# -- logs correlacionam event_key/chat_id (spec 12, 12-6 -> 08-5) -----------
+
+
+def _registros(caplog, nome: str) -> list:
+    return [r for r in caplog.records if r.__dict__.get("event") == nome]
+
+
+async def test_logs_de_inicio_e_conclusao_correlacionam_chave_e_chat(
+    fake_repos, caplog
+):
+    """O log de início do worker carrega `event_key` + `chat_id`, amarrando
+    a fila aos logs do service/client (que só conhecem o chat). Só
+    identificadores e tipo: o payload nunca chega aos logs."""
+    await _seme_evento(fake_repos, payload='{"interno": "nao-vaza"}')
+    _, agora = _relogio()
+    worker, _ = _worker(
+        fake_repos, [{"status": "SINCRONIZADO", "mensagem": "ok"}], agora
+    )
+    with caplog.at_level(logging.INFO, logger="app.outbox"):
+        await worker.processar_vaga()
+    inicio = _registros(caplog, "outbox_evento_processando")
+    assert len(inicio) == 1
+    assert inicio[0].event_key == CHAVE
+    assert inicio[0].chat_id == "chat1"
+    assert inicio[0].event_type == "TICKET_CREATE_REQUESTED"
+    assert inicio[0].tentativas == 0
+    conclusao = _registros(caplog, "outbox_evento_concluido")
+    assert len(conclusao) == 1
+    assert conclusao[0].event_key == CHAVE
+    assert conclusao[0].chat_id == "chat1"
+    assert "nao-vaza" not in str(caplog.records)
+
+
+async def test_log_de_retry_correlaciona_chave_e_chat(fake_repos, caplog):
+    await _seme_evento(fake_repos)
+    _, agora = _relogio()
+    worker, _ = _worker(
+        fake_repos,
+        [
+            {
+                "status": "ERRO",
+                "mensagem": "falha",
+                "exc_erro": ExternalRequestError("indisponível", 500),
+            }
+        ],
+        agora,
+    )
+    with caplog.at_level(logging.INFO, logger="app.outbox"):
+        await worker.processar_vaga()
+    retry = _registros(caplog, "outbox_retry_agendado")
+    assert len(retry) == 1
+    assert retry[0].event_key == CHAVE
+    assert retry[0].chat_id == "chat1"
+    assert retry[0].classe == ClasseFalha.transitoria.value
+    assert retry[0].tentativas == 1
+
+
+async def test_log_de_falha_permanente_correlaciona_chave_e_chat(
+    fake_repos, caplog
+):
+    await _seme_evento(fake_repos)
+    _, agora = _relogio()
+    worker, _ = _worker(
+        fake_repos, [MappingError("campo obrigatório ausente")], agora
+    )
+    with caplog.at_level(logging.INFO, logger="app.outbox"):
+        await worker.processar_vaga()
+    perm = _registros(caplog, "outbox_falha_permanente")
+    assert len(perm) == 1
+    assert perm[0].event_key == CHAVE
+    assert perm[0].chat_id == "chat1"
+    assert perm[0].classe == ClasseFalha.permanente.value
+    assert perm[0].tentativas == 1

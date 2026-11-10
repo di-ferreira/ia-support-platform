@@ -211,6 +211,20 @@ class OutboxWorker:
         agora = self._agora()
         await self._adquirir_lease(evento, agora)
         chat_id = evento.get("chat_id")
+        # Início da correlação do pipeline (spec 12, 12-6 -> 08-5):
+        # `event_key` amarra este log ao evento da fila; `chat_id` amarra aos
+        # logs do service/client (que só conhecem o chat). Só identificadores
+        # e tipo: nenhum segredo, nenhum payload.
+        logger.info(
+            "outbox: evento em processamento",
+            extra={
+                "event": "outbox_evento_processando",
+                "event_key": evento.get("event_key"),
+                "chat_id": chat_id,
+                "event_type": evento.get("event_type"),
+                "tentativas": evento.get("tentativas") or 0,
+            },
+        )
         try:
             resultado = await self._service.sincronizar(chat_id)
         except Exception as exc:
