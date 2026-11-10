@@ -211,7 +211,7 @@ Verificado contra o código em 2026-11-09. O scaffold da integração (contrato,
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (probe de 2026-11-09 confirmou endpoint vivo: envelope 401 `{"success":false,...}`, CORS expõe `Authorization`, sem Swagger público) | — | **Bloqueante** | **ABERTO (parcial)** — mecanismo do artefato implementado (`contract.py` valida `validado`+`evidencia`, `contract.example.json` de referência, base só via contrato); falta o artefato real preenchido e confirmado pelo responsável pela API |
+| 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (probe 2026-11-09: endpoint vivo, envelope 401, sem Swagger público; re-probe 2026-11-10: endpoint vivo com 401 "Token de autenticação não fornecido", sem Swagger público (404), **cadeia de certificado TLS incompleta** — detalhes no [pedido de contrato](../pedido-contrato-api-emsoft.md)) | — | **Bloqueante** | **ABERTO (parcial)** — mecanismo do artefato implementado e testado (`contract.py`, `contract.example.json`, 18 testes passando); falta o artefato real preenchido e confirmado pelo responsável pela API — pedido formal criado em 2026-11-10 |
 | 11-2 | Adapter/client `app/integrations/emsoft_chamados/` inexistente | `app/` | **Alta** | **CORRIGIDO** — contrato, client (timeout no POST → ambíguo, sem log de `Authorization`), mapper canônico e service |
 | 11-3 | Coleção `integracao_chamados` inexistente | `appwrite/schema.py` | **Alta** | **CORRIGIDO** |
 | 11-4 | Config `EMSOFT_CHAMADOS_*` inexistente | `core/config.py` | **Alta** | **CORRIGIDO** — enabled off por padrão; guard `verify_tls` em produção |

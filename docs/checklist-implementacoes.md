@@ -225,7 +225,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 11 — Integração com a API Interna de Chamados Emsoft
 
-- [ ] **11-1** — Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (probe de 2026-11-09 confirmou endpoint vivo: envelope 401 `{"success":false,...}`, CORS expõe `Authorization`, sem Swagger público) (**Bloqueante**) *(parcial)*
+- [ ] **11-1** — Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados **não obtidos** (probe 2026-11-09: endpoint vivo, envelope 401, sem Swagger público; re-probe 2026-11-10: endpoint vivo, sem Swagger público, cadeia de certificado TLS incompleta — ver [pedido de contrato](pedido-contrato-api-emsoft.md)) (**Bloqueante**) *(parcial)*
 - [x] **11-2** — Adapter/client `app/integrations/emsoft_chamados/` inexistente (**Alta**)
 - [x] **11-3** — Coleção `integracao_chamados` inexistente (**Alta**)
 - [x] **11-4** — Config `EMSOFT_CHAMADOS_*` inexistente (**Alta**)
