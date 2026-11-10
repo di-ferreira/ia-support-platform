@@ -128,3 +128,109 @@ async def test_payload_bruto_evolution_imagem_caption(client, fake_repos):
     assert msg["conteudo"] == "tela de erro"
     assert msg["tipo"] == "imagem"
     assert msg["url_arquivo"] == "https://exemplo/img.png"
+
+
+# --- Fix A (gaps 01-2, 03-3, 04-7): status delegado à máquina de estados e
+# guard de diagnóstico em chat encerrado. ---
+
+
+async def _criar_chat(fake_repos, status: str = "NOVO") -> dict:
+    cliente = await fake_repos.clientes.create(
+        {"nome": "Cliente Teste", "telefone": "551188877766"}
+    )
+    return await fake_repos.chats.create(
+        {
+            "cliente_id": cliente["id"],
+            "whatsapp_number": "551188877766",
+            "status": status,
+        }
+    )
+
+
+@pytest.mark.asyncio
+async def test_status_transicao_invalida_rejeitada(client, fake_repos):
+    headers = {"content-type": "application/json", **_auth_headers()}
+    chat = await _criar_chat(fake_repos, status="ENCERRADO")
+    resp = await client.patch(
+        "/webhooks/chat/status",
+        json={"chat_id": chat["id"], "status": "EM_ATENDIMENTO"},
+        headers=headers,
+    )
+    assert resp.status_code == 400
+    assert "Transição inválida" in resp.json()["detail"]
+    atualizado = await fake_repos.chats.get(chat["id"])
+    assert atualizado["status"] == "ENCERRADO"
+
+
+@pytest.mark.asyncio
+async def test_status_transicao_valida(client, fake_repos):
+    headers = {"content-type": "application/json", **_auth_headers()}
+    chat = await _criar_chat(fake_repos, status="AGUARDANDO_CLIENTE")
+    resp = await client.patch(
+        "/webhooks/chat/status",
+        json={"chat_id": chat["id"], "status": "ENCERRADO"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ENCERRADO"
+    assert body["ultima_mensagem_em"]
+    atualizado = await fake_repos.chats.get(chat["id"])
+    assert atualizado["status"] == "ENCERRADO"
+
+
+@pytest.mark.asyncio
+async def test_status_chat_inexistente_retorna_404(client, fake_repos):
+    headers = {"content-type": "application/json", **_auth_headers()}
+    resp = await client.patch(
+        "/webhooks/chat/status",
+        json={"chat_id": "nao-existe", "status": "EM_ATENDIMENTO"},
+        headers=headers,
+    )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_diagnostico_em_chat_encerrado_rejeitado(client, fake_repos):
+    headers = {"content-type": "application/json", **_auth_headers()}
+    chat = await _criar_chat(fake_repos, status="ENCERRADO")
+    resp = await client.post(
+        "/webhooks/chat/diagnostico",
+        json={
+            "chat_id": chat["id"],
+            "status_ia": "ESCLARECIMENTO",
+            "resumo": "tentativa em chat encerrado",
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 400
+    assert "chat encerrado" in resp.json()["detail"]
+    assert len(fake_repos.ia_diagnosticos.rows) == 0
+
+
+@pytest.mark.asyncio
+async def test_diagnostico_em_chat_aberto(client, fake_repos):
+    headers = {"content-type": "application/json", **_auth_headers()}
+    chat = await _criar_chat(fake_repos, status="AGUARDANDO_CLIENTE")
+    resp = await client.post(
+        "/webhooks/chat/diagnostico",
+        json={
+            "chat_id": chat["id"],
+            "status_ia": "ESCLARECIMENTO",
+            "resumo": "Erro de estoque no relatório",
+            "solucao": "Reprocessar a carga",
+            "causa_provavel": "Carga inconsistente",
+            "confianca": 0.82,
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    diag = resp.json()
+    assert diag["status_ia"] == "ESCLARECIMENTO"
+    assert diag["confianca"] == 0.82
+    assert len(fake_repos.ia_diagnosticos.rows) == 1
+    atualizado = await fake_repos.chats.get(chat["id"])
+    assert atualizado["resumo_problema"] == "Erro de estoque no relatório"
+    assert atualizado["solucao_sugerida_ia"] == "Reprocessar a carga"
+    assert atualizado["causa_provavel"] == "Carga inconsistente"
+    assert atualizado["nivel_confianca_ia"] == 0.82

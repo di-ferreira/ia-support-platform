@@ -39,7 +39,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 ## SPEC 01 — Domínio, Glossário e Máquina de Estados
 
 - [ ] **01-1** — `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) (Baixa)
-- [ ] **01-2** — `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` (**Alta**)
+- [x] **01-2** — `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` (**Alta**)
 - [ ] **01-3** — Urgência da IA (`critica`) não tem coluna; existe só no prompt (Média)
 - [x] **01-4** — Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma (**Alta**)
 - [ ] **01-5** — `chats.loja_id` nunca é populado; nenhum endpoint define a loja (Média)
@@ -77,7 +77,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **03-1** — `GET /dashboard` não aplica filtro de visibilidade (**Alta**)
 - [x] **03-2** — `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse (**Alta**)
-- [ ] **03-3** — `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` (**Alta**)
+- [x] **03-3** — `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` (**Alta**)
 - [x] **03-4** — `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) (**Alta**)
 - [x] **03-5** — `/ai/solucionar` escrevia no chat furando a máquina de estados (**Alta**)
 - [x] **03-6** — JWT do WebSocket viajava em query string (**Alta**)
@@ -103,7 +103,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **04-4** — Regra "supervisor só cria `atendente`" está no serviço e sem teste (**Alta**)
 - [ ] **04-5** — Regra "só admin altera `perfil`" está no serviço e sem teste (**Alta**)
 - [ ] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
-- [ ] **04-7** — `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit (**Alta**)
+- [x] **04-7** — `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit (**Alta**)
 - [ ] **04-8** — `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR (Média)
 - [ ] **04-9** — `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado (Baixa)
 - [x] **04-10** — Escopo por departamento não é aplicado (departamento não existe) (**Alta**)

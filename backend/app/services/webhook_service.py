@@ -84,13 +84,10 @@ class WebhookService:
         return mensagem
 
     async def atualizar_status(self, chat_id: str, novo_status: StatusChat) -> dict:
-        chat = await self.repos.chats.get(chat_id)
-        if not chat:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
-            )
-        await self.repos.chats.update(chat_id, {"status": _val(novo_status)})
-        return await self.repos.chats.get(chat_id)
+        # Spec 01 §Máquina de estados / spec 03: transições de status só são
+        # válidas pela máquina de estados; o webhook delega ao mesmo caminho
+        # validado dos endpoints REST (400 em transição inválida, 404 inexistente).
+        return await ChatService(self.repos).atualizar_status(chat_id, novo_status)
 
     async def atualizar_cliente(self, chat_id: str, data: dict) -> dict:
         chat = await self.repos.chats.get(chat_id)
@@ -119,6 +116,13 @@ class WebhookService:
         if not chat:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
+            )
+        # Spec 03: diagnóstico registrado pela IA precisa obedecer à máquina de
+        # estados; chat encerrado não recebe novos diagnósticos.
+        if chat["status"] == StatusChat.encerrado.value:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível registrar diagnóstico em chat encerrado",
             )
 
         diagnostico = await self.repos.ia_diagnosticos.create(

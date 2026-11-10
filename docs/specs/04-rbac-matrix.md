@@ -65,7 +65,7 @@ Verificado contra o código em 2026-11-06.
 | 04-4 | Regra "supervisor só cria `atendente`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
 | 04-5 | Regra "só admin altera `perfil`" está no serviço e sem teste | `services/auth_service.py`; sem teste | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
 | 04-6 | `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste | `tests/test_chat_service.py` | **Alta** | **ABERTO** → [14](14-test-strategy.md) |
-| 04-7 | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit | `api/routes/webhooks.py` | **Alta** | **ABERTO** → 01, 03 |
+| 04-7 | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit | `api/routes/webhooks.py` | **Alta** | **CORRIGIDO** (2026-11-10) — atualização de status delegada à máquina de estados (400 em transição inválida, 404 em chat inexistente); diagnóstico em chat `ENCERRADO` bloqueado (400) → 01, 03 |
 | 04-8 | `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |
 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado | `api/routes/atendentes.py` | Baixa | **ABERTO** |
 | 04-10 | Escopo por departamento não é aplicado (departamento não existe) | `services/chat_service.py` | **Alta** | **CORRIGIDO** — `ChatService.listar` filtra por `departamento_id` |

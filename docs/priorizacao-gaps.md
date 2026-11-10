@@ -40,9 +40,9 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 ### T2 — Integridade de dados e segurança (8)
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 6 | 01-2 | `PATCH /webhooks/chat/status` não valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | Máquina de estados violada por ator externo → corrupção de chats |
-| 7 | 03-3 | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | Mesma raiz de 01-2 (view do contrato da API) |
-| 8 | 04-7 | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico | Ator externo contorna máquina e permissões |
+| 6 | 01-2 (CORRIGIDO) | `PATCH /webhooks/chat/status` não valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | Máquina de estados violada por ator externo → corrupção de chats |
+| 7 | 03-3 (CORRIGIDO) | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | Mesma raiz de 01-2 (view do contrato da API) |
+| 8 | 04-7 (CORRIGIDO) | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico | Ator externo contorna máquina e permissões |
 | 9 | 08-1 | `CORS_ORIGINS` default só `localhost:3000` | Origem de prod bloqueada em produção; config aberta vira risco |
 | 10 | 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | Fluxo de renovação de sessão inexistente na prática |
 | 11 | 07-2 | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
