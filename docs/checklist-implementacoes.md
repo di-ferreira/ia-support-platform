@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **102 entregues** `[x]` — gaps CORRIGIDO
-- **97 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **106 entregues** `[x]` — gaps CORRIGIDO
+- **93 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -189,10 +189,10 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 09 — Infraestrutura, Configuração e Deploy
 
-- [ ] **09-1** — Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` (**Crítica**)
-- [ ] **09-2** — Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) (**Crítica**)
+- [x] **09-1** — Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` (**Crítica**)
+- [x] **09-2** — Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) (**Crítica**)
 - [ ] **09-3** — MinIO órfão no compose prod sem referência no código (Baixa)
-- [ ] **09-4** — Pilha do Appwrite em rede isolada; backend prod não a alcança (**Alta**)
+- [x] **09-4** — Pilha do Appwrite em rede isolada; backend prod não a alcança (**Alta**)
 - [ ] **09-5** — Backup Qdrant usa bind mount divergente do volume named de prod (**Alta**)
 - [ ] **09-6** — Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente (**Alta**)
 - [ ] **09-7** — `backup.sh` não é agendado (**Alta**)
@@ -203,7 +203,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média)
 - [x] **09-13** — Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env (**Alta**)
 - [ ] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
-- [ ] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)
+- [x] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)
 - [ ] **09-16** — `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic (Baixa)
 - [ ] **09-17** — Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração (**Alta**) *(parcial)*
 - [ ] **09-18** — Sem runbook de rollout/rollback da integração Emsoft (Média)

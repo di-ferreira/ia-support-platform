@@ -1,7 +1,8 @@
 # Priorização dos gaps ABERTOS
 
 Gerado em 2026-11-10 a partir do [checklist de implementações](checklist-implementacoes.md)
-(97 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+(93 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+Atualizado em 2026-11-10: T1 completo — 09-1, 09-2, 09-4 e 09-15 corrigidos.
 
 ## Critério de ordenação
 
@@ -28,13 +29,13 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 |---|-----|-----------|---------------|
 | 1 | 11-1 | Gate de contrato: Swagger/OpenAPI, Postman ou exemplos reais da API de chamados Emsoft não obtidos | Único item que destrava as Fases 5/6/7 (rollout); depende da equipe Emsoft — iniciar o pedido logo |
 
-### T1 — Pilha prod (4)
+### T1 — Pilha prod (4) — todos corrigidos em 2026-11-10
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 2 | 09-1 | Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` | Prod não tem datastore funcional — tudo o mais depende disso |
-| 3 | 09-4 | Pilha do Appwrite em rede isolada; backend prod não a alcança | Mesma raiz de 09-1: sem rede, o store é inalcançável |
-| 4 | 09-2 | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | Sem env o backend não sobe em prod |
-| 5 | 09-15 | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | Prod não roda IA sem LLM |
+| 2 | 09-1 (CORRIGIDO) | Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` | Prod não tem datastore funcional — tudo o mais depende disso |
+| 3 | 09-4 (CORRIGIDO) | Pilha do Appwrite em rede isolada; backend prod não a alcança | Mesma raiz de 09-1: sem rede, o store é inalcançável |
+| 4 | 09-2 (CORRIGIDO) | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | Sem env o backend não sobe em prod |
+| 5 | 09-15 (CORRIGIDO) | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | Prod não roda IA sem LLM |
 
 ### T2 — Integridade de dados e segurança (8)
 | # | Gap | Descrição | Justificativa |

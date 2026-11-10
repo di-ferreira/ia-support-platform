@@ -17,20 +17,41 @@ services:
     environment:
       ENVIRONMENT: production
       DATABASE_URL_PROD: ${DATABASE_URL_PROD}
+      # Obrigatórios em produção (validate_production_secrets no boot)
+      SECRET_KEY: ${SECRET_KEY}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       REDIS_URL: redis://redis:6379/0
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      # Appwrite: stack em infra/appwrite, alcançada pela rede compartilhada "appwrite" (09-1/09-4)
+      APPWRITE_ENDPOINT: ${APPWRITE_ENDPOINT:-http://appwrite:80/v1}
+      APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID}
+      APPWRITE_API_KEY: ${APPWRITE_API_KEY}
+      QDRANT_URL: http://qdrant:6333
+      # LLM: Ollama na própria pilha (09-15); OpenAI apenas se LLM_PROVIDER=openai
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      # CORS: lista JSON exigida pelo pydantic-settings; default é o domínio do frontend
+      CORS_ORIGINS: ${CORS_ORIGINS:-["https://app.emsoft.app"]}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.emsoft.app`)"
     restart: unless-stopped
+    networks:
+      - default
+      - appwrite
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      ollama:
         condition: service_started
 
   frontend:
@@ -69,6 +90,14 @@ services:
     image: qdrant/qdrant:latest
     volumes:
       - qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  # LLM local na pilha prod (09-15). Pull dos modelos:
+  # docker compose -f infra/docker-compose.prod.yml exec ollama ollama pull <modelo>
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-data:/root/.ollama
     restart: unless-stopped
 
   minio:
@@ -123,6 +152,15 @@ volumes:
   postgres-data:
   redis-data:
   qdrant-data:
+  ollama-data:
   minio-data:
   n8n-data:
   traefik-data:
+
+networks:
+  # Rede do stack do Appwrite (infra/appwrite, nome fixo "appwrite"). Exige que
+  # o stack Appwrite tenha sido subido ao menos uma vez no host; a rede persiste
+  # no daemon mesmo com os containers parados.
+  appwrite:
+    external: true
+    name: appwrite
