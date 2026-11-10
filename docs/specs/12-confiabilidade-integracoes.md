@@ -98,14 +98,14 @@ Manter histórico suficiente de tentativas, erros, event keys e IDs externos con
 
 ## Registro de Gaps
 
-Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec existe no código atual.
+Verificado contra o código em 2026-11-06; re-verificado em 2026-11-10 — 12-1 a 12-6 implementados. Nota de rastreio: o commit `28157e4` rotulou a implementação da `event_key` como 12-2, mas ela corresponde a 12-3; e o commit `af5c0a4` cobre 12-2 (lease) e 12-4 (backoff+jitter).
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 12-1 | Coleção `integration_outbox` inexistente | `appwrite/schema.py` | **Alta** | **ABERTO** |
-| 12-2 | Worker/lock/lease de outbox inexistente | `app/` | **Alta** | **ABERTO** |
-| 12-3 | `event_key` determinística/idempotency key inexistente | `app/` | **Alta** | **ABERTO** |
-| 12-4 | Timeout/retry/backoff+jitter de integrações externas inexistentes | `services/evolution_service.py` | **Alta** | **ABERTO** |
-| 12-5 | Reconciliação de timeout ambíguo inexistente | `app/` | **Alta** | **ABERTO** |
-| 12-6 | Logs sem correlation/event key | `app/**` | Média | **ABERTO** → 08-5 |
+| 12-1 | Coleção `integration_outbox` inexistente | `appwrite/schema.py` (L281) + `appwrite/repositories/integration_outbox.py` | **Alta** | **CORRIGIDO** |
+| 12-2 | Worker/lock/lease de outbox inexistente | `integrations/outbox/worker.py` (lease `lease_owner`/`lease_expires_at`) | **Alta** | **CORRIGIDO** |
+| 12-3 | `event_key` determinística/idempotency key inexistente | `integrations/outbox/keys.py` + enums em `models/outbox.py` | **Alta** | **CORRIGIDO** |
+| 12-4 | Timeout/retry/backoff+jitter de integrações externas inexistentes | `integrations/outbox/worker.py` (backoff exponencial + jitter; classificação transitória/permanente) | **Alta** | **CORRIGIDO** |
+| 12-5 | Reconciliação de timeout ambíguo inexistente | `integrations/outbox/worker.py` (re-PATCH pelo ID; reconciliação no boot, nunca re-POST cego) | **Alta** | **CORRIGIDO** |
+| 12-6 | Logs sem correlation/event key | `integrations/outbox/worker.py` (logs com `event_key`/`chat_id`, sem payload livre) | Média | **CORRIGIDO** → 08-5 |
 | 12-7 | Sem painel de pendência/reprocessamento para operador | `frontend/`; `api/routes/` | Média | **ABERTO** → 03, 07 |

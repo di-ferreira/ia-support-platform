@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **96 entregues** `[x]` — gaps CORRIGIDO
-- **103 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **102 entregues** `[x]` — gaps CORRIGIDO
+- **97 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -13,7 +13,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] Fase 2 — Classificação e roteamento (restam auditoria 10-12 e rota 03-19)
 - [x] Fase 3 — Diagnóstico e ciclo de resolução
 - [ ] Fase 4 — Frontend operacional (telas de departamento, filtros, painéis)
-- [ ] Fase 5 — Integração Emsoft em modo mock (scaffold do contrato feito; faltam outbox/worker e artefato real)
+- [ ] Fase 5 — Integração Emsoft em modo mock (scaffold do contrato e outbox/worker feitos; falta artefato real de contrato)
 - [ ] Fase 6 — Homologação externa (bloqueada pelo artefato de contrato, 11-1)
 - [ ] Fase 7 — Rollout (bloqueado pela homologação)
 
@@ -235,12 +235,12 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 12 — Confiabilidade, Outbox, Idempotência e Reprocessamento
 
-- [ ] **12-1** — Coleção `integration_outbox` inexistente (**Alta**)
-- [ ] **12-2** — Worker/lock/lease de outbox inexistente (**Alta**)
-- [ ] **12-3** — `event_key` determinística/idempotency key inexistente (**Alta**)
-- [ ] **12-4** — Timeout/retry/backoff+jitter de integrações externas inexistentes (**Alta**)
-- [ ] **12-5** — Reconciliação de timeout ambíguo inexistente (**Alta**)
-- [ ] **12-6** — Logs sem correlation/event key (Média)
+- [x] **12-1** — Coleção `integration_outbox` inexistente (**Alta**)
+- [x] **12-2** — Worker/lock/lease de outbox inexistente (**Alta**)
+- [x] **12-3** — `event_key` determinística/idempotency key inexistente (**Alta**)
+- [x] **12-4** — Timeout/retry/backoff+jitter de integrações externas inexistentes (**Alta**)
+- [x] **12-5** — Reconciliação de timeout ambíguo inexistente (**Alta**)
+- [x] **12-6** — Logs sem correlation/event key (Média)
 - [ ] **12-7** — Sem painel de pendência/reprocessamento para operador (Média)
 
 ## SPEC 14 — Estratégia de testes
