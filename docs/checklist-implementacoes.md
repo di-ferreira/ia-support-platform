@@ -241,7 +241,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **12-4** — Timeout/retry/backoff+jitter de integrações externas inexistentes (**Alta**)
 - [x] **12-5** — Reconciliação de timeout ambíguo inexistente (**Alta**)
 - [x] **12-6** — Logs sem correlation/event key (Média)
-- [ ] **12-7** — Sem painel de pendência/reprocessamento para operador (Média)
+- [x] **12-7** — Sem painel de pendência/reprocessamento para operador (Média)
 
 ## SPEC 14 — Estratégia de testes
 
