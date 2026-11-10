@@ -33,10 +33,9 @@ export default function LoginPage() {
               const form = new FormData(e.currentTarget);
               const email = String(form.get("email"));
               const senha = String(form.get("senha"));
-              const res = await api.post<{ access_token: string }>("/auth/login", { email, senha });
-              localStorage.setItem("token", res.access_token);
+              const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/login", { email, senha });
               const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
-              setAuth(res.access_token, me);
+              setAuth(res.access_token, me, res.refresh_token);
               router.push("/dashboard");
             } catch (err) {
               setErro(err instanceof Error ? err.message : "Erro ao fazer login");

@@ -165,7 +165,7 @@ Verificado contra o código em 2026-11-06.
 | 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution | `api/routes/mensagens.py:55-59,111-115`; `evolution.py` | Média | **ABERTO** |
 | 03-8 | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) | `api/routes/chats.py`, `kanban.py` | Média | **ABERTO** |
 | 03-9 | `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend | `api/routes/chats.py:67-75` | Baixa | **ABERTO** |
-| 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | `api/routes/auth.py` | **Alta** | **ABERTO** → [07](07-frontend.md) |
+| 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | `api/routes/auth.py` | **Alta** | **CORRIGIDO** (2026-11-10) — frontend persiste `refresh_token` e renova via `POST /auth/refresh` em 401 (retry único); decisão: `PATCH /auth/password` segue sem chamador no frontend (troca de senha fora do escopo do produto) → [07](07-frontend.md) |
 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota | `api/routes/mensagens.py:69-122` | Média | **ABERTO** |
 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota | `api/routes/atendentes.py` | Baixa | **ABERTO** |
 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |

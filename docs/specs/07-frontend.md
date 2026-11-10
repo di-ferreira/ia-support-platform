@@ -98,7 +98,7 @@ Verificado contra o código em 2026-11-06.
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
 | 07-1 | Token JWT do WebSocket na query string | `hooks/use-chat-socket.ts` | **Alta** | **CORRIGIDO** — token enviado como 1ª mensagem |
-| 07-2 | Sem refresh token/renovação; sessão cai após 60 min | `lib/stores/auth-store.ts`; `core/config.py:20` | **Alta** | **ABERTO** — `/auth/me` no boot, mas `/auth/refresh` sem uso |
+| 07-2 | Sem refresh token/renovação; sessão cai após 60 min | `lib/stores/auth-store.ts`; `core/config.py:20` | **Alta** | **CORRIGIDO** (2026-11-10) — `refresh_token` persistido no storage; interceptor em `api.ts` renova a sessão via `POST /auth/refresh` em 401 (retry único); em falha limpa o storage e volta para `/login` |
 | 07-3 | WebSocket sem reconexão nem backoff | `hooks/use-chat-socket.ts:53-59` | Média | **ABERTO** |
 | 07-4 | Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme` | `(app)/atendimento/page.tsx`, `dashboard/page.tsx`, demais telas | Média | **ABERTO** |
 | 07-5 | `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte | `lib/stores/chat-store.ts` vs `(app)/atendimento/page.tsx:15` | Baixa | **ABERTO** |

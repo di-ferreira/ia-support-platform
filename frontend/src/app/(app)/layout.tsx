@@ -23,10 +23,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me")
       .then((u) => {
         const t = localStorage.getItem("token")!;
-        setAuth(t, u);
+        const r = localStorage.getItem("refresh_token");
+        setAuth(t, u, r ?? undefined);
       })
       .catch(() => {
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
         router.replace("/login");
       });
   }, []);

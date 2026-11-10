@@ -44,8 +44,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 7 | 03-3 (CORRIGIDO) | `PATCH /webhooks/chat/status` ignora `STATUS_TRANSITIONS` | Mesma raiz de 01-2 (view do contrato da API) |
 | 8 | 04-7 (CORRIGIDO) | `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico | Ator externo contorna máquina e permissões |
 | 9 | 08-1 | `CORS_ORIGINS` default só `localhost:3000` | Origem de prod bloqueada em produção; config aberta vira risco |
-| 10 | 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | Fluxo de renovação de sessão inexistente na prática |
-| 11 | 07-2 | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
+| 10 | 03-10 (CORRIGIDO) | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | Fluxo de renovação de sessão inexistente na prática |
+| 11 | 07-2 (CORRIGIDO) | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
 | 12 | 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | Instância mal configurada envia dados para alvo errado em prod |
 | 13 | 02-10 | Bootstrap aditivo não propaga mudança de enum; health degradado não implementado | Drift de schema silencioso quebra validações da máquina de estados |
 

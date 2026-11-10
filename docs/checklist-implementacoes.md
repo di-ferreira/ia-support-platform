@@ -84,7 +84,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **03-7** — 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution (Média)
 - [ ] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
 - [ ] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
-- [ ] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
+- [x] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
 - [ ] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média)
 - [ ] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa)
 - [ ] **03-13** — `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR (Média)
@@ -161,7 +161,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 ## SPEC 07 — Frontend (Painel de Atendimento)
 
 - [x] **07-1** — Token JWT do WebSocket na query string (**Alta**)
-- [ ] **07-2** — Sem refresh token/renovação; sessão cai após 60 min (**Alta**)
+- [x] **07-2** — Sem refresh token/renovação; sessão cai após 60 min (**Alta**)
 - [ ] **07-3** — WebSocket sem reconexão nem backoff (Média)
 - [ ] **07-4** — Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme` (Média)
 - [ ] **07-5** — `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte (Baixa)
