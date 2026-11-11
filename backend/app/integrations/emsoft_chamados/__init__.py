@@ -33,5 +33,6 @@ def build_emsoft_chamados_service(settings, repos):
         settings.emsoft_chamados_token,
         timeout_s=settings.emsoft_chamados_timeout_s,
         verify_tls=settings.emsoft_chamados_verify_tls,
+        ca_bundle=settings.emsoft_chamados_ca_bundle or None,
     )
     return EmsoftChamadosService(contract, client, repos, settings)

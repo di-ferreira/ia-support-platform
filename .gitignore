@@ -49,3 +49,4 @@ logs/
 infra/.env
 infra/.env.prod
 infra/.env.local
+token_acesso.txt

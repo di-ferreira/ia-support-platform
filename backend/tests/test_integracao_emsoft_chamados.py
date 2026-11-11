@@ -5,12 +5,14 @@ vem de um artefato de contrato escrito nesses próprios testes.
 """
 
 import json
+import ssl
 
 import pytest
 import pytest_asyncio
 
 from app.core.config import settings
 from app.integrations.emsoft_chamados import build_emsoft_chamados_service
+from app.integrations.emsoft_chamados.client import EmsoftChamadosClient
 from app.integrations.emsoft_chamados.contract import ContratoEmsoft
 from app.integrations.emsoft_chamados.exceptions import (
     AmbiguousResultError,
@@ -175,6 +177,75 @@ def test_fabrica_valida_monta_service(monkeypatch, fake_repos, tmp_path):
     _habilitar(settings, monkeypatch, arquivo)
     service = build_emsoft_chamados_service(settings, fake_repos)
     assert isinstance(service, EmsoftChamadosService)
+
+
+def test_fabrica_ca_bundle_inexistente_levanta(monkeypatch, fake_repos, tmp_path):
+    arquivo = _escrever_contrato(tmp_path, CONTRATO_VALIDO)
+    _habilitar(settings, monkeypatch, arquivo)
+    monkeypatch.setattr(
+        settings, "emsoft_chamados_ca_bundle", str(tmp_path / "nao_existe.pem")
+    )
+    with pytest.raises(ContractNotValidatedError, match="Bundle"):
+        build_emsoft_chamados_service(settings, fake_repos)
+
+
+def _gerar_bundle_ca_ficticio(tmp_path) -> str:
+    """Bundle PEM válido com um self-signed CA gerado em tempo de teste."""
+    from datetime import UTC, datetime, timedelta
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.x509.oid import NameOID
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    nome = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "ca-teste")])
+    agora = datetime.now(UTC)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(nome)
+        .issuer_name(nome)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(agora - timedelta(days=1))
+        .not_valid_after(agora + timedelta(days=365))
+        .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+        .sign(key, hashes.SHA256())
+    )
+    bundle = tmp_path / "ca-bundle.pem"
+    bundle.write_bytes(cert.public_bytes(encoding=serialization.Encoding.PEM))
+    return str(bundle)
+
+
+def test_client_bundle_explicito_precede_flag(tmp_path):
+    """Bundle presente: contexto TLS próprio, mesmo com verify_tls=False."""
+    contract = ContratoEmsoft.load(_escrever_contrato(tmp_path, CONTRATO_VALIDO))
+    client = EmsoftChamadosClient(
+        contract,
+        "token-teste",
+        verify_tls=False,
+        ca_bundle=_gerar_bundle_ca_ficticio(tmp_path),
+    )
+    assert isinstance(client._verify, ssl.SSLContext)
+    assert client._verify.verify_mode is ssl.CERT_REQUIRED
+
+
+def test_client_sem_bundle_usa_flag(tmp_path):
+    """Sem bundle: a flag booleana passa direto para o httpx."""
+    contract = ContratoEmsoft.load(_escrever_contrato(tmp_path, CONTRATO_VALIDO))
+    client = EmsoftChamadosClient(contract, "token-teste")
+    assert client._verify is True
+    client_desligado = EmsoftChamadosClient(contract, "token-teste", verify_tls=False)
+    assert client_desligado._verify is False
+
+
+def test_client_bundle_pem_invalido_levanta(tmp_path):
+    """Bundle que não é um PEM válido: erro de configuração no boot."""
+    contract = ContratoEmsoft.load(_escrever_contrato(tmp_path, CONTRATO_VALIDO))
+    bundle = tmp_path / "ca-bundle.pem"
+    bundle.write_text("certificado-ficticio")
+    with pytest.raises(ContractNotValidatedError, match="Bundle de CAs inválido"):
+        EmsoftChamadosClient(contract, "token-teste", ca_bundle=str(bundle))
 
 
 async def _preparar_chat(fake_repos, status: str = "NOVO") -> dict:

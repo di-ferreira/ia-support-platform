@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     emsoft_chamados_ai_user_id: str = ""
     emsoft_chamados_timeout_s: float = Field(default=15.0, gt=0.0)
     emsoft_chamados_verify_tls: bool = True
+    # Bundle de CAs (PEM) alternativo para verificacao TLS; tem precedencia
+    # sobre verify_tls. Nunca desabilitar verify_tls em producao (guard em
+    # validate_production_secrets).
+    emsoft_chamados_ca_bundle: str = ""
 
     evolution_api_url: str = "http://localhost:8080"
     evolution_api_key: str | None = None

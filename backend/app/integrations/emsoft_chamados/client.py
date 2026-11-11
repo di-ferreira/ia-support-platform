@@ -6,6 +6,8 @@ nunca chega a log — apenas snippets redigidos do corpo de resposta.
 """
 
 import logging
+import ssl
+from pathlib import Path
 
 import httpx
 
@@ -36,7 +38,11 @@ def _resposta_erro(body: object, status_code: int | None = None) -> str:
 
 
 class EmsoftChamadosClient:
-    """Transporte fino sobre httpx; uma instância por sincronização."""
+    """Transporte fino sobre httpx; uma instância por sincronização.
+
+    TLS: com `ca_bundle`, o contexto é montado no boot (validando o PEM);
+    sem bundle, a flag `verify_tls` passa direto para o httpx (certifi).
+    """
 
     def __init__(
         self,
@@ -44,22 +50,41 @@ class EmsoftChamadosClient:
         token: str,
         timeout_s: float = 15.0,
         verify_tls: bool = True,
+        ca_bundle: str | None = None,
     ) -> None:
         if not (token or "").strip():
             raise ContractNotValidatedError("Token da API Emsoft não configurado")
+        ca_bundle = (ca_bundle or "").strip()
+        if ca_bundle and not Path(ca_bundle).is_file():
+            raise ContractNotValidatedError(
+                f"Bundle de CAs não encontrado (EMSOFT_CHAMADOS_CA_BUNDLE): "
+                f"{ca_bundle}"
+            )
         self._contract = contract
         self._headers = {
             contract.autenticacao.header: f"{contract.autenticacao.prefixo}{token}".strip()
         }
         self._timeout_s = timeout_s
-        self._verify_tls = verify_tls
+        if ca_bundle:
+            # Bundle explícito tem precedência sobre a flag booleana: o
+            # contexto é montado no boot, validando o PEM na hora.
+            try:
+                self._verify: ssl.SSLContext | bool = ssl.create_default_context(
+                    cafile=ca_bundle
+                )
+            except ssl.SSLError as exc:
+                raise ContractNotValidatedError(
+                    f"Bundle de CAs inválido (EMSOFT_CHAMADOS_CA_BUNDLE): {exc}"
+                ) from exc
+        else:
+            self._verify = verify_tls
 
     def _novo(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(
             base_url=self._contract.base_url.rstrip("/"),
             headers=self._headers,
             timeout=self._timeout_s,
-            verify=self._verify_tls,
+            verify=self._verify,
         )
 
     async def criar(self, payload: dict) -> object:
