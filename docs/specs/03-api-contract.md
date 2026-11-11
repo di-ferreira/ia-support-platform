@@ -30,8 +30,9 @@ Worker interno não usa JWT de atendente nem o segredo do n8n. Executa dentro do
 | POST | `/auth/login` | Pública | Login JWT |
 | POST | `/auth/refresh` | Refresh token | Renovar par de tokens |
 | GET | `/auth/me` | JWT | Perfil atual |
-| GET/POST | `/auth/usuarios` | Admin/supervisor | Listar/criar usuários |
-| GET/PATCH/DELETE | `/auth/usuarios/{id}` | Conforme RBAC | Detalhar/editar/desativar |
+| GET/POST | `/auth/usuarios` | Admin/supervisor | Listar/criar usuários; `departamento_id` opcional (validado como departamento ativo) |
+| GET/PATCH/DELETE | `/auth/usuarios/{id}` | Conforme RBAC | Detalhar/editar/desativar; `PATCH` usa `exclude_unset` para permitir definir **ou limpar** `departamento_id` |
+| GET | `/atendentes/ativos` | JWT | Atendentes ativos; expõe `departamento_id` para atribuição/transferência |
 | GET/POST | `/clientes` | JWT / admin-supervisor para criação | Clientes |
 | GET/PATCH | `/clientes/{id}` | JWT / admin-supervisor para edição | Cliente |
 | GET/POST | `/chats` | JWT | Listar/criar chats |
@@ -61,6 +62,7 @@ Atualizar endpoints existentes para obedecer à máquina de estados; nenhum endp
 | PATCH | `/departamentos/{id}` | Admin | Editar nome, descrição, ordem e flags; código exige migração se já referenciado |
 | DELETE | `/departamentos/{id}` | Admin | Preferir desativação; não apagar se houver chats/usuários/regras vinculados |
 | GET | `/departamentos/{id}/atendentes` | Admin/supervisor | Atendentes ativos do departamento |
+| GET | `/departamentos/{id}/regras` | JWT | Regras de roteamento que apontam para o departamento |
 
 ## Novos endpoints de roteamento
 
@@ -152,7 +154,7 @@ O modelo pode sugerir `departamento_sugerido_codigo`; o backend precisa validar 
 
 ## Registro de Gaps
 
-Verificado contra o código em 2026-11-06.
+Verificado contra o código em 2026-11-06; re-verificado em 2026-11-11 (03-19 fechado).
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
@@ -174,4 +176,4 @@ Verificado contra o código em 2026-11-06.
 | 03-16 | `WEBHOOK_SECRET` sem validação no startup | `core/config.py:50-62` | Média | **CORRIGIDO** — `validate_production_secrets` exige segredo em produção |
 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação | `main.py:85-87` | Baixa | **ABERTO** |
 | 03-18 | `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) | `api/routes/webhooks.py` | Média | **ABERTO** → [05](05-ai-pipeline.md) |
-| 03-19 | Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | `api/routes/` | **Alta** | **ABERTO (parcial)** — `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento` e `/integracoes/chamados/*` (scaffold 11-1) implementados; falta apenas `/ai/classificar-intencao` (classificação segue interna ao pipeline, sem rota) |
+| 03-19 | Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | `api/routes/` | **Alta** | **CORRIGIDO** (2026-11-11) — todos implementados: `/departamentos*` (`routes/departamentos.py`), `/chats/{id}/transferir-departamento` e `/atribuir-atendente` (`routes/roteamento.py`), `/roteamento`, `/ai/classificar-intencao` (`ai/router.py:94`, incluído em `main.py`) e `/integracoes/chamados/*` (scaffold 11-1) → [10](10-departamentos-e-roteamento.md), [11](11-integracao-api-emsoft.md) |

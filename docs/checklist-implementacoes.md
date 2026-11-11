@@ -2,15 +2,15 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **118 entregues** `[x]` — gaps CORRIGIDO
-- **81 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **119 entregues** `[x]` — gaps CORRIGIDO
+- **80 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
 
 - [x] Fase 0 — Auditoria e baseline
 - [x] Fase 1 — Departamentos e migração
-- [x] Fase 2 — Classificação e roteamento (restam auditoria 10-12 e rota 03-19)
+- [x] Fase 2 — Classificação e roteamento (resta a auditoria 10-12; rota 03-19 fechada)
 - [x] Fase 3 — Diagnóstico e ciclo de resolução
 - [ ] Fase 4 — Frontend operacional (telas de departamento, filtros, painéis)
 - [ ] Fase 5 — Integração Emsoft em modo mock (scaffold do contrato e outbox/worker feitos; falta artefato real de contrato)
@@ -93,7 +93,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **03-16** — `WEBHOOK_SECRET` sem validação no startup (Média)
 - [ ] **03-17** — `GET /settings/ia-name` é público e não requer autenticação (Baixa)
 - [ ] **03-18** — `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) (Média)
-- [ ] **03-19** — Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` (**Alta**) *(parcial)*
+- [x] **03-19** — Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` (**Alta**)
 
 ## SPEC 04 — Matriz de Permissões (RBAC)
 
