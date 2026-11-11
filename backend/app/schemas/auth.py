@@ -24,6 +24,7 @@ class AtendenteResponse(BaseModel):
     email: str
     perfil: str
     ativo: bool
+    departamento_id: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -39,6 +40,7 @@ class UsuarioCreate(BaseModel):
     email: str
     senha: str
     perfil: str = "atendente"
+    departamento_id: str | None = None
 
 
 class UsuarioUpdate(BaseModel):
@@ -46,6 +48,7 @@ class UsuarioUpdate(BaseModel):
     email: str | None = None
     perfil: str | None = None
     ativo: bool | None = None
+    departamento_id: str | None = None
 
 
 class UsuarioListResponse(BaseModel):
@@ -54,6 +57,7 @@ class UsuarioListResponse(BaseModel):
     email: str
     perfil: str
     ativo: bool
+    departamento_id: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

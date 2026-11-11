@@ -21,6 +21,7 @@ async def listar_atendentes_ativos(
             "nome": a["nome"],
             "perfil": a["perfil"],
             "setor": a["setor"],
+            "departamento_id": a.get("departamento_id"),
         }
         for a in ativos
     ]

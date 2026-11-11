@@ -52,6 +52,22 @@ class AuthService:
             user["id"], {"hash_senha": hash_password(nova_senha)}
         )
 
+    async def _validar_departamento(self, departamento_id: str | None) -> None:
+        """Departamento associado precisa existir e estar ativo (spec 10 §10-3)."""
+        if departamento_id is None:
+            return
+        depto = await self.repos.departamentos.get(departamento_id)
+        if not depto:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Departamento não encontrado",
+            )
+        if not depto.get("ativo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Departamento inativo não aceita associação",
+            )
+
     async def criar_usuario(self, data: dict, user_logado: dict) -> dict:
         perfil_solicitado = data.get("perfil", "atendente")
         if user_logado["perfil"] == PerfilAtendente.supervisor:
@@ -65,12 +81,15 @@ class AuthService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Email já cadastrado",
             )
+        departamento_id = data.get("departamento_id")
+        await self._validar_departamento(departamento_id)
         return await self.repos.atendentes.create(
             {
                 "nome": data["nome"],
                 "email": data["email"],
                 "hash_senha": hash_password(data["senha"]),
                 "perfil": perfil_solicitado,
+                "departamento_id": departamento_id,
             }
         )
 
@@ -107,6 +126,9 @@ class AuthService:
             update["email"] = data["email"]
         if "ativo" in data and data["ativo"] is not None:
             update["ativo"] = data["ativo"]
+        if "departamento_id" in data:
+            await self._validar_departamento(data["departamento_id"])
+            update["departamento_id"] = data["departamento_id"]
         if not update:
             return usuario
         return await self.repos.atendentes.update(usuario_id, update)

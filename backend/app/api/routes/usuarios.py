@@ -49,7 +49,7 @@ async def atualizar_usuario(
     repos: Repositories = Depends(get_repositories),
 ):
     service = AuthService(repos)
-    return await service.atualizar_usuario(usuario_id, body.model_dump(exclude_none=True), user)
+    return await service.atualizar_usuario(usuario_id, body.model_dump(exclude_unset=True), user)
 
 
 @router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
