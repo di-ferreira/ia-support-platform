@@ -1,3 +1,4 @@
+import json
 import logging
 
 from fastapi import APIRouter, Depends
@@ -15,6 +16,20 @@ from app.services.chat_service import ChatService
 logger = logging.getLogger("app.roteamento")
 
 router = APIRouter(prefix="/chats", tags=["Roteamento"])
+
+
+def _artigos_consultados(raw) -> list[dict] | None:
+    """`ia_diagnosticos.artigos_consultados` é JSON serializado (Appwrite não
+    tem tipo JSON); o contrato HTTP expõe lista. Corrompido -> None."""
+    if isinstance(raw, list):
+        return raw
+    if not raw:
+        return None
+    try:
+        valor = json.loads(raw)
+    except (TypeError, ValueError):
+        return None
+    return valor if isinstance(valor, list) else None
 
 
 @router.patch(
@@ -83,6 +98,6 @@ async def obter_roteamento(
         departamento_sugerido_codigo=diagnostico.get("departamento_sugerido_codigo"),
         motivo=diagnostico.get("motivo"),
         confianca=diagnostico.get("confianca"),
-        artigos_consultados=diagnostico.get("artigos_consultados"),
+        artigos_consultados=_artigos_consultados(diagnostico.get("artigos_consultados")),
         tem_diagnostico=bool(diagnostico),
     )

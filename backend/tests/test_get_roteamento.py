@@ -1,5 +1,7 @@
 """GET /chats/{id}/roteamento le o snapshot mais recente do diagnostico."""
 
+import json
+
 import pytest
 
 
@@ -59,6 +61,32 @@ async def test_le_o_diagnostico_mais_recente(client, admin_token, fake_repos):
     assert corpo["confianca"] == 0.93
     assert corpo["intencao"] == "problema_tecnico"
     assert corpo["categoria_erp"] == "fiscal"
+
+
+@pytest.mark.asyncio
+async def test_artigos_consultados_serializados_viram_lista(
+    client, admin_token, fake_repos
+):
+    _, chat = await _chat(fake_repos)
+    await fake_repos.ia_diagnosticos.create(
+        {
+            "chat_id": chat["id"],
+            "status_ia": "TRANSFERIR_COM_SOLUCAO",
+            "intencao": "problema_tecnico",
+            "artigos_consultados": json.dumps(
+                [{"id": "kb1", "titulo": "NF-e", "score": 0.9}],
+                ensure_ascii=False,
+            ),
+        }
+    )
+
+    resp = await client.get(
+        f"/chats/{chat['id']}/roteamento", headers=_auth(admin_token)
+    )
+    assert resp.status_code == 200
+    assert resp.json()["artigos_consultados"] == [
+        {"id": "kb1", "titulo": "NF-e", "score": 0.9}
+    ]
 
 
 @pytest.mark.asyncio
