@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **106 entregues** `[x]` — gaps CORRIGIDO
-- **93 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **115 entregues** `[x]` — gaps CORRIGIDO
+- **84 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -61,7 +61,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **02-7** — `ia_diagnosticos` nunca era populado; `get_by_chat` sem chamador (**Crítica**)
 - [x] **02-8** — CRUD da base de conhecimento não sincronizava o Qdrant (**Alta**)
 - [ ] **02-9** — `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) (Baixa)
-- [ ] **02-10** — Bootstrap aditivo **não propaga mudança de enum**; health degradado não implementado (**Alta**)
+- [x] **02-10** — Bootstrap aditivo **não propaga mudança de enum**; health degradado não implementado (**Alta**)
 - [ ] **02-11** — `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual (**Alta**)
 - [x] **02-12** — Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida (Média)
 - [x] **02-13** — `scripts/seed_knowledge_base.py` importava `async_session` inexistente (**Alta**)

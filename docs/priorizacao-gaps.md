@@ -1,8 +1,9 @@
 # Priorização dos gaps ABERTOS
 
 Gerado em 2026-11-10 a partir do [checklist de implementações](checklist-implementacoes.md)
-(93 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+(84 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
 Atualizado em 2026-11-10: T1 completo — 09-1, 09-2, 09-4 e 09-15 corrigidos.
+Atualizado em 2026-11-11: 02-10 corrigido (commit `d7b16bd`) — T2 completo; 12-7 (commit `5d51d67`) já corrigido marcado; contadores recalculados.
 
 ## Critério de ordenação
 
@@ -37,7 +38,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 4 | 09-2 (CORRIGIDO) | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | Sem env o backend não sobe em prod |
 | 5 | 09-15 (CORRIGIDO) | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | Prod não roda IA sem LLM |
 
-### T2 — Integridade de dados e segurança (8)
+### T2 — Integridade de dados e segurança (8) — todos corrigidos em 2026-11-10
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
 | 6 | 01-2 (CORRIGIDO) | `PATCH /webhooks/chat/status` não valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | Máquina de estados violada por ator externo → corrupção de chats |
@@ -47,7 +48,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 10 | 03-10 (CORRIGIDO) | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | Fluxo de renovação de sessão inexistente na prática |
 | 11 | 07-2 (CORRIGIDO) | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
 | 12 | 03-14 (CORRIGIDO) | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | Instância mal configurada envia dados para alvo errado em prod |
-| 13 | 02-10 | Bootstrap aditivo não propaga mudança de enum; health degradado não implementado | Drift de schema silencioso quebra validações da máquina de estados |
+| 13 | 02-10 (CORRIGIDO) | Bootstrap aditivo não propaga mudança de enum; health degradado não implementado | Drift de schema silencioso quebra validações da máquina de estados |
 
 ### T3 — Integração Emsoft e escopo (7)
 | # | Gap | Descrição | Justificativa |
@@ -128,7 +129,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 63 | 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution |
 | 64 | 08-5 | Sem logging estruturado nem request-id/correlação |
 | 65 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável |
-| 66 | 12-7 | Sem painel de pendência/reprocessamento para operador |
+| 66 | 12-7 (CORRIGIDO) | Sem painel de pendência/reprocessamento para operador |
 | 67 | 14-7 | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env |
 | 68 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes |
 | 69 | 14-9 | CI sem threshold de cobertura; regressões em IA não bloqueiam merge |
