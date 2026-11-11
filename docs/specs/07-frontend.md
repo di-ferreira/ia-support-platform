@@ -19,7 +19,9 @@ Não assumir troca de stack durante esta iniciativa.
 
 ## Rotas existentes
 
-Manter `/login`, `/atendimento`, `/kanban`, `/dashboard`, `/conhecimento`, `/cliente`, `/usuarios` e `/configuracoes`. Não recriar rotas já removidas do escopo sem decisão formal.
+Rotas: `/login`, `/atendimento`, `/kanban`, `/dashboard`, `/conhecimento`, `/cliente`, `/usuarios`, `/departamentos` (nova) e `/configuracoes`. Não recriar rotas já removidas do escopo sem decisão formal.
+
+Estado atual (2026-11-11): `/departamentos` foi criada como rota própria (link na sidebar, visível a todos; escrita restrita a admin) e `/atendimento` foi reorganizado em três colunas — inbox com filtro por departamento, conversa e painel de diagnóstico/sincronização.
 
 ## Novas capacidades de UI
 
@@ -52,6 +54,8 @@ O painel de IA deve mostrar, quando disponível:
 - estado da sincronização externa, ID/link do chamado Emsoft e erro sanitizado para perfis autorizados.
 
 Ações: transferir departamento, atribuir atendente, confirmar resolução, informar que não resolveu e solicitar intervenção humana. Ações devem chamar endpoints; não atualizar estado local como se a API tivesse confirmado antes da resposta.
+
+**Estado (2026-11-11):** o inbox entregue cobre os itens acima (com filtro por departamento e painel de sincronização lendo os endpoints locais da integração). Kanban e dashboard ainda não exibem departamento nem saúde da integração; os itens das seções seguintes permanecem como alvo.
 
 ### Kanban
 

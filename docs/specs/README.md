@@ -72,6 +72,9 @@ resolvido no código, com a evidência indicada no próprio registro.
 | Documento | Status |
 |---|---|
 | `README.md` | Setup rápido. Aponta para cá. |
+| `docs/checklist-implementacoes.md` | Checklist dos gaps das specs 00–14, com contadores de entregues/pendentes. |
+| `docs/priorizacao-gaps.md` | Priorização dos gaps ABERTOS por trilha (T0–T10) e andamento. |
+| `docs/superpowers/plans/2026-11-09-ia-support-platform/` | Planos de execução por fase e trilha de prontidão. Histórico; as specs continuam sendo a fonte de verdade. |
 | `TODO_LIST.md` | Histórico de implementação + pontes para as specs. O trabalho conhecido está nos Registros de Gaps. |
 | `IMPLEMENTATION-PROMPT.md` | Prompt de execução para agentes. **Deriva** das specs 00–13; não cria regra nova. |
 | `CHANGELOG.md` | Registro de alterações do pacote de specs (v2). |

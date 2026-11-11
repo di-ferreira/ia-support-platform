@@ -58,6 +58,8 @@
 
 **Aceite:** testes manuais/E2E com perfis admin, supervisor e atendente.
 
+**Estado (2026-11-11):** os itens de UI estão entregues (`/departamentos`, associação de atendente, filtros/assunção/transferência, painel de diagnóstico e sincronização). O aceite de testes automatizados/E2E segue pendente (14-6) e a guarda de rota por perfil continua aberta (07-11/04-3).
+
 ### Fase 5 — Integração Emsoft em modo mock
 
 - Obter contrato OpenAPI/Postman.

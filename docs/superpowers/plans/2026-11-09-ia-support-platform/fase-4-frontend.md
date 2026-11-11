@@ -44,9 +44,22 @@ A ordem canônica do README coloca **R1 antes de F4** porque a meta de 70% de so
 | 07-6 | F4.13 | selects de status/prioridade/departamento acessíveis (Radix) |
 | 07-4 | F4.13 | nenhuma cor raw de estado/neutra em `src/**/*.tsx` |
 
-**Fora desta fase:** status de sincronização do chamado Emsoft (07-10, parte externa) depende do contrato bloqueado (11-1) e fica ABERTO; `PATCH /auth/password` na UI, dropdown de perfil no header e demais telas (`/kanban` funcional, `/conhecimento`) só recebem a migração mecânica de tokens (F4.13) — não são redesenhadas.
+**Fora desta fase:** a **sincronização real** com o chamado Emsoft depende do contrato bloqueado (11-1) e fica ABERTO; o painel de sincronização entregue lê apenas os endpoints locais (`/integracoes/chamados/*`, 12-7) e não substitui a integração. `PATCH /auth/password` na UI, dropdown de perfil no header e demais telas (`/kanban` funcional, `/conhecimento`) só recebem a migração mecânica de tokens (F4.13) — não são redesenhadas.
 
 **Nota de numeração:** este doc tem 13 tasks (F4.1–F4.13), como no README. A F4.1 cria o harness Vitest; a R2.3 deixa de criar o harness e passa a **torná-lo bloqueante no CI com cobertura mínima** — ver `trilha-r-prontidao.md`.
+
+## Estado de execução (2026-11-11)
+
+A T4 entregou o **escopo funcional** de 07-9, 07-10 e 00-13 direto nas páginas existentes, sem o harness e sem a extração de componentes descrita nas tasks abaixo. O que está de pé:
+
+- `/departamentos`: CRUD admin (código/nome/descrição/ordem/flags), desativar/reativar com dependências (409 explica os vínculos), abas Fila (assumir via `PATCH /chats/{id}/pegar`), Atendentes (`GET /departamentos/{id}/atendentes`, admin/supervisor) e Regras (`GET /departamentos/{id}/regras`).
+- `/atendimento`: filtro por departamento, painel de diagnóstico (`GET /chats/{id}/roteamento`), painel de sincronização com visão por perfil (`GET /integracoes/chamados/{chat_id}`, reprocessar admin/supervisor) e ações transferir departamento, atribuir atendente, confirmar resolução, "não resolveu" e solicitar humano.
+- `/usuarios`: associação de departamento no formulário e coluna na listagem.
+- Backend de apoio: `departamento_id` em `/auth/usuarios` e `/atendentes/ativos`; `artigos_consultados` desserializado em `/chats/{id}/roteamento`.
+
+**Tasks deste plano ainda não executadas** (não marcar como concluídas): F4.1 (harness Vitest), F4.6 (`chat-store` como fonte única), F4.7 (reconexão de WebSocket/eventos nas rotas — 07-3, 03-8), F4.12 (guarda de rota por perfil — 07-11, 04-3) e F4.13 (Radix e migração total para tokens — 07-6, 07-4). Assim, o gate de saída abaixo continua **aberto**, assim como a Fase 4 no [checklist](../../../checklist-implementacoes.md).
+
+A fonte de verdade segue sendo as specs (`docs/specs/00`–`14`); este plano é o roteiro do que falta.
 
 ---
 

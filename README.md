@@ -79,6 +79,8 @@ npm run dev
 # → http://localhost:3000
 ```
 
+Telas do painel: `/login`, `/dashboard`, `/kanban`, `/atendimento` (inbox com filtro por departamento, painel de diagnóstico e sincronização), `/cliente`, `/departamentos` (cadastro, fila, atendentes e regras), `/conhecimento`, `/usuarios` e `/configuracoes`.
+
 ### Credenciais Padrão (dev)
 
 | Email | Senha | Perfil |
@@ -152,14 +154,26 @@ Com o backend rodando, acesse:
 | GET/PATCH | `/clientes/{id}` | Detalhe / Atualizar cliente |
 | GET/POST | `/chats` | Listar / Criar chats |
 | PATCH | `/chats/{id}/status` | Transicionar status |
+| PATCH | `/chats/{id}/pegar` | Assumir chat da fila |
+| PATCH | `/chats/{id}/transferir-departamento` | Transferir para departamento (por ID) |
+| PATCH | `/chats/{id}/atribuir-atendente` | Atribuir atendente |
+| PATCH | `/chats/{id}/confirmar-resolucao` | Confirmar resolução (cenário A) |
+| PATCH | `/chats/{id}/reabrir` | Reabrir ("não resolveu") |
+| GET | `/chats/{id}/roteamento` | Snapshot de intenção/roteamento |
+| GET/POST/PATCH/DELETE | `/departamentos*` | CRUD e desativação de departamentos |
+| GET | `/departamentos/{id}/atendentes` | Atendentes do departamento |
+| GET | `/departamentos/{id}/regras` | Regras de roteamento do departamento |
+| GET | `/atendentes/ativos` | Atendentes ativos com `departamento_id` |
 | GET/POST | `/chats/{id}/mensagens` | Listar / Enviar mensagens |
 | GET | `/kanban` | Kanban com 7 colunas |
 | CRUD | `/knowledge-base` | Base de conhecimento |
 | POST | `/webhooks/mensagem` | Webhook n8n (mensagem) |
 | POST | `/webhooks/chat/diagnostico` | Webhook n8n (diagnóstico IA) |
 | POST | `/ai/classificar` | Classificar problema |
+| POST | `/ai/classificar-intencao` | Classificar intenção (read-only, não transfere) |
 | POST | `/ai/analisar?tipo=sumarizar\|diagnosticar` | Sumarizar ou diagnosticar |
 | POST | `/ai/solucionar` | Solução com RAG |
+| GET/POST | `/integracoes/chamados/*` | Estado e reprocessamento da sincronização Emsoft |
 | WS | `/ws/chat/{id}` | WebSocket tempo real |
 
 ---
@@ -169,14 +183,20 @@ Com o backend rodando, acesse:
 ```
 NOVO → IA_ANALISANDO
          ├→ AGUARDANDO_CLIENTE
+         |    ├→ EM_ATENDIMENTO
+         |    ├→ RESOLVIDO → ENCERRADO
+         |    ├→ ENCERRADO
+         |    └→ IA_ANALISANDO  (reabertura: "não resolveu")
          ├→ AGUARDANDO_HUMANO_COM_SOLUCAO
          └→ AGUARDANDO_HUMANO_SEM_SOLUCAO
                   ↓
-            EM_ATENDIMENTO
-              ├→ AGUARDANDO_CLIENTE
-              ├→ RESOLVIDO → ENCERRADO
-              └→ ENCERRADO
+             EM_ATENDIMENTO
+               ├→ AGUARDANDO_CLIENTE
+               ├→ RESOLVIDO → ENCERRADO
+               └→ ENCERRADO
 ```
+
+`RESOLVIDO` só é alcançado por confirmação explícita (`PATCH /chats/{id}/confirmar-resolucao`); `ENCERRADO` não transita para nenhum estado.
 
 ---
 
