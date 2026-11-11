@@ -10,6 +10,7 @@ import {
   Users,
   UserCog,
   BookOpen,
+  Building2,
   Settings,
   Workflow,
   LogOut,
@@ -27,6 +28,7 @@ export function Sidebar() {
     { href: "/kanban", label: "Kanban", icon: Columns3 },
     { href: "/atendimento", label: "Atendimento", icon: MessageSquare },
     { href: "/cliente", label: "Clientes", icon: Users },
+    { href: "/departamentos", label: "Departamentos", icon: Building2 },
     { href: "/conhecimento", label: "Base de Conhecimento", icon: BookOpen },
     ...(user?.perfil === "admin" || user?.perfil === "supervisor"
       ? [{ href: "/usuarios", label: "Usuários", icon: UserCog }]

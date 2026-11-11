@@ -42,8 +42,17 @@ export default function UsuariosPage() {
     queryFn: () => api.get<any[]>("/auth/usuarios"),
   });
 
+  const { data: departamentos } = useQuery({
+    queryKey: ["departamentos", false],
+    queryFn: () => api.get<any[]>("/departamentos"),
+    staleTime: 60000,
+  });
+
+  const nomeDepartamento = (id: string | null | undefined) =>
+    (departamentos ?? []).find((d: any) => d.id === id)?.nome ?? "—";
+
   const toggleAtivo = useMutation({
-    mutationFn: ({ id, ativo }: { id: number; ativo: boolean }) =>
+    mutationFn: ({ id, ativo }: { id: string; ativo: boolean }) =>
       api.patch(`/auth/usuarios/${id}`, { ativo }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["usuarios"] }),
   });
@@ -69,6 +78,7 @@ export default function UsuariosPage() {
                   <th className="pb-3 font-medium">Nome</th>
                   <th className="pb-3 font-medium">Email</th>
                   <th className="pb-3 font-medium">Perfil</th>
+                  <th className="pb-3 font-medium">Departamento</th>
                   <th className="pb-3 font-medium">Status</th>
                   {isAdmin && <th className="pb-3 font-medium">Ações</th>}
                 </tr>
@@ -83,6 +93,9 @@ export default function UsuariosPage() {
                         {profileIcon(u.perfil)}
                         <span className="capitalize">{u.perfil}</span>
                       </Badge>
+                    </td>
+                    <td className="py-3 text-gray-500">
+                      {nomeDepartamento(u.departamento_id)}
                     </td>
                     <td className="py-3">
                       {isAdmin ? (
@@ -127,6 +140,7 @@ export default function UsuariosPage() {
         <UserFormModal
           user={editUser}
           isAdmin={isAdmin}
+          departamentos={departamentos ?? []}
           onClose={() => setModalOpen(false)}
           onSaved={() => {
             setModalOpen(false);
@@ -141,11 +155,13 @@ export default function UsuariosPage() {
 function UserFormModal({
   user,
   isAdmin,
+  departamentos,
   onClose,
   onSaved,
 }: {
   user: any;
   isAdmin: boolean;
+  departamentos: any[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -153,18 +169,21 @@ function UserFormModal({
   const [email, setEmail] = useState(user?.email || "");
   const [senha, setSenha] = useState("");
   const [perfil, setPerfil] = useState(user?.perfil || "atendente");
+  const [departamentoId, setDepartamentoId] = useState(
+    user?.departamento_id || "",
+  );
   const [error, setError] = useState("");
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post("/auth/usuarios", data),
     onSuccess: onSaved,
-    onError: (err: any) => setError(err?.detail || "Erro ao criar usuário"),
+    onError: (err: any) => setError(err?.message || "Erro ao criar usuário"),
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => api.patch(`/auth/usuarios/${user.id}`, data),
     onSuccess: onSaved,
-    onError: (err: any) => setError(err?.detail || "Erro ao atualizar usuário"),
+    onError: (err: any) => setError(err?.message || "Erro ao atualizar usuário"),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -176,11 +195,20 @@ function UserFormModal({
       if (email !== user.email) payload.email = email;
       if (perfil !== user.perfil) payload.perfil = perfil;
       if (senha) payload.senha = senha;
+      if ((user.departamento_id || "") !== departamentoId) {
+        payload.departamento_id = departamentoId || null;
+      }
       if (Object.keys(payload).length === 0) return;
       updateMutation.mutate(payload);
     } else {
       if (!senha) { setError("Senha é obrigatória"); return; }
-      createMutation.mutate({ nome, email, senha, perfil });
+      createMutation.mutate({
+        nome,
+        email,
+        senha,
+        perfil,
+        departamento_id: departamentoId || null,
+      });
     }
   };
 
@@ -217,7 +245,28 @@ function UserFormModal({
               <option value="atendente">Atendente</option>
             </SelectNative>
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {perfil === "atendente" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Departamento
+              </label>
+              <SelectNative
+                value={departamentoId}
+                onChange={(e) => setDepartamentoId(e.target.value)}
+              >
+                <option value="">Sem departamento</option>
+                {departamentos.map((d: any) => (
+                  <option key={d.id} value={d.id}>
+                    {d.nome}
+                  </option>
+                ))}
+              </SelectNative>
+              <p className="mt-1 text-xs text-gray-500">
+                Departamento principal do atendente (spec 10).
+              </p>
+            </div>
+          )}
+          {error && <p className="text-sm text-danger">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
