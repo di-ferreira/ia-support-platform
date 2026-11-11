@@ -37,6 +37,16 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
       OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      # Emsoft chamados (spec 11): nasce desabilitado; contrato e bundle de CAs
+      # já estão na imagem (/app/contracts, /app/certs). VERIFY_TLS não pode ser
+      # false em produção (guard no boot); o bundle resolve a cadeia de CAs.
+      EMSOFT_CHAMADOS_ENABLED: ${EMSOFT_CHAMADOS_ENABLED:-false}
+      EMSOFT_CHAMADOS_TOKEN: ${EMSOFT_CHAMADOS_TOKEN:-}
+      EMSOFT_CHAMADOS_CONTRACT_FILE: ${EMSOFT_CHAMADOS_CONTRACT_FILE:-/app/contracts/emsoft-chamados.json}
+      EMSOFT_CHAMADOS_AI_USER_ID: ${EMSOFT_CHAMADOS_AI_USER_ID:-}
+      EMSOFT_CHAMADOS_TIMEOUT_S: ${EMSOFT_CHAMADOS_TIMEOUT_S:-15}
+      EMSOFT_CHAMADOS_VERIFY_TLS: ${EMSOFT_CHAMADOS_VERIFY_TLS:-true}
+      EMSOFT_CHAMADOS_CA_BUNDLE: ${EMSOFT_CHAMADOS_CA_BUNDLE:-/app/certs/emsoft-ca-bundle.pem}
       # CORS: lista JSON exigida pelo pydantic-settings; default é o domínio do frontend
       CORS_ORIGINS: ${CORS_ORIGINS:-["https://app.emsoft.app"]}
     labels:
