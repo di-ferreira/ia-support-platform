@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8001";
 
-export function useChatSocket(chatId: number | null) {
+export function useChatSocket(chatId: string | number | null) {
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
 

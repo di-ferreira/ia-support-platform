@@ -41,7 +41,7 @@ export default function LoginPage() {
               if (res.refresh_token) {
                 localStorage.setItem("refresh_token", res.refresh_token);
               }
-              const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
+              const me = await api.get<{ id: string; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
               setAuth(res.access_token, me, res.refresh_token);
               router.push("/dashboard");
             } catch (err) {

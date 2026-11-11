@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-    api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me")
+    api.get<{ id: string; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me")
       .then((u) => {
         const t = localStorage.getItem("token")!;
         const r = localStorage.getItem("refresh_token");

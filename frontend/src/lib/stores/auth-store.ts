@@ -3,11 +3,12 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 
 interface Atendente {
-  id: number;
+  id: string;
   nome: string;
   email: string;
   perfil: string;
   ativo: boolean;
+  departamento_id?: string | null;
 }
 
 interface AuthState {

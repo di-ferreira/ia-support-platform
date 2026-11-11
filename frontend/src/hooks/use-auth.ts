@@ -11,14 +11,14 @@ export function useAuth() {
 
   useEffect(() => {
     if (!token) return;
-    api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me")
+    api.get<{ id: string; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me")
       .then((u) => setAuth(token, u))
       .catch(() => logout());
   }, []);
 
   const login = async (email: string, senha: string) => {
     const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/login", { email, senha });
-    const me = await api.get<{ id: number; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
+    const me = await api.get<{ id: string; nome: string; email: string; perfil: string; ativo: boolean }>("/auth/me");
     setAuth(res.access_token, me, res.refresh_token);
     router.push("/dashboard");
   };
