@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **115 entregues** `[x]` — gaps CORRIGIDO
-- **84 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **118 entregues** `[x]` — gaps CORRIGIDO
+- **81 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -31,7 +31,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
 - [ ] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média)
 - [ ] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**)
-- [ ] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
+- [x] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
 - [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**) *(parcial)*
 - [ ] **00-15** — Sem outbox/idempotência para chamados externos (**Alta**)
 - [ ] **00-16** — Indicadores de sucesso por departamento/duplicidade sem instrumentação (Média)
@@ -168,8 +168,8 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **07-6** — Selects de status/prioridade usam `<select>` nativo (Baixa)
 - [x] **07-7** — Manifest referenciava `relatorios.html` fora de escopo (Média)
 - [x] **07-8** — Manifest referenciava `ia-dashboard.html` fora de escopo (Média)
-- [ ] **07-9** — Sem telas de departamento, fila por departamento e transferência por departamento (**Alta**)
-- [ ] **07-10** — Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado (**Alta**)
+- [x] **07-9** — Sem telas de departamento, fila por departamento e transferência por departamento (**Alta**)
+- [x] **07-10** — Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado (**Alta**)
 - [ ] **07-11** — Sem guarda de rota por perfil (Média)
 
 ## SPEC 08 — Requisitos Não Funcionais, Segurança e Observabilidade

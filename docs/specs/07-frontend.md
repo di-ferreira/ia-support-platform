@@ -105,6 +105,6 @@ Verificado contra o código em 2026-11-06.
 | 07-6 | Selects de status/prioridade usam `<select>` nativo | `(app)/atendimento/page.tsx:226,235` | Baixa | **ABERTO** |
 | 07-7 | Manifest referenciava `relatorios.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** |
 | 07-8 | Manifest referenciava `ia-dashboard.html` fora de escopo | `DESIGN-MANIFEST.json` | Média | **CORRIGIDO** |
-| 07-9 | Sem telas de departamento, fila por departamento e transferência por departamento | `frontend/src/app/` | **Alta** | **ABERTO** → [10](10-departamentos-e-roteamento.md) |
-| 07-10 | Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado | `(app)/atendimento/page.tsx` | **Alta** | **ABERTO** → 10, 11 |
+| 07-9 | Sem telas de departamento, fila por departamento e transferência por departamento | `frontend/src/app/` | **Alta** | **CORRIGIDO** (2026-11-11) — `/departamentos` (CRUD admin, atendentes, regras, fila com "Assumir" via `PATCH /chats/{id}/pegar`), filtro por departamento no inbox e transferência via `PATCH /chats/{id}/transferir-departamento` → [10](10-departamentos-e-roteamento.md) |
+| 07-10 | Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado | `(app)/atendimento/page.tsx` | **Alta** | **CORRIGIDO** (2026-11-11) — painel lê `GET /chats/{id}/roteamento` (intenção/categoria/destinos/motivo/confiança/artigos) e `GET /integracoes/chamados/{chat_id}` (visão limitada ao atendente responsável, reprocessar admin/supervisor); ações de transferir/atribuir/confirmar/não resolveu/solicitar humano → 10, 11 |
 | 07-11 | Sem guarda de rota por perfil | `(app)/layout.tsx` | Média | **ABERTO** → [04](04-rbac-matrix.md) |

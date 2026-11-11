@@ -1,9 +1,10 @@
 # Priorização dos gaps ABERTOS
 
 Gerado em 2026-11-10 a partir do [checklist de implementações](checklist-implementacoes.md)
-(84 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+(81 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
 Atualizado em 2026-11-10: T1 completo — 09-1, 09-2, 09-4 e 09-15 corrigidos.
 Atualizado em 2026-11-11: 02-10 corrigido (commit `d7b16bd`) — T2 completo; 12-7 (commit `5d51d67`) já corrigido marcado; contadores recalculados.
+Atualizado em 2026-11-11: T4 completo — 07-9, 07-10 e 00-13 corrigidos no frontend (telas de departamento/fila, painel de diagnóstico e sincronização, ações do inbox).
 
 ## Critério de ordenação
 
@@ -61,12 +62,12 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 19 | 00-14 | Integração com a API interna de chamados Emsoft não existe | Escopo de produto (SPEC 00) ainda ausente |
 | 20 | 00-15 | Sem outbox/idempotência para chamados externos | Chamadas externas duplicadas/sem garantia |
 
-### T4 — Frontend Fase 4 e painéis (3)
+### T4 — Frontend Fase 4 e painéis (3) — todos corrigidos em 2026-11-11
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 21 | 07-9 | Sem telas de departamento, fila por departamento e transferência por departamento | Fase 4 não existe no painel |
-| 22 | 07-10 | Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado | Operador não vê decisão da IA nem estado do chamado |
-| 23 | 00-13 | Departamentos, roteamento e pedido explícito por humano/setor não existem | Mesma raiz de 07-9/03-19 (view do produto) |
+| 21 | 07-9 (CORRIGIDO) | Sem telas de departamento, fila por departamento e transferência por departamento | Fase 4 não existe no painel |
+| 22 | 07-10 (CORRIGIDO) | Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado | Operador não vê decisão da IA nem estado do chamado |
+| 23 | 00-13 (CORRIGIDO) | Departamentos, roteamento e pedido explícito por humano/setor não existem | Mesma raiz de 07-9/03-19 (view do produto) |
 
 ### T5 — Mídia (2)
 | # | Gap | Descrição | Justificativa |
