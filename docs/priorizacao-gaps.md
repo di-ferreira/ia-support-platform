@@ -19,6 +19,7 @@ Atualizado em 2026-11-12: 03-9 e 04-13 corrigidos — /assinar deprecado (atribu
 Atualizado em 2026-11-12: 14-1, 05-20 e 14-3 corrigidos (T6) — `ai/router.py`, `ai_cache.py`, clients Ollama/OpenAI e `qdrant_service.py` cobertos por testes unitários sem rede (`test_ai_router.py`, `test_ai_cache.py`, `test_llm_services.py`, `test_qdrant_service.py`); 57 abertos.
 Atualizado em 2026-11-12: 14-9 e 09-14 corrigidos (T9) — CI 100% bloqueante (`ruff`, `mypy`, `pytest --cov-fail-under=86`, `npm run lint`, `npm run test`) e piso de cobertura `fail_under = 86` (medido) em `pyproject.toml`; 55 abertos.
 Atualizado em 2026-11-12: 14-7 corrigido (T9) — harness `backend/tests/test_workflow_n8n.py` valida nós essenciais, `$env.*` × `.env.example`/compose, `onError`, path do webhook e conexões sem nó órfão; 54 abertos.
+Atualizado em 2026-11-12: 14-12 corrigido (T6) — adapter com contrato congelado + ciclo do outbox (`tests/test_outbox_ciclo.py`: sucesso, retry com backoff, `FALHA_PERMANENTE`, lease, reprocessamento manual e evento obsoleto, com clock injetado); 53 abertos.
 
 ## Critério de ordenação
 
@@ -99,7 +100,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 30 | 05-20 (CORRIGIDO) | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients | Mesma raiz de 14-1 (view do pipeline) |
 | 31 | 14-3 (CORRIGIDO) | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768 | Fundação do RAG sem teste |
 | 32 | 14-10 | Sem teste que garanta a dimensão de embedding (768 vs 1536) | Bloqueio OpenAI (ADR-0005) não é travado por teste |
-| 33 | 14-12 | Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento | Integração (Fases 5/6) sem porta de regressão |
+| 33 | 14-12 (CORRIGIDO) | Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento | Integração (Fases 5/6) sem porta de regressão |
 | 34 | 14-6 | Frontend sem infraestrutura de teste (sem Vitest/Playwright) | Código da Fase 4 entraria sem teste |
 
 ### T7 — Backup e resiliência (4)

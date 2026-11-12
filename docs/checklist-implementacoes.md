@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **146 entregues** `[x]` — gaps CORRIGIDO
-- **54 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **147 entregues** `[x]` — gaps CORRIGIDO
+- **53 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 200 itens
 
 ## Fases do plano (SPEC 13)
@@ -257,4 +257,4 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
 - [x] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
 - [x] **14-11** — Sem testes de classificação de intenção, separação categoria ERP × departamento e resolução de roteamento (**Alta**)
-- [ ] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**) *(parcial)*
+- [x] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**)
