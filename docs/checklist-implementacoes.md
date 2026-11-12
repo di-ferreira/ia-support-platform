@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **129 entregues** `[x]` — gaps CORRIGIDO
-- **70 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **131 entregues** `[x]` — gaps CORRIGIDO
+- **68 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -82,7 +82,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **03-5** — `/ai/solucionar` escrevia no chat furando a máquina de estados (**Alta**)
 - [x] **03-6** — JWT do WebSocket viajava em query string (**Alta**)
 - [ ] **03-7** — 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution (Média)
-- [ ] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
+- [x] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
 - [ ] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
 - [x] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
 - [ ] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média)
@@ -162,7 +162,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **07-1** — Token JWT do WebSocket na query string (**Alta**)
 - [x] **07-2** — Sem refresh token/renovação; sessão cai após 60 min (**Alta**)
-- [ ] **07-3** — WebSocket sem reconexão nem backoff (Média)
+- [x] **07-3** — WebSocket sem reconexão nem backoff (Média)
 - [ ] **07-4** — Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme` (Média)
 - [ ] **07-5** — `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte (Baixa)
 - [ ] **07-6** — Selects de status/prioridade usam `<select>` nativo (Baixa)

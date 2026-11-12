@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_current_user, get_repositories
+from app.api.realtime import emitir_chat_atualizado
 from app.appwrite.repositories import Repositories
 from app.models.chat import StatusChat
 from app.schemas.kanban import KanbanResponse, MoverCardRequest
@@ -27,4 +28,6 @@ async def mover_card(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    await service.atualizar_status(body.chat_id, StatusChat(body.novo_status))
+    anterior = await service.obter(body.chat_id)
+    chat = await service.atualizar_status(body.chat_id, StatusChat(body.novo_status))
+    await emitir_chat_atualizado(anterior, chat)

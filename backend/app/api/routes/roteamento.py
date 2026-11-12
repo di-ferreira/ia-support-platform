@@ -4,6 +4,7 @@ import logging
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_current_user, get_repositories
+from app.api.realtime import emitir_chat_atualizado
 from app.appwrite.repositories import Repositories
 from app.schemas.chat import (
     ChatAtribuirAtendente,
@@ -42,6 +43,7 @@ async def transferir_departamento(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
+    anterior = await service.obter(chat_id)
     chat = await service.transferir_departamento(
         chat_id,
         body.departamento_id,
@@ -59,6 +61,7 @@ async def transferir_departamento(
             "usuario_id": user["id"],
         },
     )
+    await emitir_chat_atualizado(anterior, chat)
     return chat
 
 

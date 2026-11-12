@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_current_user, get_repositories, require_perfil
+from app.api.realtime import emitir_chat_atualizado
 from app.appwrite.repositories import Repositories
 from app.models.chat import PrioridadeChat, StatusChat
 from app.schemas.chat import (
@@ -71,7 +72,10 @@ async def atualizar_status(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    return await service.atualizar_status(chat_id, body.status)
+    anterior = await service.obter(chat_id)
+    chat = await service.atualizar_status(chat_id, body.status)
+    await emitir_chat_atualizado(anterior, chat)
+    return chat
 
 
 @router.patch("/{chat_id}/confirmar-resolucao", response_model=ChatDetailResponse)
@@ -103,7 +107,10 @@ async def assinar_chat(
     user: dict = Depends(require_perfil("admin", "supervisor")),
 ):
     service = ChatService(repos)
-    return await service.assinar(chat_id, body.atendente_id)
+    anterior = await service.obter(chat_id)
+    chat = await service.assinar(chat_id, body.atendente_id)
+    await emitir_chat_atualizado(anterior, chat)
+    return chat
 
 
 @router.patch("/{chat_id}/prioridade", response_model=ChatDetailResponse)
@@ -114,7 +121,10 @@ async def definir_prioridade(
     user: dict = Depends(require_perfil("admin", "supervisor")),
 ):
     service = ChatService(repos)
-    return await service.definir_prioridade(chat_id, body.prioridade)
+    anterior = await service.obter(chat_id)
+    chat = await service.definir_prioridade(chat_id, body.prioridade)
+    await emitir_chat_atualizado(anterior, chat)
+    return chat
 
 
 @router.patch("/{chat_id}/pegar", response_model=ChatDetailResponse)
@@ -124,7 +134,10 @@ async def pegar_chat(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    return await service.pegar(chat_id, user["id"])
+    anterior = await service.obter(chat_id)
+    chat = await service.pegar(chat_id, user["id"])
+    await emitir_chat_atualizado(anterior, chat)
+    return chat
 
 
 @router.patch("/{chat_id}/transferir", response_model=ChatDetailResponse)
@@ -135,7 +148,10 @@ async def transferir_chat(
     user: dict = Depends(get_current_user),
 ):
     service = ChatService(repos)
-    return await service.transferir(chat_id, body.atendente_id, user)
+    anterior = await service.obter(chat_id)
+    chat = await service.transferir(chat_id, body.atendente_id, user)
+    await emitir_chat_atualizado(anterior, chat)
+    return chat
 
 
 @router.patch("/{chat_id}/transferir-grupo", response_model=ChatDetailResponse)

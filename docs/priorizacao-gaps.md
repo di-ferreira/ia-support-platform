@@ -10,6 +10,7 @@ Atualizado em 2026-11-12: 02-17 e 12-7 corrigidos; contadores em 122 entregues /
 Atualizado em 2026-11-12: 08-3 e 08-12 corrigidos (08-12 coberto por 08-3) — `/health/ready` com sondas e bootstrap degradado (R1.4); 75 abertos.
 Atualizado em 2026-11-12: 08-9, 00-10 e 00-16 corrigidos — métricas de produto e tempo de primeira resposta (R1.2/R1.3); 72 abertos.
 Atualizado em 2026-11-12: 04-3 e 07-11 corrigidos — guarda de rota e menu por perfil no frontend (Task F4.12, `lib/permissoes.ts`); 70 abertos.
+Atualizado em 2026-11-12: 03-8 e 07-3 corrigidos — eventos WS nas rotas de chat e reconexão com backoff + jitter (Task F4.7); 68 abertos.
 
 ## Critério de ordenação
 
@@ -114,13 +115,13 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 |---|-----|-----------|
 | 43 | 04-3 (CORRIGIDO) | Frontend oculta ações por perfil, mas sem guarda de rota: digitando URL alcança `/usuarios` e `/configuracoes` |
 | 44 | 07-11 (CORRIGIDO) | Sem guarda de rota por perfil (= 04-3) |
-| 45 | 03-8 | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) |
+| 45 | 03-8 (CORRIGIDO) | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) |
 | 46 | 01-8 | Sem tabela de auditoria: não há como saber quem mudou status/atribuição |
 | 47 | 02-20 | Sem trilha de auditoria de atribuição/transferência (= 01-8) |
 | 48 | 04-12 | Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (= 01-8) |
 | 49 | 10-12 | Sem auditoria de transferência/atribuição (= 01-8) |
 | 50 | 04-11 | Identidade de serviço da IA / `actor_type` auditável não implementada |
-| 51 | 07-3 | WebSocket sem reconexão nem backoff |
+| 51 | 07-3 (CORRIGIDO) | WebSocket sem reconexão nem backoff |
 | 52 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR |
 | 53 | 04-8 | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |
 | 54 | 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases` sem upload/download/storage |
