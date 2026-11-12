@@ -206,6 +206,11 @@ class ChatService:
 
     async def assinar(self, chat_id: str, atendente_id: str) -> dict:
         chat = await self.obter(chat_id)
+        if chat["status"] == StatusChat.encerrado.value:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Chat encerrado não pode ser atribuído",
+            )
         data = {"atendente_id": atendente_id}
         if chat["status"] == StatusChat.novo:
             data["status"] = StatusChat.em_atendimento.value
@@ -219,6 +224,11 @@ class ChatService:
 
     async def pegar(self, chat_id: str, atendente_id: str) -> dict:
         chat = await self.obter(chat_id)
+        if chat["status"] == StatusChat.encerrado.value:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Chat encerrado não pode ser atribuído",
+            )
         if chat["atendente_id"] is not None and chat["atendente_id"] != atendente_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -336,6 +346,11 @@ class ChatService:
         salvo override de admin/supervisor com motivo (auditável).
         """
         chat = await self.obter(chat_id)
+        if chat["status"] == StatusChat.encerrado.value:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Chat encerrado não pode ser atribuído",
+            )
         if user["perfil"] == "atendente" and atendente_id != user["id"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

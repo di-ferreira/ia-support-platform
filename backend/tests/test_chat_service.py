@@ -118,11 +118,11 @@ async def test_pegar_preserva_status_em_atendimento(fake_repos):
 
 
 @pytest.mark.asyncio
-async def test_pegar_chat_encerrado_de_outro_atendente_retorna_400(fake_repos):
+async def test_pegar_chat_de_outro_atendente_retorna_400(fake_repos):
     chat = await fake_repos.chats.create(
         {
             "cliente_id": "c1",
-            "status": StatusChat.encerrado.value,
+            "status": StatusChat.em_atendimento.value,
             "atendente_id": "outro-atendente",
         }
     )
@@ -350,3 +350,71 @@ async def test_listar_admin_ve_chamados_de_outros_atendentes(fake_repos):
         user={"id": "admin-1", "perfil": "admin"}
     )
     assert total == 1
+
+
+# ---------------------------------------------------------------------------
+# 04-13 — chat ENCERRADO não pode ser assumido/atribuído
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_pegar_chat_encerrado_retorna_409(fake_repos):
+    chat = await fake_repos.chats.create(
+        {
+            "cliente_id": "c1",
+            "status": StatusChat.encerrado.value,
+            "atendente_id": "outro-atendente",
+        }
+    )
+    with pytest.raises(HTTPException) as exc:
+        await ChatService(fake_repos).pegar(chat["id"], "atendente-1")
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "Chat encerrado não pode ser atribuído"
+
+
+@pytest.mark.asyncio
+async def test_assinar_chat_encerrado_retorna_409(fake_repos):
+    chat = await fake_repos.chats.create(
+        {"cliente_id": "c1", "status": StatusChat.encerrado.value}
+    )
+    with pytest.raises(HTTPException) as exc:
+        await ChatService(fake_repos).assinar(chat["id"], "atendente-1")
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "Chat encerrado não pode ser atribuído"
+
+
+@pytest.mark.asyncio
+async def test_atribuir_atendente_chat_encerrado_retorna_409(fake_repos):
+    await fake_repos.atendentes.create(
+        {"nome": "Destino", "email": "d@x.com", "ativo": True}
+    )
+    destino = (await fake_repos.atendentes.list_all())[0]
+    chat = await fake_repos.chats.create(
+        {
+            "cliente_id": "c1",
+            "status": StatusChat.encerrado.value,
+            "atendente_id": "outro-atendente",
+        }
+    )
+    with pytest.raises(HTTPException) as exc:
+        await ChatService(fake_repos).atribuir_atendente(
+            chat["id"], destino["id"], {"id": "admin", "perfil": "admin"}
+        )
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "Chat encerrado não pode ser atribuído"
+
+
+@pytest.mark.asyncio
+async def test_atribuir_atendente_chat_em_atendimento_mantem_fluxo(fake_repos):
+    await fake_repos.atendentes.create(
+        {"nome": "Destino", "email": "d@x.com", "ativo": True}
+    )
+    destino = (await fake_repos.atendentes.list_all())[0]
+    chat = await fake_repos.chats.create(
+        {"cliente_id": "c1", "status": StatusChat.em_atendimento.value}
+    )
+    atualizado = await ChatService(fake_repos).atribuir_atendente(
+        chat["id"], destino["id"], {"id": "admin", "perfil": "admin"}
+    )
+    assert atualizado["atendente_id"] == destino["id"]
+    assert atualizado["status"] == StatusChat.em_atendimento.value
