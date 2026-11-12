@@ -42,7 +42,7 @@ def build_health_service(databases, schema_status: dict) -> HealthService:
     """
 
     async def appwrite_ok() -> None:
-        databases.list()
+        await asyncio.to_thread(databases.list)
 
     async def schema_ok() -> None:
         if not schema_status.get("ok"):
