@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **122 entregues** `[x]` — gaps CORRIGIDO
-- **77 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **124 entregues** `[x]` — gaps CORRIGIDO
+- **75 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -176,7 +176,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **08-1** — `CORS_ORIGINS` default só `localhost:3000` (**Alta**)
 - [x] **08-2** — Comportamento de `verify_webhook` sem segredo não fixado (**Alta**)
-- [ ] **08-3** — `/health` não checa dependências; sem readiness (Média)
+- [x] **08-3** — `/health` não checa dependências; sem readiness (Média)
 - [x] **08-4** — Sem rate limiting em login/webhooks (**Alta**)
 - [x] **08-5** — Sem logging estruturado nem request-id/correlação (Média)
 - [ ] **08-6** — Sem métricas/tracing/APM; nenhum SLO observável (Média) *(parcial)*
@@ -185,7 +185,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
 - [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
 - [ ] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**)
-- [ ] **08-12** — Health check degradado do bootstrap não implementado (Média) (= 08-3)
+- [x] **08-12** — Health check degradado do bootstrap não implementado (Média) (coberto por 08-3)
 
 ## SPEC 09 — Infraestrutura, Configuração e Deploy
 

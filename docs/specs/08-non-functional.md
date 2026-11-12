@@ -85,7 +85,7 @@ Verificado contra o código em 2026-11-06.
 |---|---|---|---|---|
 | 08-1 | `CORS_ORIGINS` default só `localhost:3000` | `core/config.py:39` | **Alta** | **CORRIGIDO** (2026-11-10) — validação de produção rejeita `CORS_ORIGINS` vazio ou com `*` (origens explícitas obrigatórias) → [09](09-infra-deploy.md) |
 | 08-2 | Comportamento de `verify_webhook` sem segredo não fixado | `api/routes/webhooks.py:32-44` | **Alta** | **CORRIGIDO** — fail-closed (401) e comparação em tempo constante |
-| 08-3 | `/health` não checa dependências; sem readiness | `main.py:90-92` | Média | **ABERTO** |
+| 08-3 | `/health` não checa dependências; sem readiness | `main.py:90-92` | Média | **CORRIGIDO** — `GET /health/ready` com `HealthService` (sondas paralelas com timeout, erro sanitizado, 503 degradado com a dependência nomina) em `services/health_service.py`; `/health` continua liveness puro |
 | 08-4 | Sem rate limiting em login/webhooks | `core/rate_limit.py` | **Alta** | **CORRIGIDO** — limiter in-memory (login 60/60s, webhooks 120/60s) |
 | 08-5 | Sem logging estruturado nem request-id/correlação | `app/**` | Média | **CORRIGIDO** — `core/logging.py` (`JsonFormatter`) + `core/correlacao.py` (`CorrelacaoMiddleware`, `X-Request-Id`) |
 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO (parcial)** — limiar de relevância do RAG é configurável e testado; APM/SLO seguem na Trilha R1 |
@@ -94,4 +94,4 @@ Verificado contra o código em 2026-11-06.
 | 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **ABERTO** → 00-10 |
 | 08-10 | Degradação da integração Emsoft/outbox não implementada (outbox não existe) | `app/` | **Alta** | **ABERTO (parcial)** — degradação da integração existe (off por padrão; contrato ausente/inválido desliga; tentativas e último erro registrados em `integracao_chamados`); outbox ainda não existe → [12](12-confiabilidade-integracoes.md) |
 | 08-11 | Timeout/retry/backoff explícitos de integrações externas não implementados | `services/evolution_service.py` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
-| 08-12 | Health check degradado do bootstrap não implementado | `appwrite/bootstrap.py` | Média | **ABERTO** → 02-10 |
+| 08-12 | Health check degradado do bootstrap não implementado | `appwrite/bootstrap.py` | Média | **CORRIGIDO** — resultado do bootstrap vira estado explícito (`app.state.bootstrap`) e a sonda `schema` de `/health/ready` responde 503 quando degradado (coberto por 08-3) |

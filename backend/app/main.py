@@ -34,6 +34,7 @@ from app.core.logging import configurar_logging
 from app.integrations.emsoft_chamados import build_emsoft_chamados_service
 from app.integrations.emsoft_chamados.exceptions import ContractNotValidatedError
 from app.integrations.outbox import OutboxWorker
+from app.services.health_service import HealthService, build_health_service
 
 logger = logging.getLogger(__name__)
 
@@ -52,18 +53,33 @@ async def lifespan(app: FastAPI):
         ensure_appwrite_schema(app.state.appwrite_databases)
         # Schema coerente com o declarativo: nenhum drift (spec 08).
         app.state.schema_drifts = []
+        app.state.bootstrap = {"ok": True, "erro": None}
     except SchemaDriftError as exc:
         # Degradado (spec 08): a API sobe e o /health passa a responder 503
         # com o detalhe dos drifts; só normaliza quando o schema é reconciliado.
         app.state.schema_drifts = exc.drifts
+        app.state.bootstrap = {"ok": False, "erro": str(exc)[:200]}
         logger.error(
             "Appwrite: drift de enum no schema (app em estado degradado)",
             extra={"event": "appwrite_schema_drift", "drifts": exc.drifts},
         )
-    except Exception:
+    except Exception as exc:
         # Best-effort: a API sobe mesmo com Appwrite fora; o schema é criado no próximo boot.
         app.state.schema_drifts = None
-        logger.exception("Appwrite: falha ao garantir o schema (verifique o serviço)")
+        app.state.bootstrap = {
+            "ok": False,
+            "erro": f"{type(exc).__name__}: {exc}"[:200],
+        }
+        logger.exception(
+            "Appwrite: falha ao garantir o schema (verifique o serviço)",
+            extra={"event": "bootstrap"},
+        )
+    # Readiness (spec 08, gaps 08-3/08-12): sonda real de Appwrite + estado
+    # explícito do bootstrap. Qdrant/Ollama/Redis ficam fora de propósito —
+    # o orquestrador só precisa garantir schema pronto antes do tráfego.
+    app.state.saude = build_health_service(
+        app.state.appwrite_databases, app.state.bootstrap
+    )
     # Integração com a API de chamados Emsoft (spec 11): nasce desabilitada.
     # Habilitada sem contrato válido/token é erro de configuração; em vez de
     # derrubar a API inteira, a integração fica off (rotas 503, /status expõe
@@ -169,3 +185,28 @@ async def health(request: Request):
             content={"status": "degradado", "schema_drifts": drifts},
         )
     return {"status": "ok"}
+
+
+@app.get("/health/ready")
+async def health_ready(request: Request):
+    # Readiness (spec 08, gaps 08-3/08-12): 200 só com dependências ok; 503
+    # nomina a dependência com erro curto. Boot parcial (sem `saude`) também
+    # degrada — nunca leva a rota a 500.
+    saude: HealthService | None = getattr(request.app.state, "saude", None)
+    if saude is None:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "status": "degradado",
+                "checks": {"servico": {"ok": False, "erro": "nao inicializado"}},
+            },
+        )
+    resultado = await saude.pronto()
+    return JSONResponse(
+        status_code=(
+            status.HTTP_200_OK
+            if resultado["status"] == "ok"
+            else status.HTTP_503_SERVICE_UNAVAILABLE
+        ),
+        content=resultado,
+    )

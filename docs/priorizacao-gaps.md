@@ -1,12 +1,13 @@
 # Priorização dos gaps ABERTOS
 
 Gerado em 2026-11-10 a partir do [checklist de implementações](checklist-implementacoes.md)
-(78 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+(76 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
 Atualizado em 2026-11-10: T1 completo — 09-1, 09-2, 09-4 e 09-15 corrigidos.
 Atualizado em 2026-11-11: 02-10 corrigido (commit `d7b16bd`) — T2 completo; 12-7 (commit `5d51d67`) já corrigido marcado; contadores recalculados.
 Atualizado em 2026-11-11: T4 completo — 07-9, 07-10 e 00-13 corrigidos no frontend (telas de departamento/fila, painel de diagnóstico e sincronização, ações do inbox).
 Atualizado em 2026-11-11: 03-19 corrigido — `/ai/classificar-intencao` já existe e todos os endpoints-alvo estão implementados; contadores em 119 entregues / 80 abertos.
 Atualizado em 2026-11-12: 02-17 e 12-7 corrigidos; contadores em 121 entregues / 78 abertos.
+Atualizado em 2026-11-12: 08-3 e 08-12 corrigidos (08-12 coberto por 08-3) — `/health/ready` com sondas e bootstrap degradado (R1.4); 76 abertos.
 
 ## Critério de ordenação
 
@@ -125,8 +126,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 56 | 01-3 | Urgência da IA (`critica`) só no prompt, sem coluna |
 | 57 | 01-5 | `chats.loja_id` nunca é populado |
 | 58 | 02-5 | `chats.loja_id` nunca é populado (= 01-5) |
-| 59 | 08-3 | `/health` não checa dependências; sem readiness |
-| 60 | 08-12 | Health check degradado do bootstrap (= 08-3) |
+| 59 | 08-3 (CORRIGIDO) | `/health` não checa dependências; sem readiness |
+| 60 | 08-12 (CORRIGIDO) | Health check degradado do bootstrap (= 08-3) |
 | 61 | 03-18 | `/webhooks/chat/diagnostico` sem chamador |
 | 62 | 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado |
 | 63 | 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution |
