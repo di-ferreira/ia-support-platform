@@ -71,3 +71,4 @@ Verificado contra o código em 2026-11-06.
 | 04-10 | Escopo por departamento não é aplicado (departamento não existe) | `services/chat_service.py` | **Alta** | **CORRIGIDO** — `ChatService.listar` filtra por `departamento_id` |
 | 04-11 | Identidade de serviço da IA / `actor_type` auditável não implementada | `app/` | Média | **ABERTO** → 04, 11 |
 | 04-12 | Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) | `app/` | Média | **ABERTO** → [02](02-data-model.md) |
+| 04-13 | chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) | `services/chat_service.py` | Média | **CORRIGIDO** — 409 "Chat encerrado não pode ser atribuído" nas três ações; coberto por `tests/test_chat_service.py` |

@@ -15,6 +15,7 @@ Atualizado em 2026-11-12: 07-5 corrigido — `chat-store` (Zustand) como fonte �
 Atualizado em 2026-11-12: 07-4 e 07-6 corrigidos (Task F4.13) — selects Radix e cores via tokens `@theme`; 65 abertos.
 Atualizado em 2026-11-12: 04-4 e 04-5 corrigidos (T6) — regras RBAC de criação de usuário e troca de perfil cobertas por `tests/test_rbac_usuarios.py`; 63 abertos.
 Atualizado em 2026-11-12: 04-6 e 14-10 corrigidos (T6) — ações do ChatService (pegar/transferir/transferir_grupo/assinar/definir_prioridade/listar com filtros e escopo) cobertas por `tests/test_chat_service.py`; dimensão 768 do embedding e bloqueio OpenAI (ADR-0005) travados por `tests/test_qdrant_dimensao.py`; 61 abertos.
+Atualizado em 2026-11-12: 03-9 e 04-13 corrigidos — /assinar deprecado (atribuir-atendente é o caminho único) e chat ENCERRADO recusa atribuição; 60 abertos.
 
 ## Critério de ordenação
 
@@ -34,7 +35,7 @@ Gaps que são a mesma raiz aparecem juntos; o duplicado (outra view do mesmo gap
 é marcado `(= gap)`. Os tiers são critério de impacto e podem não coincidir com o
 rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baixa).
 
-## Ordem de importância (1–97)
+## Ordem de importância (1–98)
 
 ### T0 — Bloqueante (1)
 | # | Gap | Descrição | Justificativa |
@@ -114,7 +115,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 41 | 08-9 (CORRIGIDO) | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação | Produto não é mensurável |
 | 42 | 00-10 (CORRIGIDO) | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente | Mesma raiz de 08-9 (view do escopo) |
 
-### T9 — Média (40)
+### T9 — Média (41)
 | # | Gap | Descrição |
 |---|-----|-----------|
 | 43 | 04-3 (CORRIGIDO) | Frontend oculta ações por perfil, mas sem guarda de rota: digitando URL alcança `/usuarios` e `/configuracoes` |
@@ -157,25 +158,26 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
 | 81 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente |
 | 82 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution |
+| 83 | 04-13 (CORRIGIDO) | chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) |
 
 ### T10 — Baixa (15)
 | # | Gap | Descrição |
 |---|-----|-----------|
-| 83 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) |
-| 84 | 03-9 | `POST /chats/{id}/assinar` existe sem chamador no frontend |
-| 85 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota |
-| 86 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação |
-| 87 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
-| 88 | 05-19 | Dependência `openai` declarada e nunca importada |
-| 89 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
-| 90 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
-| 91 | 08-7 | `DATABASE_URL` default com credenciais em claro |
-| 92 | 09-3 | MinIO órfão no compose prod sem referência no código |
-| 93 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
-| 94 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
-| 95 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
-| 96 | 00-5 | Docs citavam stack NestJS/TypeScript/Prisma |
-| 97 | 00-6 | Docs citavam workflow de 19 nós |
+| 84 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) |
+| 85 | 03-9 (CORRIGIDO) | `POST /chats/{id}/assinar` existe sem chamador no frontend |
+| 86 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota |
+| 87 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação |
+| 88 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
+| 89 | 05-19 | Dependência `openai` declarada e nunca importada |
+| 90 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
+| 91 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
+| 92 | 08-7 | `DATABASE_URL` default com credenciais em claro |
+| 93 | 09-3 | MinIO órfão no compose prod sem referência no código |
+| 94 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
+| 95 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
+| 96 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
+| 97 | 00-5 | Docs citavam stack NestJS/TypeScript/Prisma |
+| 98 | 00-6 | Docs citavam workflow de 19 nós |
 
 ## Nota
 

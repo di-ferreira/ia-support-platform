@@ -2,9 +2,9 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **138 entregues** `[x]` — gaps CORRIGIDO
-- **61 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
-- Total: 199 itens
+- **140 entregues** `[x]` — gaps CORRIGIDO
+- **60 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- Total: 200 itens
 
 ## Fases do plano (SPEC 13)
 
@@ -83,7 +83,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **03-6** — JWT do WebSocket viajava em query string (**Alta**)
 - [ ] **03-7** — 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution (Média)
 - [x] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
-- [ ] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
+- [x] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
 - [x] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
 - [ ] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média)
 - [ ] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa)
@@ -109,6 +109,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **04-10** — Escopo por departamento não é aplicado (departamento não existe) (**Alta**)
 - [ ] **04-11** — Identidade de serviço da IA / `actor_type` auditável não implementada (Média)
 - [ ] **04-12** — Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (Média)
+- [x] **04-13** — chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) (Média)
 
 ## SPEC 05 — Pipeline de IA, Classificação, RAG e Decisão
 

@@ -99,13 +99,22 @@ async def reabrir_chat(
     return await service.reabrir(chat_id, user, motivo=body.motivo)
 
 
-@router.patch("/{chat_id}/assinar", response_model=ChatDetailResponse)
+@router.patch(
+    "/{chat_id}/assinar",
+    response_model=ChatDetailResponse,
+    deprecated=True,
+)
 async def assinar_chat(
     chat_id: str,
     body: ChatAssign,
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(require_perfil("admin", "supervisor")),
 ):
+    """[DEPRECATED] Assumir/atribuir um chamado.
+
+    Use ``PATCH /chats/{id}/atribuir-atendente``, que registra ator e motivo
+    (spec 04/01).
+    """
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
     chat = await service.assinar(chat_id, body.atendente_id)
