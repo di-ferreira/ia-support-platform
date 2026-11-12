@@ -18,6 +18,7 @@ Atualizado em 2026-11-12: 04-6 e 14-10 corrigidos (T6) — ações do ChatServic
 Atualizado em 2026-11-12: 03-9 e 04-13 corrigidos — /assinar deprecado (atribuir-atendente é o caminho único) e chat ENCERRADO recusa atribuição; 60 abertos.
 Atualizado em 2026-11-12: 14-1, 05-20 e 14-3 corrigidos (T6) — `ai/router.py`, `ai_cache.py`, clients Ollama/OpenAI e `qdrant_service.py` cobertos por testes unitários sem rede (`test_ai_router.py`, `test_ai_cache.py`, `test_llm_services.py`, `test_qdrant_service.py`); 57 abertos.
 Atualizado em 2026-11-12: 14-9 e 09-14 corrigidos (T9) — CI 100% bloqueante (`ruff`, `mypy`, `pytest --cov-fail-under=86`, `npm run lint`, `npm run test`) e piso de cobertura `fail_under = 86` (medido) em `pyproject.toml`; 55 abertos.
+Atualizado em 2026-11-12: 14-7 corrigido (T9) — harness `backend/tests/test_workflow_n8n.py` valida nós essenciais, `$env.*` × `.env.example`/compose, `onError`, path do webhook e conexões sem nó órfão; 54 abertos.
 
 ## Critério de ordenação
 
@@ -144,7 +145,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 64 | 08-5 | Sem logging estruturado nem request-id/correlação |
 | 65 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável |
 | 66 | 12-7 (CORRIGIDO) | Sem painel de pendência/reprocessamento para operador |
-| 67 | 14-7 | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env |
+| 67 | 14-7 (CORRIGIDO) | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env |
 | 68 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes |
 | 69 | 14-9 (CORRIGIDO) | CI sem threshold de cobertura; regressões em IA não bloqueiam merge |
 | 70 | 09-14 (CORRIGIDO) | CI: mypy e lint do frontend report-only; sem job de teste do frontend |

@@ -32,6 +32,7 @@ dev = [
     "ruff>=0.6.0",
     "mypy>=1.11.0",
     "aiosqlite>=0.20.0",
+    "pyyaml>=6.0.0",
 ]
 
 # requirements.txt é a fonte canônica para deploy/Dockerfile.

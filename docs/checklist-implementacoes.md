@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **145 entregues** `[x]` — gaps CORRIGIDO
-- **55 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **146 entregues** `[x]` — gaps CORRIGIDO
+- **54 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 200 itens
 
 ## Fases do plano (SPEC 13)
@@ -252,7 +252,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **14-4** — Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic (**Alta**)
 - [x] **14-5** — Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` (**Alta**)
 - [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito com 8 testes; falta Playwright/E2E)*
-- [ ] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
+- [x] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
 - [ ] **14-8** — Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes (Média)
 - [x] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
 - [x] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
