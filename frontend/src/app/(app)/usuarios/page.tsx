@@ -12,7 +12,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select as SelectNative } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { UserPlus, Pencil, ShieldCheck, Shield, User } from "lucide-react";
 import { useState } from "react";
 
@@ -235,32 +235,32 @@ function UserFormModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Perfil</label>
-            <SelectNative value={perfil} onChange={(e) => setPerfil(e.target.value)}>
+            <Select valor={perfil} onValorChange={(valor) => setPerfil(valor)}>
               {isAdmin ? (
                 <>
-                  <option value="admin">Admin</option>
-                  <option value="supervisor">Supervisor</option>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="supervisor">Supervisor</SelectItem>
                 </>
               ) : null}
-              <option value="atendente">Atendente</option>
-            </SelectNative>
+              <SelectItem value="atendente">Atendente</SelectItem>
+            </Select>
           </div>
           {perfil === "atendente" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Departamento
               </label>
-              <SelectNative
-                value={departamentoId}
-                onChange={(e) => setDepartamentoId(e.target.value)}
+              <Select
+                valor={departamentoId}
+                onValorChange={(valor) => setDepartamentoId(valor)}
+                placeholder="Sem departamento"
               >
-                <option value="">Sem departamento</option>
                 {departamentos.map((d: any) => (
-                  <option key={d.id} value={d.id}>
+                  <SelectItem key={d.id} value={d.id}>
                     {d.nome}
-                  </option>
+                  </SelectItem>
                 ))}
-              </SelectNative>
+              </Select>
               <p className="mt-1 text-xs text-gray-500">
                 Departamento principal do atendente (spec 10).
               </p>

@@ -24,7 +24,7 @@ import { useChatStore } from "@/lib/stores/chat-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -488,15 +488,15 @@ export default function AtendimentoPage() {
           </div>
           <Select
             aria-label="Filtrar por departamento"
-            value={filtroDepartamento}
-            onChange={(e) => setFiltroDepartamento(e.target.value)}
+            valor={filtroDepartamento}
+            onValorChange={(valor) => setFiltroDepartamento(valor)}
+            placeholder="Todos os departamentos"
             className="h-8 text-xs"
           >
-            <option value="">Todos os departamentos</option>
             {departamentos.map((d) => (
-              <option key={d.id} value={d.id}>
+              <SelectItem key={d.id} value={d.id}>
                 {d.nome}
-              </option>
+              </SelectItem>
             ))}
           </Select>
         </div>
@@ -633,26 +633,26 @@ export default function AtendimentoPage() {
                 <div className="flex items-center gap-2">
                   <Select
                     aria-label="Status do chamado"
-                    value={chatDetail?.status || ""}
-                    onChange={(e) => updateStatus.mutate(e.target.value)}
+                    valor={chatDetail?.status ?? ""}
+                    onValorChange={(valor) => updateStatus.mutate(valor)}
                     className="h-8 w-auto text-xs"
                   >
                     {Object.entries(statusLabels).map(([key, label]) => (
-                      <option key={key} value={key}>
+                      <SelectItem key={key} value={key}>
                         {label}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                   <Select
                     aria-label="Prioridade do chamado"
-                    value={chatDetail?.prioridade || "media"}
-                    onChange={(e) => updatePrioridade.mutate(e.target.value)}
+                    valor={chatDetail?.prioridade ?? "media"}
+                    onValorChange={(valor) => updatePrioridade.mutate(valor)}
                     className="h-8 w-auto text-xs"
                   >
                     {Object.entries(prioridadeLabels).map(([key, label]) => (
-                      <option key={key} value={key}>
+                      <SelectItem key={key} value={key}>
                         {label}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                 </div>
@@ -1216,15 +1216,15 @@ export default function AtendimentoPage() {
               </label>
               <Select
                 id="depto-destino"
-                value={deptoDestinoId}
-                onChange={(e) => setDeptoDestinoId(e.target.value)}
+                valor={deptoDestinoId}
+                onValorChange={(valor) => setDeptoDestinoId(valor)}
+                placeholder="Selecione…"
               >
-                <option value="">Selecione…</option>
                 {departamentosDestino.map((d) => (
-                  <option key={d.id} value={d.id}>
+                  <SelectItem key={d.id} value={d.id}>
                     {d.nome}
                     {d.id === chatDetail?.departamento_id ? " (atual)" : ""}
-                  </option>
+                  </SelectItem>
                 ))}
               </Select>
               {departamentosDestino.length === 0 && (
@@ -1303,15 +1303,15 @@ export default function AtendimentoPage() {
               </label>
               <Select
                 id="atendente-destino"
-                value={atendenteDestinoId}
-                onChange={(e) => setAtendenteDestinoId(e.target.value)}
+                valor={atendenteDestinoId}
+                onValorChange={(valor) => setAtendenteDestinoId(valor)}
+                placeholder="Selecione…"
               >
-                <option value="">Selecione…</option>
                 {atendentes.map((a) => (
-                  <option key={a.id} value={a.id}>
+                  <SelectItem key={a.id} value={a.id}>
                     {a.nome} —{" "}
                     {nomeDepartamento(a.departamento_id) || "sem departamento"}
-                  </option>
+                  </SelectItem>
                 ))}
               </Select>
             </div>

@@ -18,7 +18,7 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -770,11 +770,11 @@ function DepartamentoFormModal({
                 </label>
                 <Select
                   id="depto-ativo"
-                  value={ativo ? "true" : "false"}
-                  onChange={(e) => setAtivo(e.target.value === "true")}
+                  valor={ativo ? "true" : "false"}
+                  onValorChange={(valor) => setAtivo(valor === "true")}
                 >
-                  <option value="true">Ativo</option>
-                  <option value="false">Inativo</option>
+                  <SelectItem value="true">Ativo</SelectItem>
+                  <SelectItem value="false">Inativo</SelectItem>
                 </Select>
               </div>
             )}
