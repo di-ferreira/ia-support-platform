@@ -109,3 +109,4 @@ Verificado contra o código em 2026-11-06; re-verificado em 2026-11-10 — 12-1 
 | 12-5 | Reconciliação de timeout ambíguo inexistente | `integrations/outbox/worker.py` (re-PATCH pelo ID; reconciliação no boot, nunca re-POST cego) | **Alta** | **CORRIGIDO** |
 | 12-6 | Logs sem correlation/event key | `integrations/outbox/worker.py` (logs com `event_key`/`chat_id`, sem payload livre) | Média | **CORRIGIDO** → 08-5 |
 | 12-7 | Sem painel de pendência/reprocessamento para operador | `api/routes/integracoes.py` (GET /pendentes, GET /{chat_id}, POST /{chat_id}/reprocessar) | Média | **CORRIGIDO** → 03, 07 |
+| 12-8 | Evento obsoleto do outbox não é descartado (`event_version` só entra na `event_key`); versão antiga pode sobrescrever o estado no sistema externo com dado velho | `integrations/outbox/worker.py` | **Alta** | **ABERTO** |
