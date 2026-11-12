@@ -13,6 +13,7 @@ Atualizado em 2026-11-12: 04-3 e 07-11 corrigidos — guarda de rota e menu por 
 Atualizado em 2026-11-12: 03-8 e 07-3 corrigidos — eventos WS nas rotas de chat e reconexão com backoff + jitter (Task F4.7); 68 abertos.
 Atualizado em 2026-11-12: 07-5 corrigido — `chat-store` (Zustand) como fonte única do chat ativo (Task F4.6); 67 abertos.
 Atualizado em 2026-11-12: 07-4 e 07-6 corrigidos (Task F4.13) — selects Radix e cores via tokens `@theme`; 65 abertos.
+Atualizado em 2026-11-12: 04-4 e 04-5 corrigidos (T6) — regras RBAC de criação de usuário e troca de perfil cobertas por `tests/test_rbac_usuarios.py`; 63 abertos.
 
 ## Critério de ordenação
 
@@ -86,8 +87,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 ### T6 — Testes (9)
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 26 | 04-4 | Regra "supervisor só cria `atendente`" está no serviço e sem teste | Regra de RBAC sem proteção de regressão |
-| 27 | 04-5 | Regra "só admin altera `perfil`" está no serviço e sem teste | Idem — RBAC sem teste |
+| 26 | 04-4 (CORRIGIDO) | Regra "supervisor só cria `atendente`" está no serviço e sem teste | Regra de RBAC sem proteção de regressão |
+| 27 | 04-5 (CORRIGIDO) | Regra "só admin altera `perfil`" está no serviço e sem teste | Idem — RBAC sem teste |
 | 28 | 04-6 | `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` sem teste | Ações principais do `ChatService` descobertas |
 | 29 | 14-1 | `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` sem teste unitário direto | Caminho crítico da IA sem teste |
 | 30 | 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients | Mesma raiz de 14-1 (view do pipeline) |

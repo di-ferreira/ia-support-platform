@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **134 entregues** `[x]` — gaps CORRIGIDO
-- **65 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **136 entregues** `[x]` — gaps CORRIGIDO
+- **63 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -100,8 +100,8 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **04-1** — `GET /dashboard` não aplica filtro de visibilidade; atendente lê KPIs globais e nomes de clientes (**Alta**)
 - [x] **04-2** — `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse (**Alta**)
 - [x] **04-3** — Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` (Média)
-- [ ] **04-4** — Regra "supervisor só cria `atendente`" está no serviço e sem teste (**Alta**)
-- [ ] **04-5** — Regra "só admin altera `perfil`" está no serviço e sem teste (**Alta**)
+- [x] **04-4** — Regra "supervisor só cria `atendente`" está no serviço e sem teste (**Alta**)
+- [x] **04-5** — Regra "só admin altera `perfil`" está no serviço e sem teste (**Alta**)
 - [ ] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
 - [x] **04-7** — `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit (**Alta**)
 - [ ] **04-8** — `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR (Média)
