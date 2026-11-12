@@ -1,11 +1,12 @@
 # Priorização dos gaps ABERTOS
 
 Gerado em 2026-11-10 a partir do [checklist de implementações](checklist-implementacoes.md)
-(80 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
+(78 gaps ABERTOS + 4 fases pendentes do SPEC 13). A fonte de verdade segue sendo cada spec.
 Atualizado em 2026-11-10: T1 completo — 09-1, 09-2, 09-4 e 09-15 corrigidos.
 Atualizado em 2026-11-11: 02-10 corrigido (commit `d7b16bd`) — T2 completo; 12-7 (commit `5d51d67`) já corrigido marcado; contadores recalculados.
 Atualizado em 2026-11-11: T4 completo — 07-9, 07-10 e 00-13 corrigidos no frontend (telas de departamento/fila, painel de diagnóstico e sincronização, ações do inbox).
 Atualizado em 2026-11-11: 03-19 corrigido — `/ai/classificar-intencao` já existe e todos os endpoints-alvo estão implementados; contadores em 119 entregues / 80 abertos.
+Atualizado em 2026-11-12: 02-17 e 12-7 corrigidos; contadores em 121 entregues / 78 abertos.
 
 ## Critério de ordenação
 
@@ -56,7 +57,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
 | 14 | 03-19 (CORRIGIDO) | Endpoints-alvo inexistentes: `/departamentos*`, `transferir-departamento`, `atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | Superfície de API das Fases 4/5 inexistente |
-| 15 | 02-17 | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | Sem persistência para departamentos, roteamento e integração |
+| 15 | 02-17 (CORRIGIDO) | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | Sem persistência para departamentos, roteamento e integração |
 | 16 | 08-11 | Timeout/retry/backoff explícitos de integrações externas não implementados | Toda chamada externa (Evolution/Emsoft) é frágil |
 | 17 | 08-10 | Degradação da integração Emsoft/outbox não implementada | Falha na integração derruba o fluxo sem fallback |
 | 18 | 09-17 | Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração | Integração não sobe em prod |

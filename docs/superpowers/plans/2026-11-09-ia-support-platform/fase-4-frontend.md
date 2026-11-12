@@ -57,7 +57,7 @@ A T4 entregou o **escopo funcional** de 07-9, 07-10 e 00-13 direto nas páginas 
 - `/usuarios`: associação de departamento no formulário e coluna na listagem.
 - Backend de apoio: `departamento_id` em `/auth/usuarios` e `/atendentes/ativos`; `artigos_consultados` desserializado em `/chats/{id}/roteamento`.
 
-**Tasks deste plano ainda não executadas** (não marcar como concluídas): F4.1 (harness Vitest), F4.6 (`chat-store` como fonte única), F4.7 (reconexão de WebSocket/eventos nas rotas — 07-3, 03-8), F4.12 (guarda de rota por perfil — 07-11, 04-3) e F4.13 (Radix e migração total para tokens — 07-6, 07-4). Assim, o gate de saída abaixo continua **aberto**, assim como a Fase 4 no [checklist](../../../checklist-implementacoes.md).
+**Tasks deste plano ainda não executadas** (não marcar como concluídas): F4.6 (`chat-store` como fonte única), F4.7 (reconexão de WebSocket/eventos nas rotas — 07-3, 03-8), F4.12 (guarda de rota por perfil — 07-11, 04-3) e F4.13 (Radix e migração total para tokens — 07-6, 07-4). A F4.1 foi executada (harness Vitest + catálogo status/prioridade em `src/lib/status.ts`; `npm run test` com 8 testes). Assim, o gate de saída abaixo continua **aberto**, assim como a Fase 4 no [checklist](../../../checklist-implementacoes.md).
 
 A fonte de verdade segue sendo as specs (`docs/specs/00`–`14`); este plano é o roteiro do que falta.
 
@@ -306,13 +306,13 @@ export function statusEncerrado(status: string): boolean {
 
 Run: `cd frontend && npm run test -- src/lib/status.test.ts`
 
-Expected: PASS (7 testes).
+Expected: PASS (8 testes).
 
 - [ ] **Step 5: Run the full suite + build**
 
 Run: `cd frontend && npm run test && npm run build`
 
-Expected: 7 testes verdes; build conclui sem erro de tipo.
+Expected: 8 testes verdes; build conclui sem erro de tipo.
 
 - [ ] **Step 6: Commit**
 

@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **119 entregues** `[x]` — gaps CORRIGIDO
-- **80 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **121 entregues** `[x]` — gaps CORRIGIDO
+- **78 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -68,7 +68,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **02-14** — `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant (**Alta**)
 - [x] **02-15** — `dashboard_service.py` chama `clientes.get` dentro do loop de recentes (Média)
 - [ ] **02-16** — Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente (Média)
-- [ ] **02-17** — Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes (**Alta**) *(parcial)*
+- [x] **02-17** — Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes (**Alta**)
 - [x] **02-18** — `departamento_id` ausente em `atendentes`/`chats` (**Alta**)
 - [x] **02-19** — `ia_diagnosticos` não guarda intenção, categoria ERP, departamento destino, artigos consultados nem razão (**Alta**)
 - [ ] **02-20** — Sem trilha de auditoria de atribuição/transferência (exigida em 04) (Média)
@@ -185,7 +185,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
 - [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
 - [ ] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**)
-- [ ] **08-12** — Health check degradado do bootstrap não implementado (Média)
+- [ ] **08-12** — Health check degradado do bootstrap não implementado (Média) (= 08-3)
 
 ## SPEC 09 — Infraestrutura, Configuração e Deploy
 
@@ -250,7 +250,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **14-3** — `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` (**Alta**)
 - [x] **14-4** — Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic (**Alta**)
 - [x] **14-5** — Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` (**Alta**)
-- [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**)
+- [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito com 8 testes; falta Playwright/E2E)*
 - [ ] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
 - [ ] **14-8** — Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes (Média)
 - [ ] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
