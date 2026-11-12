@@ -197,7 +197,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **09-6** — Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente (**Alta**)
 - [ ] **09-7** — `backup.sh` não é agendado (**Alta**)
 - [ ] **09-8** — Senha do Postgres em claro no compose/string da Evolution (Média)
-- [ ] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)
+- [x] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)
 - [ ] **09-10** — Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média)
 - [x] **09-11** — `infra/.env.prod` não era gitignored (**Alta**)
 - [ ] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média)

@@ -162,7 +162,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 90 | 07-6 | Selects de status/prioridade usam `<select>` nativo |
 | 91 | 08-7 | `DATABASE_URL` default com credenciais em claro |
 | 92 | 09-3 | MinIO órfão no compose prod sem referência no código |
-| 93 | 09-9 | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
+| 93 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
 | 94 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
 | 95 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
 | 96 | 00-5 | Docs citavam stack NestJS/TypeScript/Prisma |

@@ -101,7 +101,7 @@ Verificado contra o código em 2026-11-06.
 | 09-6 | Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente | `scripts/backup.sh` | **Alta** | **ABERTO** |
 | 09-7 | `backup.sh` não é agendado | `scripts/` | **Alta** | **ABERTO** |
 | 09-8 | Senha do Postgres em claro no compose/string da Evolution | `infra/docker-compose.prod.yml` | Média | **ABERTO** |
-| 09-9 | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` | `pyproject.toml`; `backend/Dockerfile`; `ci.yml` | Baixa | **ABERTO** |
+| 09-9 | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` | `pyproject.toml`; `backend/Dockerfile`; `ci.yml` | Baixa | **CORRIGIDO** — backend/.python-version (3.12), pyproject ruff/mypy em py312/3.12, CI em 3.12, Dockerfile em 3.12-slim |
 | 09-10 | Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **ABERTO** → 05-14 |
 | 09-11 | `infra/.env.prod` não era gitignored | `.gitignore` | **Alta** | **CORRIGIDO** — `infra/.env*` (exceto `.env.example`) ignorado |
 | 09-12 | Alembic/Postgres híbrido com runtime em Appwrite | `alembic/env.py`; `seed_qdrant.py` | Média | **ABERTO** → 02-14 |
