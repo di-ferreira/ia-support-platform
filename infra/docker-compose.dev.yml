@@ -79,8 +79,8 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    # Sem porta publicada durante o teste manual (restaurar: "8001:8000").
-    ports: []
+    ports:
+      - "8001:8000"
     environment:
       # Rede interna do compose (sobrepoe os valores do .env local)
       REDIS_URL: redis://redis:6379/0
@@ -111,8 +111,8 @@ services:
         # Injetados no build do Next.js (valores vistos pelo navegador)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8001}
-    # Sem porta publicada durante o teste manual (restaurar: "${FRONTEND_PORT:-3000}:3000").
-    ports: []
+    ports:
+      - "3000:3000"
     depends_on:
       backend:
         condition: service_healthy
