@@ -20,30 +20,71 @@ def _parse_dt(s: str) -> datetime:
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
+def escopo_visivel(user: dict | None):
+    """Predicado de visibilidade de chats, igual ao aplicado no dashboard."""
+    if not user or user.get("perfil") != "atendente":
+        return lambda chat: True
+
+    departamento_id = user.get("departamento_id")
+    usuario_id = user["id"]
+
+    def pode_ver(chat: dict) -> bool:
+        if chat.get("atendente_id") == usuario_id:
+            return True
+        if chat.get("atendente_id") is not None:
+            return False
+        if departamento_id:
+            return chat.get("departamento_id") == departamento_id
+        return (
+            chat.get("departamento_id") is None
+            and chat.get("setor_alvo") is not None
+            and chat.get("setor_alvo") == user.get("setor")
+        )
+
+    return pode_ver
+
+
 class DashboardService:
     def __init__(self, repos: Repositories):
         self.repos = repos
 
+    @staticmethod
+    def tempo_medio_primeira_resposta(mensagens: list[dict]) -> float | None:
+        """Segundos entre a primeira mensagem do cliente e a primeira resposta humana."""
+        por_chat: dict[str, list[dict]] = {}
+        for mensagem in mensagens:
+            if not mensagem.get("created_at") or not mensagem.get("chat_id"):
+                continue
+            por_chat.setdefault(mensagem["chat_id"], []).append(mensagem)
+
+        tempos: list[float] = []
+        for lista in por_chat.values():
+            do_cliente = [
+                _parse_dt(m["created_at"])
+                for m in lista
+                if m.get("remetente") == RemetenteMensagem.cliente.value
+            ]
+            humanas = [
+                _parse_dt(m["created_at"])
+                for m in lista
+                if m.get("remetente") == RemetenteMensagem.atendente.value
+            ]
+            if not do_cliente or not humanas:
+                continue
+            primeira_cliente = min(do_cliente)
+            resposta = min((d for d in humanas if d > primeira_cliente), default=None)
+            if resposta is None:
+                continue
+            tempos.append((resposta - primeira_cliente).total_seconds())
+
+        if not tempos:
+            return None
+        return round(sum(tempos) / len(tempos), 0)
+
     async def obter_dashboard(self, user: dict | None = None) -> dict:
         todos = await self.repos.chats.list_all()
-
-        if user and user["perfil"] == "atendente":
-            departamento_id = user.get("departamento_id")
-
-            def no_escopo(c: dict) -> bool:
-                if c.get("atendente_id") == user["id"]:
-                    return True
-                if c.get("atendente_id") is not None:
-                    return False
-                if departamento_id:
-                    return c.get("departamento_id") == departamento_id
-                return (
-                    c.get("departamento_id") is None
-                    and c.get("setor_alvo") is not None
-                    and c.get("setor_alvo") == user.get("setor")
-                )
-
-            todos = [c for c in todos if no_escopo(c)]
+        pode_ver = escopo_visivel(user)
+        todos = [c for c in todos if pode_ver(c)]
 
         total = len(todos)
         ia_resolvidos = sum(1 for c in todos if c["status"] == StatusChat.resolvido.value)
@@ -59,26 +100,9 @@ class DashboardService:
 
         taxa_ia = round(ia_resolvidos / total, 4) if total > 0 else 0.0
 
-        # tempo médio de resposta (atendente)
+        # tempo médio da primeira resposta humana por chat
         mensagens = await self.repos.mensagens.list_all()
-        chats_no_escopo = {c["id"] for c in todos}
-        atendente_msgs = [
-            m
-            for m in mensagens
-            if m["remetente"] == RemetenteMensagem.atendente.value
-            and m["chat_id"] in chats_no_escopo
-        ]
-        atendente_msgs.sort(key=lambda m: m["created_at"] or "", reverse=True)
-        rows = [_parse_dt(m["created_at"]) for m in atendente_msgs[:100]]
-        if len(rows) > 1:
-            gaps = []
-            for i in range(len(rows) - 1):
-                gap = (rows[i] - rows[i + 1]).total_seconds()
-                if gap > 0:
-                    gaps.append(gap)
-            tempo_medio = round(sum(gaps) / len(gaps), 0) if gaps else None
-        else:
-            tempo_medio = None
+        tempo_medio = self.tempo_medio_primeira_resposta(mensagens)
 
         # por status
         por_status = []

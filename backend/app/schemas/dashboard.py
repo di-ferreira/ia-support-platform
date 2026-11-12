@@ -32,3 +32,24 @@ class DashboardResponse(BaseModel):
     kpis: KpiItem
     por_status: list[StatusCount]
     recentes: list[ChatRecente]
+
+
+class MetricaDepartamento(BaseModel):
+    departamento_id: str | None = None
+    total: int
+    resolvidos: int
+    transbordo: int
+    tempo_medio_primeira_resposta: float | None = None
+
+
+class MetricasResponse(BaseModel):
+    periodo: dict[str, str | None]
+    total: int
+    resolucao_confirmada: int
+    taxa_resolucao_confirmada: float
+    transbordo: int
+    taxa_transbordo: float
+    clientes_com_duplicidade: int
+    chats_duplicados: int
+    por_departamento: list[MetricaDepartamento]
+    tempo_medio_primeira_resposta: float | None = None

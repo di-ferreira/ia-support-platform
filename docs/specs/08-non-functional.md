@@ -91,7 +91,7 @@ Verificado contra o código em 2026-11-06.
 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO (parcial)** — limiar de relevância do RAG é configurável e testado; APM/SLO seguem na Trilha R1 |
 | 08-7 | `DATABASE_URL` default com credenciais em claro | `core/config.py:10` | Baixa | **ABERTO** |
 | 08-8 | WebSocket aceitava token por query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** → 07-1 |
-| 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **ABERTO** → 00-10 |
+| 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **CORRIGIDO** — `MetricasService.calcular` + `GET /dashboard/metricas` (Tasks R1.2/R1.3) |
 | 08-10 | Degradação da integração Emsoft/outbox não implementada (outbox não existe) | `app/` | **Alta** | **ABERTO (parcial)** — degradação da integração existe (off por padrão; contrato ausente/inválido desliga; tentativas e último erro registrados em `integracao_chamados`); outbox ainda não existe → [12](12-confiabilidade-integracoes.md) |
 | 08-11 | Timeout/retry/backoff explícitos de integrações externas não implementados | `services/evolution_service.py` | **Alta** | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
 | 08-12 | Health check degradado do bootstrap não implementado | `appwrite/bootstrap.py` | Média | **CORRIGIDO** — resultado do bootstrap vira estado explícito (`app.state.bootstrap`) e a sonda `schema` de `/health/ready` responde 503 quando degradado (coberto por 08-3) |

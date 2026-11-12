@@ -8,6 +8,7 @@ Atualizado em 2026-11-11: T4 completo — 07-9, 07-10 e 00-13 corrigidos no fron
 Atualizado em 2026-11-11: 03-19 corrigido — `/ai/classificar-intencao` já existe e todos os endpoints-alvo estão implementados; contadores em 119 entregues / 80 abertos.
 Atualizado em 2026-11-12: 02-17 e 12-7 corrigidos; contadores em 122 entregues / 77 abertos.
 Atualizado em 2026-11-12: 08-3 e 08-12 corrigidos (08-12 coberto por 08-3) — `/health/ready` com sondas e bootstrap degradado (R1.4); 75 abertos.
+Atualizado em 2026-11-12: 08-9, 00-10 e 00-16 corrigidos — métricas de produto e tempo de primeira resposta (R1.2/R1.3); 72 abertos.
 
 ## Critério de ordenação
 
@@ -104,8 +105,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 |---|-----|-----------|---------------|
 | 39 | 02-11 | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | Caminho de migração legado pode causar operações erradas |
 | 40 | 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | Seed quebrado contra a fonte real (Appwrite) |
-| 41 | 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação | Produto não é mensurável |
-| 42 | 00-10 | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente | Mesma raiz de 08-9 (view do escopo) |
+| 41 | 08-9 (CORRIGIDO) | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação | Produto não é mensurável |
+| 42 | 00-10 (CORRIGIDO) | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente | Mesma raiz de 08-9 (view do escopo) |
 
 ### T9 — Média (40)
 | # | Gap | Descrição |
@@ -147,7 +148,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 77 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
 | 78 | 07-4 | Cores raw do Tailwind fora dos tokens `@theme` |
 | 79 | 00-11 | Sem CSAT/NPS nem coleta de feedback |
-| 80 | 00-16 | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
+| 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
 | 81 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente |
 | 82 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution |
 

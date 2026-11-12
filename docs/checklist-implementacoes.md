@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **124 entregues** `[x]` — gaps CORRIGIDO
-- **75 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **127 entregues** `[x]` — gaps CORRIGIDO
+- **72 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -28,13 +28,13 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **00-7** — Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod (**Alta**)
 - [x] **00-8** — Status do chat nunca saía de `NOVO` no fluxo real (**Crítica**)
 - [x] **00-9** — `ia_diagnosticos` nunca era populado (**Crítica**)
-- [ ] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
+- [x] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
 - [ ] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média)
 - [ ] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**)
 - [x] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
 - [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**) *(parcial)*
 - [ ] **00-15** — Sem outbox/idempotência para chamados externos (**Alta**)
-- [ ] **00-16** — Indicadores de sucesso por departamento/duplicidade sem instrumentação (Média)
+- [x] **00-16** — Indicadores de sucesso por departamento/duplicidade sem instrumentação (Média)
 
 ## SPEC 01 — Domínio, Glossário e Máquina de Estados
 
@@ -182,7 +182,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **08-6** — Sem métricas/tracing/APM; nenhum SLO observável (Média) *(parcial)*
 - [ ] **08-7** — `DATABASE_URL` default com credenciais em claro (Baixa)
 - [x] **08-8** — WebSocket aceitava token por query string (**Alta**)
-- [ ] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
+- [x] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
 - [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
 - [ ] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**)
 - [x] **08-12** — Health check degradado do bootstrap não implementado (Média) (coberto por 08-3)
