@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **121 entregues** `[x]` — gaps CORRIGIDO
-- **78 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **122 entregues** `[x]` — gaps CORRIGIDO
+- **77 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -178,7 +178,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **08-2** — Comportamento de `verify_webhook` sem segredo não fixado (**Alta**)
 - [ ] **08-3** — `/health` não checa dependências; sem readiness (Média)
 - [x] **08-4** — Sem rate limiting em login/webhooks (**Alta**)
-- [ ] **08-5** — Sem logging estruturado nem request-id/correlação (Média)
+- [x] **08-5** — Sem logging estruturado nem request-id/correlação (Média)
 - [ ] **08-6** — Sem métricas/tracing/APM; nenhum SLO observável (Média) *(parcial)*
 - [ ] **08-7** — `DATABASE_URL` default com credenciais em claro (Baixa)
 - [x] **08-8** — WebSocket aceitava token por query string (**Alta**)

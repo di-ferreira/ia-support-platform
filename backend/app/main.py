@@ -29,6 +29,8 @@ from app.appwrite.bootstrap import SchemaDriftError, ensure_appwrite_schema
 from app.appwrite.repositories import Repositories
 from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
+from app.core.correlacao import CorrelacaoMiddleware
+from app.core.logging import configurar_logging
 from app.integrations.emsoft_chamados import build_emsoft_chamados_service
 from app.integrations.emsoft_chamados.exceptions import ContractNotValidatedError
 from app.integrations.outbox import OutboxWorker
@@ -101,12 +103,18 @@ async def lifespan(app: FastAPI):
             pass
 
 
+# Logging estruturado: uma linha JSON por evento em producao (spec 08, gap 08-5).
+configurar_logging()
+
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     lifespan=lifespan,
 )
 
+# Ordem: CORS por fora, correlacao por dentro — o log de acesso enxerga o
+# request ja com CORS aplicado (R1.1).
+app.add_middleware(CorrelacaoMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
