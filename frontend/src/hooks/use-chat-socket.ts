@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { proximoBackoff } from "@/lib/reconnect";
+import { useChatStore, type ChatAtualizadoEvent } from "@/lib/stores/chat-store";
 
 const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8001";
 
@@ -67,7 +68,7 @@ export function useChatSocket(chatId: string | number | null) {
       };
 
       ws.onmessage = (event) => {
-        let msg: { event?: string; data?: { chat_id?: string | number } };
+        let msg: { event?: string; data?: ChatAtualizadoEvent };
         try {
           msg = JSON.parse(String(event.data));
         } catch {
@@ -76,6 +77,16 @@ export function useChatSocket(chatId: string | number | null) {
         const invalidar = INVALIDACOES[msg.event ?? ""];
         if (!invalidar) return;
         const id = String(msg.data?.chat_id ?? chatId);
+        if (msg.event === "chat_atualizado") {
+          // Fonte única: atualiza o chat ativo no store (gap 07-5)
+          useChatStore.getState().aplicarChatAtualizado({
+            chat_id: id,
+            status: msg.data?.status,
+            prioridade: msg.data?.prioridade,
+            departamento_id: msg.data?.departamento_id,
+            atendente_id: msg.data?.atendente_id,
+          });
+        }
         for (const chave of invalidar(id)) {
           queryClient.invalidateQueries({ queryKey: chave });
         }

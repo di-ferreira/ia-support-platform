@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useChatStore } from "@/lib/stores/chat-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,7 +179,8 @@ function humanizar(valor: string | null | undefined): string {
 export default function AtendimentoPage() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const [chatAtivo, setChatAtivo] = useState<string | null>(null);
+  const { chatAtivo, setChatAtivo } = useChatStore();
+  const chatAtivoId = chatAtivo?.id ?? null;
   const [novaMsg, setNovaMsg] = useState("");
   const [filtroDepartamento, setFiltroDepartamento] = useState("");
   const [modal, setModal] = useState<Modal>(null);
@@ -199,7 +201,7 @@ export default function AtendimentoPage() {
   const possuiGestao =
     user?.perfil === "admin" || user?.perfil === "supervisor";
 
-  useChatSocket(chatAtivo);
+  useChatSocket(chatAtivoId);
 
   const { data: iaSettings } = useQuery({
     queryKey: ["settings", "ia-name"],
@@ -229,24 +231,24 @@ export default function AtendimentoPage() {
   const chats = useMemo(() => chatsQuery.data ?? [], [chatsQuery.data]);
 
   const mensagensQuery = useQuery({
-    queryKey: ["mensagens", chatAtivo],
-    queryFn: () => api.get<any[]>(`/chats/${chatAtivo}/mensagens`),
-    enabled: !!chatAtivo,
+    queryKey: ["mensagens", chatAtivoId],
+    queryFn: () => api.get<any[]>(`/chats/${chatAtivoId}/mensagens`),
+    enabled: !!chatAtivoId,
     refetchInterval: 30000,
   });
   const mensagens = mensagensQuery.data ?? [];
 
   const chatDetailQuery = useQuery({
-    queryKey: ["chat", chatAtivo],
-    queryFn: () => api.get<ChatDetail>(`/chats/${chatAtivo}`),
-    enabled: !!chatAtivo,
+    queryKey: ["chat", chatAtivoId],
+    queryFn: () => api.get<ChatDetail>(`/chats/${chatAtivoId}`),
+    enabled: !!chatAtivoId,
   });
   const chatDetail = chatDetailQuery.data;
 
   const roteamentoQuery = useQuery({
-    queryKey: ["roteamento", chatAtivo],
-    queryFn: () => api.get<Roteamento>(`/chats/${chatAtivo}/roteamento`),
-    enabled: !!chatAtivo,
+    queryKey: ["roteamento", chatAtivoId],
+    queryFn: () => api.get<Roteamento>(`/chats/${chatAtivoId}/roteamento`),
+    enabled: !!chatAtivoId,
     retry: false,
   });
   const roteamento = roteamentoQuery.data;
@@ -256,9 +258,10 @@ export default function AtendimentoPage() {
     !!chatDetail && (possuiGestao || chatDetail.atendente_id === user?.id);
 
   const syncQuery = useQuery({
-    queryKey: ["integracao", chatAtivo],
-    queryFn: () => api.get<Sincronizacao>(`/integracoes/chamados/${chatAtivo}`),
-    enabled: !!chatAtivo && podeVerSync,
+    queryKey: ["integracao", chatAtivoId],
+    queryFn: () =>
+      api.get<Sincronizacao>(`/integracoes/chamados/${chatAtivoId}`),
+    enabled: !!chatAtivoId && podeVerSync,
     retry: false,
   });
   const sync = syncQuery.data;
@@ -280,10 +283,7 @@ export default function AtendimentoPage() {
   });
   const atendentes = atendentesQuery.data ?? [];
 
-  const chatSelecionado = useMemo(
-    () => chats.find((c) => c.id === chatAtivo) ?? null,
-    [chats, chatAtivo],
-  );
+  const chatSelecionado = chatAtivo;
 
   const nomeDepartamento = (id: string | null | undefined) =>
     departamentos.find((d) => d.id === id)?.nome ?? null;
@@ -309,9 +309,9 @@ export default function AtendimentoPage() {
 
   const updatePrioridade = useMutation({
     mutationFn: (prioridade: string) =>
-      api.patch(`/chats/${chatAtivo}/prioridade`, { prioridade }),
+      api.patch(`/chats/${chatAtivoId}/prioridade`, { prioridade }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       setAviso({ tipo: "sucesso", texto: "Prioridade atualizada." });
     },
     onError: (err) => setAviso({ tipo: "erro", texto: mensagemErro(err) }),
@@ -319,9 +319,9 @@ export default function AtendimentoPage() {
 
   const updateStatus = useMutation({
     mutationFn: (status: string) =>
-      api.patch(`/chats/${chatAtivo}/status`, { status }),
+      api.patch(`/chats/${chatAtivoId}/status`, { status }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       setAviso({ tipo: "sucesso", texto: "Status atualizado." });
     },
     onError: (err) => setAviso({ tipo: "erro", texto: mensagemErro(err) }),
@@ -329,13 +329,13 @@ export default function AtendimentoPage() {
 
   const sendMsg = useMutation({
     mutationFn: (conteudo: string) =>
-      api.post(`/chats/${chatAtivo}/mensagens`, {
+      api.post(`/chats/${chatAtivoId}/mensagens`, {
         remetente: "atendente",
         tipo: "texto",
         conteudo,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mensagens", chatAtivo] });
+      queryClient.invalidateQueries({ queryKey: ["mensagens", chatAtivoId] });
       setNovaMsg("");
     },
     onError: (err) => setAviso({ tipo: "erro", texto: mensagemErro(err) }),
@@ -356,7 +356,7 @@ export default function AtendimentoPage() {
 
   const transferirDepartamento = useMutation({
     mutationFn: () =>
-      api.patch(`/chats/${chatAtivo}/transferir-departamento`, {
+      api.patch(`/chats/${chatAtivoId}/transferir-departamento`, {
         departamento_id: deptoDestinoId,
         preservar_atendente_se_compativel: preservarAtendente,
         ...(motivoTransferencia.trim()
@@ -364,7 +364,7 @@ export default function AtendimentoPage() {
           : {}),
       }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       fecharModal();
       setDeptoDestinoId("");
       setMotivoTransferencia("");
@@ -376,12 +376,12 @@ export default function AtendimentoPage() {
 
   const atribuirAtendente = useMutation({
     mutationFn: () =>
-      api.patch(`/chats/${chatAtivo}/atribuir-atendente`, {
+      api.patch(`/chats/${chatAtivoId}/atribuir-atendente`, {
         atendente_id: atendenteDestinoId,
         ...(motivoAtribuicao.trim() ? { motivo: motivoAtribuicao.trim() } : {}),
       }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       fecharModal();
       setAtendenteDestinoId("");
       setMotivoAtribuicao("");
@@ -391,9 +391,9 @@ export default function AtendimentoPage() {
   });
 
   const confirmarResolucao = useMutation({
-    mutationFn: () => api.patch(`/chats/${chatAtivo}/confirmar-resolucao`),
+    mutationFn: () => api.patch(`/chats/${chatAtivoId}/confirmar-resolucao`),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       setAviso({ tipo: "sucesso", texto: "Resolução confirmada." });
     },
     onError: (err) => setAviso({ tipo: "erro", texto: mensagemErro(err) }),
@@ -401,13 +401,13 @@ export default function AtendimentoPage() {
 
   const reabrir = useMutation({
     mutationFn: () =>
-      api.patch(`/chats/${chatAtivo}/reabrir`, {
+      api.patch(`/chats/${chatAtivoId}/reabrir`, {
         ...(motivoNaoResolveu.trim()
           ? { motivo: motivoNaoResolveu.trim() }
           : {}),
       }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       fecharModal();
       setMotivoNaoResolveu("");
       setAviso({
@@ -420,13 +420,13 @@ export default function AtendimentoPage() {
 
   const solicitarHumano = useMutation({
     mutationFn: () =>
-      api.patch(`/chats/${chatAtivo}/status`, {
+      api.patch(`/chats/${chatAtivoId}/status`, {
         status: chatDetail?.solucao_sugerida_ia
           ? "AGUARDANDO_HUMANO_COM_SOLUCAO"
           : "AGUARDANDO_HUMANO_SEM_SOLUCAO",
       }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       setAviso({
         tipo: "sucesso",
         texto: "Intervenção humana solicitada: chamado encaminhado à fila.",
@@ -437,11 +437,11 @@ export default function AtendimentoPage() {
 
   const reprocessar = useMutation({
     mutationFn: () =>
-      api.post(`/integracoes/chamados/${chatAtivo}/reprocessar`, {
+      api.post(`/integracoes/chamados/${chatAtivoId}/reprocessar`, {
         motivo: motivoReprocesso.trim(),
       }),
     onSuccess: () => {
-      invalidarChat(chatAtivo);
+      invalidarChat(chatAtivoId);
       fecharModal();
       setMotivoReprocesso("");
       setAviso({
@@ -536,9 +536,9 @@ export default function AtendimentoPage() {
           {chats.map((chat) => (
             <button
               key={chat.id}
-              onClick={() => setChatAtivo(chat.id)}
+              onClick={() => setChatAtivo(chat)}
               className={`w-full border-b p-4 text-left transition-colors hover:bg-gray-50 ${
-                chatAtivo === chat.id
+                chatAtivo?.id === chat.id
                   ? "border-l-4 border-l-primary-500 bg-primary-50"
                   : ""
               }`}
@@ -590,7 +590,7 @@ export default function AtendimentoPage() {
                     className="h-6 gap-1 text-xs"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setChatAtivo(chat.id);
+                      setChatAtivo(chat);
                       pegarChat.mutate(chat.id);
                     }}
                     disabled={pegarChat.isPending}
@@ -606,7 +606,7 @@ export default function AtendimentoPage() {
 
       {/* Chat */}
       <div className="flex flex-1 flex-col rounded-lg border bg-white">
-        {chatAtivo ? (
+        {chatAtivoId ? (
           <>
             <div className="space-y-3 border-b p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -663,7 +663,7 @@ export default function AtendimentoPage() {
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => pegarChat.mutate(chatAtivo)}
+                    onClick={() => pegarChat.mutate(chatAtivoId)}
                     disabled={pegarChat.isPending}
                   >
                     <UserPlus className="h-4 w-4" /> Assumir
@@ -818,7 +818,7 @@ export default function AtendimentoPage() {
       </div>
 
       {/* Painel de diagnóstico e sincronização */}
-      {chatAtivo && (
+      {chatAtivoId && (
         <div className="flex w-80 flex-col gap-4 overflow-auto">
           <section className="rounded-lg border bg-white">
             <div className="border-b p-4">
@@ -1143,7 +1143,7 @@ export default function AtendimentoPage() {
                 </>
               )}
 
-              {possuiGestao && chatAtivo && (
+              {possuiGestao && chatAtivoId && (
                 <Button
                   size="sm"
                   variant="outline"

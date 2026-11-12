@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **131 entregues** `[x]` — gaps CORRIGIDO
-- **68 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **132 entregues** `[x]` — gaps CORRIGIDO
+- **67 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -164,7 +164,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **07-2** — Sem refresh token/renovação; sessão cai após 60 min (**Alta**)
 - [x] **07-3** — WebSocket sem reconexão nem backoff (Média)
 - [ ] **07-4** — Cores raw do Tailwind (`green/red/blue/gray`) fora dos tokens `@theme` (Média)
-- [ ] **07-5** — `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte (Baixa)
+- [x] **07-5** — `chat-store` (`chatAtivo`) não é usado; estado local duplica a fonte (Baixa)
 - [ ] **07-6** — Selects de status/prioridade usam `<select>` nativo (Baixa)
 - [x] **07-7** — Manifest referenciava `relatorios.html` fora de escopo (Média)
 - [x] **07-8** — Manifest referenciava `ia-dashboard.html` fora de escopo (Média)

@@ -11,6 +11,7 @@ Atualizado em 2026-11-12: 08-3 e 08-12 corrigidos (08-12 coberto por 08-3) — `
 Atualizado em 2026-11-12: 08-9, 00-10 e 00-16 corrigidos — métricas de produto e tempo de primeira resposta (R1.2/R1.3); 72 abertos.
 Atualizado em 2026-11-12: 04-3 e 07-11 corrigidos — guarda de rota e menu por perfil no frontend (Task F4.12, `lib/permissoes.ts`); 70 abertos.
 Atualizado em 2026-11-12: 03-8 e 07-3 corrigidos — eventos WS nas rotas de chat e reconexão com backoff + jitter (Task F4.7); 68 abertos.
+Atualizado em 2026-11-12: 07-5 corrigido — `chat-store` (Zustand) como fonte única do chat ativo (Task F4.6); 67 abertos.
 
 ## Critério de ordenação
 
@@ -163,7 +164,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 86 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação |
 | 87 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
 | 88 | 05-19 | Dependência `openai` declarada e nunca importada |
-| 89 | 07-5 | `chat-store` não é usado; estado local duplica a fonte |
+| 89 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
 | 90 | 07-6 | Selects de status/prioridade usam `<select>` nativo |
 | 91 | 08-7 | `DATABASE_URL` default com credenciais em claro |
 | 92 | 09-3 | MinIO órfão no compose prod sem referência no código |
