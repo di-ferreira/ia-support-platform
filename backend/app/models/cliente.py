@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.chat import Chat
 
 
 class Cliente(Base):
@@ -24,7 +28,7 @@ class Cliente(Base):
     lojas: Mapped[list["Loja"]] = relationship(
         back_populates="cliente", cascade="all, delete-orphan"
     )
-    chats: Mapped[list["Chat"]] = relationship(back_populates="cliente")  # noqa: F821
+    chats: Mapped[list["Chat"]] = relationship(back_populates="cliente")
 
 
 class Loja(Base):

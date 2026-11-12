@@ -57,13 +57,16 @@ Faltam a camada de **classificação de intenção/roteamento** e as **integraç
 `.github/workflows/ci.yml`:
 
 - Backend — `uv lock --check`, `ruff check app tests` (bloqueante),
-  `mypy app/ --ignore-missing-imports || true` (**report-only**), `pytest tests/ -q`.
-- Frontend — `npm run lint || true` (**report-only**), `npm run build` (bloqueante).
+  `mypy app/ --ignore-missing-imports` (bloqueante),
+  `pytest tests/ -q --cov=app --cov-report=term-missing --cov-fail-under=86` (bloqueante).
+- Frontend — `npm run lint` (bloqueante), `npm run test` (Vitest, bloqueante),
+  `npm run build` (bloqueante).
 - Docker — `build` das imagens (push desativado).
 
-Sem threshold de cobertura; mypy e lint do frontend não bloqueiam. A camada de IA saiu de
-cobertura zero (pipeline testado), mas regressões em `ai/router.py`, caches e clients ainda
-**não** impedem merge. Ver gaps **09-14** e **14-9**.
+Cobertura com piso `--cov-fail-under=86`, fixado em `[tool.coverage.report]`
+(`backend/pyproject.toml`) — valor medido em 2026-11-12 (450 testes), não meta aspiracional.
+mypy, lint e testes do frontend agora são bloqueantes: regressões em `ai/router.py`, caches
+e clients impedem merge. Gaps **09-14** e **14-9** — **CORRIGIDO**.
 
 ## Registro de Gaps
 
@@ -77,7 +80,7 @@ cobertura zero (pipeline testado), mas regressões em `ai/router.py`, caches e c
 | 14-6 | Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) | `frontend/package.json` | **Alta** | **ABERTO (parcial)** — Vitest + jsdom + Testing Library em `vitest.config.ts` (Task F4.1); bloqueio de CI e cobertura mínima na Task R2.3 |
 | 14-7 | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env | `infra/n8n/` | Média | **ABERTO** → 06-11 |
 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes | `tests/` | Média | **ABERTO** |
-| 14-9 | CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge | `ci.yml` | Média | **ABERTO** → 09-14 |
+| 14-9 | CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge | `ci.yml` | Média | **CORRIGIDO** — CI 100% bloqueante: `ruff`, `mypy`, `pytest --cov-fail-under=86`, `npm run lint`, `npm run test`; `fail_under = 86` (medido) em `pyproject.toml` |
 | 14-10 | Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste | `services/qdrant_service.py`; `ai/provider.py` | **Alta** | **CORRIGIDO** — `tests/test_qdrant_dimensao.py` trava `VECTOR_SIZE == 768`, a criação da coleção com 768/COSINE (cliente fake, sem rede) e o `get_embedder()` sempre retornando Ollama mesmo com provider OpenAI (ADR-0005) |
 | 14-11 | Sem testes de classificação de intenção, separação categoria ERP × departamento e resolução de roteamento | `app/ai/`; `app/services/` | **Alta** | **CORRIGIDO** — `tests/data/intencao_rotulada.py` + `test_intencao_regressao.py` |
 | 14-12 | Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento | `app/integrations/` | **Alta** | **ABERTO (parcial)** — adapter Emsoft coberto por 18 testes (`tests/test_integracao_emsoft_chamados.py`: validação de contrato, ciclo criar/editar, reconciliação, retry e rotas); ciclo outbox/reprocessamento ainda sem testes → 12 |

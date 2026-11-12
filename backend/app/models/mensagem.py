@@ -1,10 +1,14 @@
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.chat import Chat
 
 
 class TipoMensagem(enum.StrEnum):
@@ -39,4 +43,4 @@ class Mensagem(Base):
         DateTime(timezone=True), server_default=func.now(), index=True
     )
 
-    chat: Mapped["Chat"] = relationship(back_populates="mensagens")  # noqa: F821
+    chat: Mapped["Chat"] = relationship(back_populates="mensagens")

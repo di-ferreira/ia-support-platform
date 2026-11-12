@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **143 entregues** `[x]` — gaps CORRIGIDO
-- **57 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **145 entregues** `[x]` — gaps CORRIGIDO
+- **55 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 200 itens
 
 ## Fases do plano (SPEC 13)
@@ -203,7 +203,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **09-11** — `infra/.env.prod` não era gitignored (**Alta**)
 - [ ] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média)
 - [x] **09-13** — Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env (**Alta**)
-- [ ] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
+- [x] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
 - [x] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)
 - [ ] **09-16** — `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic (Baixa)
 - [ ] **09-17** — Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração (**Alta**) *(parcial)*
@@ -254,7 +254,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito com 8 testes; falta Playwright/E2E)*
 - [ ] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
 - [ ] **14-8** — Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes (Média)
-- [ ] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
+- [x] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
 - [x] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
 - [x] **14-11** — Sem testes de classificação de intenção, separação categoria ERP × departamento e resolução de roteamento (**Alta**)
 - [ ] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**) *(parcial)*

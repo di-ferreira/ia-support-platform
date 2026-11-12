@@ -1,10 +1,14 @@
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.chat import Chat
 
 
 class StatusIA(enum.StrEnum):
@@ -28,4 +32,4 @@ class IADiagnostico(Base):
     tokens_usados: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    chat: Mapped["Chat"] = relationship(back_populates="diagnosticos")  # noqa: F821
+    chat: Mapped["Chat"] = relationship(back_populates="diagnosticos")

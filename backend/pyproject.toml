@@ -27,6 +27,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
     "httpx>=0.27.0",
     "ruff>=0.6.0",
     "mypy>=1.11.0",
@@ -41,6 +42,12 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["."]
+
+# Piso de cobertura (gap 14-9): valor medido real da suíte em 2026-11-12
+# (450 testes, TOTAL 86%) — piso bloqueante de regressão, não meta.
+# Elevar apenas quando a suíte de testes crescer de fato.
+[tool.coverage.report]
+fail_under = 86
 
 [tool.ruff]
 target-version = "py312"

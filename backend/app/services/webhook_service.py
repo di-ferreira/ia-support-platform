@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import cast
 
 from fastapi import HTTPException, status
 
@@ -17,7 +18,7 @@ class WebhookService:
         self.repos = repos
 
     async def receber_mensagem(self, data: dict) -> dict:
-        whatsapp = data.get("whatsapp_number")
+        whatsapp = cast("str", data.get("whatsapp_number"))
         chat_id = data.get("chat_id")
 
         if whatsapp and "@" in whatsapp:
@@ -108,10 +109,10 @@ class WebhookService:
         }
         if update:
             await self.repos.clientes.update(cliente["id"], update)
-        return await self.repos.clientes.get(cliente["id"])
+        return cast("dict", await self.repos.clientes.get(cliente["id"]))
 
     async def salvar_diagnostico(self, data: dict) -> dict:
-        chat_id = data.get("chat_id")
+        chat_id = cast("str", data.get("chat_id"))
         chat = await self.repos.chats.get(chat_id)
         if not chat:
             raise HTTPException(

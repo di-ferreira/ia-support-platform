@@ -14,7 +14,7 @@ _CAMPOS = ("request_id", "chat_id", "event", "metodo", "rota", "status", "duraca
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-        dados = {
+        dados: dict[str, object] = {
             "ts": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,

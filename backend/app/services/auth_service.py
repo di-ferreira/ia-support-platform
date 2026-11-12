@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import HTTPException, status
 
 from app.appwrite.repositories import Repositories
@@ -34,7 +36,7 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
             )
-        user_id = payload.get("sub")
+        user_id = cast("str", payload.get("sub"))
         user = await self.repos.atendentes.get(user_id)
         if not user or not user["ativo"]:
             raise HTTPException(

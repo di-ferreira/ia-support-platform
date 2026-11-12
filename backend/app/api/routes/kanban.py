@@ -1,10 +1,12 @@
+from typing import cast
+
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_current_user, get_repositories
 from app.api.realtime import emitir_chat_atualizado
 from app.appwrite.repositories import Repositories
 from app.models.chat import StatusChat
-from app.schemas.kanban import KanbanResponse, MoverCardRequest
+from app.schemas.kanban import KanbanColumn, KanbanResponse, MoverCardRequest
 from app.services.chat_service import ChatService
 from app.services.kanban_service import KanbanService
 
@@ -18,7 +20,8 @@ async def obter_kanban(
 ):
     service = KanbanService(repos)
     colunas = await service.obter_kanban(user)
-    return KanbanResponse(colunas=colunas)
+    # O service devolve dicts; o schema valida em runtime (pydantic).
+    return KanbanResponse(colunas=cast("list[KanbanColumn]", colunas))
 
 
 @router.patch("/mover", status_code=204)

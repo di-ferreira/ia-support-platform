@@ -108,7 +108,7 @@ def calcular_delay_s(
     """Backoff exponencial com jitter (spec 12 §Retry):
     `base * 2^tentativas`, limitado por `max_s`, mais uniform em
     `[0, jitter_s)` para evitar tempestade de retries simultâneos."""
-    rng = rng or random
+    rng = rng or random.Random()
     exponencial = base_s * (2 ** max(tentativas, 0))
     return min(exponencial, max_s) + rng.uniform(0, jitter_s)
 
@@ -156,7 +156,7 @@ class OutboxWorker:
         self._batch = batch_size
         self._owner = owner or f"outbox-{socket.gethostname()}-{os.getpid()}"
         self._agora = agora or (lambda: datetime.now(UTC))
-        self._rng = rng or random
+        self._rng = rng or random.Random()
 
     # -- elegibilidade -----------------------------------------------------
 
@@ -234,8 +234,8 @@ class OutboxWorker:
         if (resultado or {}).get("status") == "SINCRONIZADO":
             await self._concluir(evento, self._agora())
             return
-        exc = self._service.ultimo_erro
-        if exc is None:
+        ultimo = self._service.ultimo_erro
+        if ultimo is None:
             # Defensivo: sem exceção registrada; trata como transitória
             # com a mensagem do resumo de sincronização.
             classe = ClasseFalha.transitoria
@@ -245,8 +245,8 @@ class OutboxWorker:
                 f"{(resultado or {}).get('mensagem') or 'sem detalhes'}"
             )
         else:
-            classe, motivo = classificar_erro(exc)
-        await self._falhar(evento, exc, self._agora(), classe, motivo)
+            classe, motivo = classificar_erro(ultimo)
+        await self._falhar(evento, ultimo, self._agora(), classe, motivo)
 
     async def _adquirir_lease(self, evento: dict, agora: datetime) -> None:
         await self._repos.integration_outbox.update(

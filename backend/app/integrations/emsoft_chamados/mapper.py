@@ -98,7 +98,7 @@ def build_payload(
     for campo_externo, dot_path in mapa.items():
         if dot_path == STATUS_INTENT_PATH:
             intent = chamado.external_status_intent
-            valor = (
+            valor: object = (
                 contract.status_externos.get(intent) if intent else None
             )
             if not valor:

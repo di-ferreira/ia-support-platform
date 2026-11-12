@@ -162,7 +162,7 @@ async def websocket_chat(websocket: WebSocket, chat_id: str, token: str | None =
     await manager.connect(chat_id, websocket, token)
     try:
         while True:
-            data = await manager.receive_json()
+            data = await websocket.receive_json()
             await manager.broadcast(chat_id, data)
     except WebSocketDisconnect:
         manager.disconnect(chat_id, websocket)

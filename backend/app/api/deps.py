@@ -1,4 +1,6 @@
 
+from typing import cast
+
 from appwrite.client import Client
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -38,7 +40,7 @@ async def _get_user_from_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
         )
-    user_id = payload.get("sub")
+    user_id = cast("str", payload.get("sub"))
     user = await repos.atendentes.get(user_id)
     if user is None or not user["ativo"]:
         raise HTTPException(

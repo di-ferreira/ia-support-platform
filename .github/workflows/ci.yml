@@ -31,11 +31,11 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check app tests
 
-      - name: Type check (mypy, report-only)
-        run: uv run mypy app/ --ignore-missing-imports || true
+      - name: Type check (mypy)
+        run: uv run mypy app/ --ignore-missing-imports
 
-      - name: Testes (pytest)
-        run: uv run pytest tests/ -q -p no:cacheprovider
+      - name: Testes (pytest + cobertura)
+        run: uv run pytest tests/ -q --cov=app --cov-report=term-missing --cov-fail-under=86
 
   frontend:
     name: Frontend
@@ -56,8 +56,11 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Lint (report-only)
-        run: npm run lint || true
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes (Vitest)
+        run: npm run test
 
       - name: Build
         run: npm run build

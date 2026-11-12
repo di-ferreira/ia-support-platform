@@ -1,10 +1,18 @@
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.atendente import Atendente
+    from app.models.cliente import Cliente
+    from app.models.ia_diagnostico import IADiagnostico
+    from app.models.mensagem import Mensagem
+    from app.models.tag import Tag
 
 
 class StatusChat(enum.StrEnum):
@@ -55,14 +63,14 @@ class Chat(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    cliente: Mapped["Cliente"] = relationship(back_populates="chats")  # noqa: F821
-    atendente: Mapped["Atendente"] = relationship()  # noqa: F821
-    mensagens: Mapped[list["Mensagem"]] = relationship(  # noqa: F821
+    cliente: Mapped["Cliente"] = relationship(back_populates="chats")
+    atendente: Mapped["Atendente"] = relationship()
+    mensagens: Mapped[list["Mensagem"]] = relationship(
         back_populates="chat", cascade="all, delete-orphan"
     )
-    diagnosticos: Mapped[list["IADiagnostico"]] = relationship(  # noqa: F821
+    diagnosticos: Mapped[list["IADiagnostico"]] = relationship(
         back_populates="chat", cascade="all, delete-orphan"
     )
-    tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
+    tags: Mapped[list["Tag"]] = relationship(
         secondary="chat_tag", back_populates="chats"
     )

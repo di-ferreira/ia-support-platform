@@ -106,7 +106,7 @@ Verificado contra o código em 2026-11-06.
 | 09-11 | `infra/.env.prod` não era gitignored | `.gitignore` | **Alta** | **CORRIGIDO** — `infra/.env*` (exceto `.env.example`) ignorado |
 | 09-12 | Alembic/Postgres híbrido com runtime em Appwrite | `alembic/env.py`; `seed_qdrant.py` | Média | **ABERTO** → 02-14 |
 | 09-13 | Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env | `infra/docker-compose.*.yml` | **Alta** | **CORRIGIDO** |
-| 09-14 | CI: mypy e lint do frontend report-only; sem job de teste do frontend | `.github/workflows/ci.yml` | Média | **ABERTO** → [14](14-test-strategy.md) |
+| 09-14 | CI: mypy e lint do frontend report-only; sem job de teste do frontend | `.github/workflows/ci.yml` | Média | **CORRIGIDO** — mypy e lint do frontend bloqueantes; testes do frontend (`npm run test`) antes do build; `pytest --cov-fail-under=86` → [14](14-test-strategy.md) |
 | 09-15 | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | `infra/docker-compose.prod.yml`; `core/config.py:30` | **Crítica** | **CORRIGIDO** (2026-11-10) — serviço `ollama` na pilha; `OLLAMA_BASE_URL` default `http://ollama:11434` (pull dos modelos via `exec ollama`) |
 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic | `scripts/start-prod.sh` | Baixa | **ABERTO** |
 | 09-17 | Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração | `core/config.py`; `infra/` | **Alta** | **ABERTO (parcial)** — variáveis `EMSOFT_CHAMADOS_*` criadas (`core/config.py`, scaffold 11-1); serviço de worker de integração ainda não existe → 12 |

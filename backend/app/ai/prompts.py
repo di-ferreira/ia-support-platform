@@ -137,10 +137,11 @@ def _formatar_historico(historico: list[dict]) -> str:
     if not historico:
         return "Sem histórico anterior (primeira mensagem do cliente)."
     rotulos = {"cliente": "Cliente", "ia": "IA", "atendente": "Atendente"}
-    linhas = [
-        f"{rotulos.get(m.get('remetente'), m.get('remetente', 'Cliente'))}: {m.get('conteudo')}"
-        for m in historico
-    ]
+    linhas = []
+    for m in historico:
+        remetente = m.get("remetente")
+        rotulo = "Cliente" if remetente is None else rotulos.get(remetente, remetente)
+        linhas.append(f"{rotulo}: {m.get('conteudo')}")
     return "\n".join(linhas)
 
 

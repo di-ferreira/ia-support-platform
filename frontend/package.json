@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "test:cov": "vitest run --coverage",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",
     "jsdom": "^25.0.1",
