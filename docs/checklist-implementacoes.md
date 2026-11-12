@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **140 entregues** `[x]` — gaps CORRIGIDO
-- **60 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **143 entregues** `[x]` — gaps CORRIGIDO
+- **57 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 200 itens
 
 ## Fases do plano (SPEC 13)
@@ -132,7 +132,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **05-17** — Categoria `multiempresa` reconhecida pela IA mas ausente do schema (**Alta**)
 - [x] **05-18** — `IADiagnosticoRepository.get_by_chat` sem chamador (Baixa)
 - [ ] **05-19** — Dependência `openai` declarada e nunca importada (clients usam `httpx`) (Baixa)
-- [ ] **05-20** — Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` (**Alta**) *(parcial)*
+- [x] **05-20** — Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` (**Alta**)
 - [x] **05-21** — Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria (**Alta**)
 - [x] **05-22** — Resolução determinística de regras de roteamento inexistente (**Alta**)
 - [x] **05-23** — Diagnóstico não persiste intenção/departamento/artigos consultados/razão (**Alta**)
@@ -246,9 +246,9 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 14 — Estratégia de testes
 
-- [ ] **14-1** — `AIPipelineService` é coberto, mas `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` não têm teste unitário direto (**Alta**)
+- [x] **14-1** — `AIPipelineService` é coberto, mas `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` não têm teste unitário direto (**Alta**)
 - [x] **14-2** — Stub de LLM/embedder via monkeypatch de `get_llm`/`get_embedder` permite exercitar RAG → cenário de forma determinística (**Crítica**)
-- [ ] **14-3** — `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` (**Alta**)
+- [x] **14-3** — `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` (**Alta**)
 - [x] **14-4** — Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic (**Alta**)
 - [x] **14-5** — Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` (**Alta**)
 - [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito com 8 testes; falta Playwright/E2E)*

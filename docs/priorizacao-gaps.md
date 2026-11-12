@@ -16,6 +16,7 @@ Atualizado em 2026-11-12: 07-4 e 07-6 corrigidos (Task F4.13) — selects Radix 
 Atualizado em 2026-11-12: 04-4 e 04-5 corrigidos (T6) — regras RBAC de criação de usuário e troca de perfil cobertas por `tests/test_rbac_usuarios.py`; 63 abertos.
 Atualizado em 2026-11-12: 04-6 e 14-10 corrigidos (T6) — ações do ChatService (pegar/transferir/transferir_grupo/assinar/definir_prioridade/listar com filtros e escopo) cobertas por `tests/test_chat_service.py`; dimensão 768 do embedding e bloqueio OpenAI (ADR-0005) travados por `tests/test_qdrant_dimensao.py`; 61 abertos.
 Atualizado em 2026-11-12: 03-9 e 04-13 corrigidos — /assinar deprecado (atribuir-atendente é o caminho único) e chat ENCERRADO recusa atribuição; 60 abertos.
+Atualizado em 2026-11-12: 14-1, 05-20 e 14-3 corrigidos (T6) — `ai/router.py`, `ai_cache.py`, clients Ollama/OpenAI e `qdrant_service.py` cobertos por testes unitários sem rede (`test_ai_router.py`, `test_ai_cache.py`, `test_llm_services.py`, `test_qdrant_service.py`); 57 abertos.
 
 ## Critério de ordenação
 
@@ -92,9 +93,9 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 26 | 04-4 (CORRIGIDO) | Regra "supervisor só cria `atendente`" está no serviço e sem teste | Regra de RBAC sem proteção de regressão |
 | 27 | 04-5 (CORRIGIDO) | Regra "só admin altera `perfil`" está no serviço e sem teste | Idem — RBAC sem teste |
 | 28 | 04-6 | `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` sem teste | Ações principais do `ChatService` descobertas |
-| 29 | 14-1 | `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` sem teste unitário direto | Caminho crítico da IA sem teste |
-| 30 | 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients | Mesma raiz de 14-1 (view do pipeline) |
-| 31 | 14-3 | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768 | Fundação do RAG sem teste |
+| 29 | 14-1 (CORRIGIDO) | `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` sem teste unitário direto | Caminho crítico da IA sem teste |
+| 30 | 05-20 (CORRIGIDO) | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients | Mesma raiz de 14-1 (view do pipeline) |
+| 31 | 14-3 (CORRIGIDO) | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768 | Fundação do RAG sem teste |
 | 32 | 14-10 | Sem teste que garanta a dimensão de embedding (768 vs 1536) | Bloqueio OpenAI (ADR-0005) não é travado por teste |
 | 33 | 14-12 | Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento | Integração (Fases 5/6) sem porta de regressão |
 | 34 | 14-6 | Frontend sem infraestrutura de teste (sem Vitest/Playwright) | Código da Fase 4 entraria sem teste |

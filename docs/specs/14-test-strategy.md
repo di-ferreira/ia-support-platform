@@ -69,9 +69,9 @@ cobertura zero (pipeline testado), mas regressões em `ai/router.py`, caches e c
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 14-1 | `AIPipelineService` é coberto, mas `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` não têm teste unitário direto | `app/ai/`; `tests/` | **Alta** | **ABERTO** |
+| 14-1 | `AIPipelineService` é coberto, mas `ai/router.py`, `ai_cache.py`, `ollama_service.py` e `openai_service.py` não têm teste unitário direto | `app/ai/`; `tests/` | **Alta** | **CORRIGIDO** — `tests/test_ai_router.py` (4 endpoints com dependências mockadas: 200/404/422/502), `tests/test_ai_cache.py` (hit/miss/TTL/`clear`/fail-safe) e `tests/test_llm_services.py` (Ollama e OpenAI com `httpx.MockTransport`, sem rede) |
 | 14-2 | Stub de LLM/embedder via monkeypatch de `get_llm`/`get_embedder` permite exercitar RAG → cenário de forma determinística | `tests/test_ai_pipeline.py` | **Crítica** | **CORRIGIDO** |
-| 14-3 | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` | `services/qdrant_service.py` | **Alta** | **ABERTO** → 05-6 |
+| 14-3 | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` | `services/qdrant_service.py` | **Alta** | **CORRIGIDO** — `tests/test_qdrant_service.py` (cliente fake, sem rede: `search_similar` com/sem filtro de categoria, `upsert_article`, `ensure_collection`, `article_point_id` e dimensão 768) → 05-6 |
 | 14-4 | Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic | `ai/prompts.py`; `ai_pipeline.py` | **Alta** | **CORRIGIDO** → 05-16 |
 | 14-5 | Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` | `tests/test_webhooks.py` | **Alta** | **CORRIGIDO** → 06-3 |
 | 14-6 | Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) | `frontend/package.json` | **Alta** | **ABERTO (parcial)** — Vitest + jsdom + Testing Library em `vitest.config.ts` (Task F4.1); bloqueio de CI e cobertura mínima na Task R2.3 |
