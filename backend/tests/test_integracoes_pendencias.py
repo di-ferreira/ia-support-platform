@@ -14,8 +14,8 @@ Endpoints em ``/integracoes/chamados`` (spec 03 L76–84, spec 12
 from datetime import datetime
 from uuid import uuid4
 
-from app.main import app
 from app.integrations.outbox.worker import OutboxWorker
+from app.main import app
 
 BASE = "/integracoes/chamados"
 
@@ -56,7 +56,12 @@ def _auth(token: str) -> dict:
 
 async def test_pendentes_lista_somente_nao_concluidos(client, fake_repos, admin_token):
     chat = await _preparar_chat(fake_repos)
-    await _criar_evento(fake_repos, chat["id"], status="PENDENTE", quando="2026-01-03T00:00:01+00:00")
+    await _criar_evento(
+        fake_repos,
+        chat["id"],
+        status="PENDENTE",
+        quando="2026-01-03T00:00:01+00:00",
+    )
     await _criar_evento(
         fake_repos,
         chat["id"],
@@ -208,7 +213,9 @@ async def test_reprocessar_recusa_payload_arbitrario_422(client, fake_repos, adm
 
 async def test_reprocessar_motivo_invalido_422(client, fake_repos, admin_token):
     chat = await _preparar_chat(fake_repos)
-    resp = await client.post(f"{BASE}/{chat['id']}/reprocessar", json={}, headers=_auth(admin_token))
+    resp = await client.post(
+        f"{BASE}/{chat['id']}/reprocessar", json={}, headers=_auth(admin_token)
+    )
     assert resp.status_code == 422
     resp = await client.post(
         f"{BASE}/{chat['id']}/reprocessar", json={"motivo": "ab"}, headers=_auth(admin_token)
