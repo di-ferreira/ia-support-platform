@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **136 entregues** `[x]` — gaps CORRIGIDO
-- **63 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **138 entregues** `[x]` — gaps CORRIGIDO
+- **61 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -102,7 +102,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **04-3** — Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` (Média)
 - [x] **04-4** — Regra "supervisor só cria `atendente`" está no serviço e sem teste (**Alta**)
 - [x] **04-5** — Regra "só admin altera `perfil`" está no serviço e sem teste (**Alta**)
-- [ ] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
+- [x] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
 - [x] **04-7** — `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit (**Alta**)
 - [ ] **04-8** — `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR (Média)
 - [ ] **04-9** — `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado (Baixa)
@@ -254,6 +254,6 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
 - [ ] **14-8** — Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes (Média)
 - [ ] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)
-- [ ] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
+- [x] **14-10** — Sem teste que garanta a dimensão de embedding (768 vs 1536); o bloqueio OpenAI (ADR-0005) não é travado por teste (**Alta**)
 - [x] **14-11** — Sem testes de classificação de intenção, separação categoria ERP × departamento e resolução de roteamento (**Alta**)
 - [ ] **14-12** — Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento (**Alta**) *(parcial)*

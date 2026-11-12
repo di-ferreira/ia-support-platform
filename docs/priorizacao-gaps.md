@@ -14,6 +14,7 @@ Atualizado em 2026-11-12: 03-8 e 07-3 corrigidos — eventos WS nas rotas de cha
 Atualizado em 2026-11-12: 07-5 corrigido — `chat-store` (Zustand) como fonte única do chat ativo (Task F4.6); 67 abertos.
 Atualizado em 2026-11-12: 07-4 e 07-6 corrigidos (Task F4.13) — selects Radix e cores via tokens `@theme`; 65 abertos.
 Atualizado em 2026-11-12: 04-4 e 04-5 corrigidos (T6) — regras RBAC de criação de usuário e troca de perfil cobertas por `tests/test_rbac_usuarios.py`; 63 abertos.
+Atualizado em 2026-11-12: 04-6 e 14-10 corrigidos (T6) — ações do ChatService (pegar/transferir/transferir_grupo/assinar/definir_prioridade/listar com filtros e escopo) cobertas por `tests/test_chat_service.py`; dimensão 768 do embedding e bloqueio OpenAI (ADR-0005) travados por `tests/test_qdrant_dimensao.py`; 61 abertos.
 
 ## Critério de ordenação
 
