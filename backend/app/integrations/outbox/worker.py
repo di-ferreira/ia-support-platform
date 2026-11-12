@@ -15,6 +15,14 @@ multi-documento): cada evento é protegido por um lease
 (`lease_owner`/`lease_expires_at`). Evento `PROCESSANDO` com lease
 expirado volta a ser elegível, e o service impede duplicatas
 (re-PATCH pelo ID; reconciliar, nunca re-POST cego).
+
+Obsolescência por versão do agregado (spec 12 §Concorrência, gap
+12-8): antes da chamada externa, o worker verifica se existe outro
+evento do mesmo `chat_id` com `event_version` maior e status não
+concluído; se existir, o evento atual é descartado
+(`FALHA_PERMANENTE` — o schema não tem status `OBSOLETO`) sem
+chamada externa, para uma versão antiga não sobrescrever o estado
+no sistema externo com dado velho.
 """
 
 import asyncio
@@ -209,6 +217,13 @@ class OutboxWorker:
 
     async def _processar_evento(self, evento: dict) -> None:
         agora = self._agora()
+        # Obsolescência por versão do agregado (spec 12 §Concorrência,
+        # gap 12-8): se um evento mais novo do chat ainda está na fila,
+        # processar este sobrescreveria o estado externo com dado velho.
+        mais_novo = await self._evento_mais_novo_nao_concluido(evento)
+        if mais_novo is not None:
+            await self._descartar_obsoleto(evento, mais_novo, agora)
+            return
         await self._adquirir_lease(evento, agora)
         chat_id = evento.get("chat_id")
         # Início da correlação do pipeline (spec 12, 12-6 -> 08-5):
@@ -247,6 +262,74 @@ class OutboxWorker:
         else:
             classe, motivo = classificar_erro(ultimo)
         await self._falhar(evento, ultimo, self._agora(), classe, motivo)
+
+    @staticmethod
+    def _chave_versao(evento: dict) -> tuple[int, str]:
+        """Ordem determinística por versão do agregado (gap 12-8):
+        `event_version` e, em empate, `created_at` (enfileiramento)."""
+        return (
+            int(evento.get("event_version") or 0),
+            evento.get("created_at") or "",
+        )
+
+    async def _evento_mais_novo_nao_concluido(self, evento: dict) -> dict | None:
+        """Evento do mesmo `chat_id` com `event_version` maior e status
+        não concluído (spec 12 §Concurrência, gap 12-8).
+
+        Uma única consulta ao repositório por `chat_id`, ordenada por
+        versão decrescente; versões iguais não se bloqueiam (dedup
+        por `event_key`) e evento `CONCLUIDO` não bloqueia (já
+        aplicado). Devolve o bloqueador ou `None`.
+        """
+        chat_id = evento.get("chat_id")
+        if not chat_id:
+            return None
+        eventos = await self._repos.integration_outbox.list_by("chat_id", chat_id)
+        por_versao = sorted(eventos, key=self._chave_versao, reverse=True)
+        atual = self._chave_versao(evento)[0]
+        for outro in por_versao:
+            if outro.get("id") == evento.get("id"):
+                continue
+            if self._chave_versao(outro)[0] <= atual:
+                break  # ordenado decrescente: não há versão maior adiante
+            if outro.get("status") != StatusOutbox.concluido.value:
+                return outro
+        return None
+
+    async def _descartar_obsoleto(
+        self, evento: dict, mais_novo: dict, agora: datetime
+    ) -> None:
+        """Descarta evento superado por versão sem chamada externa
+        (gap 12-8). O schema não tem status `OBSOLETO`; usa-se
+        `FALHA_PERMANENTE` (único terminal não-concluído) com
+        `ultimo_erro` explicando — o reprocessamento manual continua
+        disponível para o operador."""
+        await self._repos.integration_outbox.update(
+            evento["id"],
+            {
+                "status": StatusOutbox.falha_permanente.value,
+                "ultimo_erro": (
+                    f"Evento obsoleto: existe evento mais novo do chat na fila "
+                    f"(event_version={mais_novo.get('event_version')}, "
+                    f"status={mais_novo.get('status')}); descartado sem chamada "
+                    "externa (spec 12 §Concorrência)"
+                )[:1000],
+                "next_attempt_at": None,
+                "ultima_tentativa_em": agora.isoformat(),
+                "lease_owner": None,
+                "lease_expires_at": None,
+            },
+        )
+        logger.warning(
+            "outbox: evento obsoleto descartado sem chamada externa",
+            extra={
+                "event": "outbox_evento_obsoleto",
+                "event_key": evento.get("event_key"),
+                "chat_id": evento.get("chat_id"),
+                "event_version": evento.get("event_version"),
+                "versao_nova": mais_novo.get("event_version"),
+            },
+        )
 
     async def _adquirir_lease(self, evento: dict, agora: datetime) -> None:
         await self._repos.integration_outbox.update(

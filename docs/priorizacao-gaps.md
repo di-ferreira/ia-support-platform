@@ -21,6 +21,7 @@ Atualizado em 2026-11-12: 14-9 e 09-14 corrigidos (T9) — CI 100% bloqueante (`
 Atualizado em 2026-11-12: 14-7 corrigido (T9) — harness `backend/tests/test_workflow_n8n.py` valida nós essenciais, `$env.*` × `.env.example`/compose, `onError`, path do webhook e conexões sem nó órfão; 54 abertos.
 Atualizado em 2026-11-12: 14-12 corrigido (T6) — adapter com contrato congelado + ciclo do outbox (`tests/test_outbox_ciclo.py`: sucesso, retry com backoff, `FALHA_PERMANENTE`, lease, reprocessamento manual e evento obsoleto, com clock injetado); 53 abertos.
 Atualizado em 2026-11-12: 12-8 registrado (auditoria do worker: `event_version` só entra na `event_key` e o evento obsoleto não é descartado, spec 12 §Concorrência); 54 abertos.
+Atualizado em 2026-11-12: 12-8 corrigido — worker descarta evento obsoleto por `event_version` do agregado (descarte `FALHA_PERMANENTE`, sem status novo no enum) sem chamada externa; 53 abertos.
 
 ## Critério de ordenação
 
@@ -77,7 +78,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 18 | 09-17 | Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração | Integração não sobe em prod |
 | 19 | 00-14 | Integração com a API interna de chamados Emsoft não existe | Escopo de produto (SPEC 00) ainda ausente |
 | 20 | 00-15 | Sem outbox/idempotência para chamados externos | Chamadas externas duplicadas/sem garantia |
-| 21 | 12-8 | Evento obsoleto do outbox não é descartado (`event_version` só entra na `event_key`); versão antiga pode sobrescrever o estado no sistema externo com dado velho | Versão antiga processada depois da nova aplica dado velho no sistema externo (spec 12 §Concorrência) |
+| 21 | 12-8 (CORRIGIDO) | Evento obsoleto do outbox não é descartado (`event_version` só entra na `event_key`); versão antiga pode sobrescrever o estado no sistema externo com dado velho | Versão antiga processada depois da nova aplica dado velho no sistema externo (spec 12 §Concorrência) |
 
 ### T4 — Frontend Fase 4 e painéis (3) — todos corrigidos em 2026-11-11
 | # | Gap | Descrição | Justificativa |

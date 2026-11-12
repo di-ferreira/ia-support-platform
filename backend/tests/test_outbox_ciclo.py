@@ -11,11 +11,10 @@ Cobre, com clock/rng injetáveis e fakes (sem rede, sem `sleep` real):
    volta a pegá-lo quando ele expira;
 5. reprocessamento manual (ator + motivo) reabre o evento preservando
    a auditoria (mesmo registro, mesmo `created_at`);
-6. evento obsoletos (versão antiga do agregado): **divergência do
-   esperado** — o worker não inspeciona `event_version`; o evento
-   obsoleto é processado normalmente (chamada externa feita). O
-   descarte de obsoletos (spec 12 §Concorrência) não está implementado
-   na produção; aqui se asserta o comportamento real.
+6. evento obsoleto (versão antiga do agregado, spec 12 §Concorrência,
+   gap 12-8): versão antiga é descartada sem chamada externa
+   (`FALHA_PERMANENTE` + `ultimo_erro` explicando); a versão mais
+   nova é processada normalmente; versões iguais não se bloqueiam.
 
 Padrão de helpers copiado de `tests/test_integracoes_pendencias.py`.
 """
@@ -247,26 +246,92 @@ async def test_reprocessamento_manual_reabre_evento(
     assert _evento(fake_repos, evento["id"])["status"] == "CONCLUIDO"
 
 
-async def test_evento_obsoleto_divergencia_do_esperado(fake_repos):
-    """6. evento obsoleto (versão antiga do agregado).
+async def test_evento_obsoleto_e_descartado_sem_chamada_externa(fake_repos):
+    """6. evento obsoleto (versão antiga do agregado, gap 12-8).
 
-    ESPERADO pelo gap 14-12: o evento seria descartado sem chamada
-    externa (spec 12 §Concorrência — `event_version` para detectar
-    obsolescência). DIVERGÊNCIA: a produção não implementa esse
-    descarte — nem o worker (`eventos_eligiveis`/`_processar_evento`)
-    nem o service leem `event_version`. Asserta-se o comportamento
-    REAL: o evento obsoleto é processado normalmente.
-    """
+    Com v1 e v2 do mesmo chat na fila, o worker processa v1 primeiro
+    (ordem de enfileiramento), encontra v2 mais nova e não concluída
+    e descarta v1 SEM chamada externa (`FALHA_PERMANENTE` +
+    `ultimo_erro` explicando); v2 segue normalmente."""
     chat = await _preparar_chat(fake_repos)
-    # Versão antiga do agregado (ex.: emsoft:update:{chat}:1 superada).
-    evento = await _criar_evento(
+    antigo = await _criar_evento(
+        fake_repos,
+        chat["id"],
+        event_key=f"emsoft:update:{chat['id']}:1",
+        event_type="TICKET_UPDATE_REQUESTED",
+        event_version=1,
+    )
+    novo = await _criar_evento(
+        fake_repos,
+        chat["id"],
+        event_key=f"emsoft:update:{chat['id']}:2",
+        event_type="TICKET_UPDATE_REQUESTED",
+        event_version=2,
+    )
+    service = _ServiceFake(resultado={"status": "SINCRONIZADO"})
+    worker = _worker(fake_repos, service)
+
+    assert await worker.processar_vaga() == 2
+
+    v1 = _evento(fake_repos, antigo["id"])
+    assert v1["status"] == "FALHA_PERMANENTE"
+    assert "obsoleto" in v1["ultimo_erro"].lower()
+    assert "event_version=2" in v1["ultimo_erro"]
+    assert v1["next_attempt_at"] is None
+    assert v1["lease_owner"] is None
+    assert v1["lease_expires_at"] is None
+    assert _evento(fake_repos, novo["id"])["status"] == "CONCLUIDO"
+    # Uma única chamada externa: só a versão mais nova foi sincronizada.
+    assert service.chamadas == [chat["id"]]
+
+
+async def test_versao_nova_e_processada_normalmente(fake_repos):
+    """6b. a versão mais nova do agregado não é bloqueada por nenhuma:
+    só o evento antigo é descartado (gap 12-8)."""
+    chat = await _preparar_chat(fake_repos)
+    await _criar_evento(
+        fake_repos,
+        chat["id"],
+        event_key=f"emsoft:update:{chat['id']}:1",
+        event_type="TICKET_UPDATE_REQUESTED",
+        event_version=1,
+    )
+    novo = await _criar_evento(
+        fake_repos,
+        chat["id"],
+        event_key=f"emsoft:update:{chat['id']}:2",
+        event_type="TICKET_UPDATE_REQUESTED",
+        event_version=2,
+    )
+    service = _ServiceFake(resultado={"status": "SINCRONIZADO"})
+    worker = _worker(fake_repos, service)
+
+    assert await worker.processar_vaga() == 2
+
+    v2 = _evento(fake_repos, novo["id"])
+    assert v2["status"] == "CONCLUIDO"
+    assert v2["tentativas"] == 0
+    assert service.chamadas == [chat["id"]]
+
+
+async def test_versoes_iguais_nao_se_bloqueiam(fake_repos):
+    """6c. eventos com a MESMA `event_version` não se bloqueiam (dedup
+    é por `event_key`, não por versão): ambos são processados
+    (gap 12-8)."""
+    chat = await _preparar_chat(fake_repos)
+    primeiro = await _criar_evento(
         fake_repos, chat["id"], event_type="TICKET_UPDATE_REQUESTED",
+        event_version=1,
+    )
+    segundo = await _criar_evento(
+        fake_repos, chat["id"], event_type="TICKET_ASSIGNMENT_CHANGED",
         event_version=1,
     )
     service = _ServiceFake(resultado={"status": "SINCRONIZADO"})
     worker = _worker(fake_repos, service)
 
-    # Comportamento real: obsoleto ou não, o evento é processado.
-    assert await worker.processar_vaga() == 1
-    assert service.chamadas == [chat["id"]]
-    assert _evento(fake_repos, evento["id"])["status"] == "CONCLUIDO"
+    assert await worker.processar_vaga() == 2
+
+    assert _evento(fake_repos, primeiro["id"])["status"] == "CONCLUIDO"
+    assert _evento(fake_repos, segundo["id"])["status"] == "CONCLUIDO"
+    assert service.chamadas == [chat["id"], chat["id"]]

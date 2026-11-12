@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **147 entregues** `[x]` — gaps CORRIGIDO
-- **54 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **148 entregues** `[x]` — gaps CORRIGIDO
+- **53 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -243,7 +243,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **12-5** — Reconciliação de timeout ambíguo inexistente (**Alta**)
 - [x] **12-6** — Logs sem correlation/event key (Média)
 - [x] **12-7** — Sem painel de pendência/reprocessamento para operador (Média)
-- [ ] **12-8** — Evento obsoleto do outbox não é descartado (`event_version` só entra na `event_key`); versão antiga pode sobrescrever o estado no sistema externo com dado velho (**Alta**)
+- [x] **12-8** — Evento obsoleto do outbox não é descartado (`event_version` só entra na `event_key`); versão antiga pode sobrescrever o estado no sistema externo com dado velho (**Alta**)
 
 ## SPEC 14 — Estratégia de testes
 
