@@ -74,7 +74,7 @@ cobertura zero (pipeline testado), mas regressões em `ai/router.py`, caches e c
 | 14-3 | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` | `services/qdrant_service.py` | **Alta** | **ABERTO** → 05-6 |
 | 14-4 | Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic | `ai/prompts.py`; `ai_pipeline.py` | **Alta** | **CORRIGIDO** → 05-16 |
 | 14-5 | Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` | `tests/test_webhooks.py` | **Alta** | **CORRIGIDO** → 06-3 |
-| 14-6 | Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) | `frontend/package.json` | **Alta** | **ABERTO** |
+| 14-6 | Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) | `frontend/package.json` | **Alta** | **ABERTO (parcial)** — Vitest + jsdom + Testing Library em `vitest.config.ts` (Task F4.1); bloqueio de CI e cobertura mínima na Task R2.3 |
 | 14-7 | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env | `infra/n8n/` | Média | **ABERTO** → 06-11 |
 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes | `tests/` | Média | **ABERTO** |
 | 14-9 | CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge | `ci.yml` | Média | **ABERTO** → 09-14 |
