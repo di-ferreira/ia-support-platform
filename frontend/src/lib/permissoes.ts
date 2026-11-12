@@ -17,7 +17,9 @@ export const ROTAS_APP: RotaApp[] = [
   { href: "/kanban", rotulo: "Kanban", perfis: TODOS },
   { href: "/cliente", rotulo: "Clientes", perfis: TODOS },
   { href: "/conhecimento", rotulo: "Base de Conhecimento", perfis: ["admin", "supervisor"] },
-  { href: "/departamentos", rotulo: "Departamentos", perfis: ["admin", "supervisor"] },
+  // Spec 04: atendente lê os departamentos e assume chamados na fila
+  // (aba "fila" desta página); a escrita continua restrita ao backend.
+  { href: "/departamentos", rotulo: "Departamentos", perfis: TODOS },
   { href: "/usuarios", rotulo: "Usuários", perfis: ["admin", "supervisor"] },
   { href: "/configuracoes", rotulo: "Configurações", perfis: ["admin"] },
 ];

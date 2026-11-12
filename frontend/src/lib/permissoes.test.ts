@@ -9,15 +9,14 @@ describe("guarda de rota por perfil", () => {
     }
   });
 
-  it("atendente nao acessa usuarios, configuracoes, conhecimento nem departamentos", () => {
+  it("atendente nao acessa usuarios, configuracoes nem conhecimento", () => {
     expect(podeAcessarRota("atendente", "/usuarios")).toBe(false);
     expect(podeAcessarRota("atendente", "/configuracoes")).toBe(false);
     expect(podeAcessarRota("atendente", "/conhecimento")).toBe(false);
-    expect(podeAcessarRota("atendente", "/departamentos")).toBe(false);
   });
 
-  it("atendente acessa a operacao", () => {
-    for (const rota of ["/dashboard", "/atendimento", "/kanban", "/cliente"]) {
+  it("atendente acessa a operacao e a fila de departamentos (spec 04)", () => {
+    for (const rota of ["/dashboard", "/atendimento", "/kanban", "/cliente", "/departamentos"]) {
       expect(podeAcessarRota("atendente", rota)).toBe(true);
     }
   });
