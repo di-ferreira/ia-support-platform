@@ -11,8 +11,8 @@ const buttonVariants = cva(
         secondary: "bg-primary-100 text-primary-700 hover:bg-primary-200",
         accent: "bg-accent-500 text-white hover:bg-accent-600",
         ghost: "hover:bg-primary-100 text-primary-700",
-        danger: "bg-danger text-white hover:bg-red-700",
-        outline: "border border-gray-300 hover:bg-primary-50",
+        danger: "bg-danger text-white hover:opacity-90",
+        outline: "border border-neutral-300 hover:bg-primary-50",
       },
       size: {
         sm: "h-8 px-3 text-xs",

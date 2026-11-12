@@ -25,9 +25,9 @@ export default function UsuariosPage() {
 
   const profileIcon = (perfil: string) => {
     switch (perfil) {
-      case "admin": return <ShieldCheck className="h-4 w-4 text-red-500" />;
-      case "supervisor": return <Shield className="h-4 w-4 text-orange-500" />;
-      default: return <User className="h-4 w-4 text-blue-500" />;
+      case "admin": return <ShieldCheck className="h-4 w-4 text-status-danger" />;
+      case "supervisor": return <Shield className="h-4 w-4 text-status-warning" />;
+      default: return <User className="h-4 w-4 text-status-info" />;
     }
   };
 
@@ -60,7 +60,7 @@ export default function UsuariosPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Usuários</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900">Usuários</h1>
         <Button onClick={() => { setEditUser(null); setModalOpen(true); }}>
           <UserPlus className="h-4 w-4 mr-2" /> Novo Usuário
         </Button>
@@ -74,7 +74,7 @@ export default function UsuariosPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-gray-500">
+                <tr className="border-b text-left text-neutral-500">
                   <th className="pb-3 font-medium">Nome</th>
                   <th className="pb-3 font-medium">Email</th>
                   <th className="pb-3 font-medium">Perfil</th>
@@ -86,15 +86,15 @@ export default function UsuariosPage() {
               <tbody>
                 {usuarios?.map((u: any) => (
                   <tr key={u.id} className="border-b last:border-0">
-                    <td className="py-3 text-gray-900">{u.nome}</td>
-                    <td className="py-3 text-gray-500">{u.email}</td>
+                    <td className="py-3 text-neutral-900">{u.nome}</td>
+                    <td className="py-3 text-neutral-500">{u.email}</td>
                     <td className="py-3">
                       <Badge variant={(profileColors[u.perfil] || "neutral") as any} className="flex items-center gap-1 w-fit">
                         {profileIcon(u.perfil)}
                         <span className="capitalize">{u.perfil}</span>
                       </Badge>
                     </td>
-                    <td className="py-3 text-gray-500">
+                    <td className="py-3 text-neutral-500">
                       {nomeDepartamento(u.departamento_id)}
                     </td>
                     <td className="py-3">
@@ -103,15 +103,15 @@ export default function UsuariosPage() {
                           onClick={() => toggleAtivo.mutate({ id: u.id, ativo: !u.ativo })}
                           className={`text-xs font-medium px-2 py-1 rounded-full ${
                             u.ativo
-                              ? "bg-green-100 text-green-700 hover:bg-green-200"
-                              : "bg-red-100 text-red-700 hover:bg-red-200"
+                              ? "bg-status-success-soft text-status-success hover:bg-status-success hover:text-white"
+                              : "bg-status-danger-soft text-status-danger hover:bg-status-danger hover:text-white"
                           }`}
                         >
                           {u.ativo ? "Ativo" : "Inativo"}
                         </button>
                       ) : (
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          u.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          u.ativo ? "bg-status-success-soft text-status-success" : "bg-status-danger-soft text-status-danger"
                         }`}>
                           {u.ativo ? "Ativo" : "Inativo"}
                         </span>
@@ -215,26 +215,26 @@ function UserFormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="text-lg font-semibold text-neutral-900 mb-4">
           {user ? "Editar Usuário" : "Novo Usuário"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Nome</label>
             <Input value={nome} onChange={(e) => setNome(e.target.value)} required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
               {user ? "Nova senha (deixe em branco para manter)" : "Senha"}
             </label>
             <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required={!user} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Perfil</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Perfil</label>
             <Select valor={perfil} onValorChange={(valor) => setPerfil(valor)}>
               {isAdmin ? (
                 <>
@@ -247,7 +247,7 @@ function UserFormModal({
           </div>
           {perfil === "atendente" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Departamento
               </label>
               <Select
@@ -261,7 +261,7 @@ function UserFormModal({
                   </SelectItem>
                 ))}
               </Select>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-neutral-500">
                 Departamento principal do atendente (spec 10).
               </p>
             </div>

@@ -40,13 +40,13 @@ export default function ConhecimentoPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Base de Conhecimento</h1>
-        <p className="mt-1 text-sm text-gray-500">Artigos e documentação do ERP</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Base de Conhecimento</h1>
+        <p className="mt-1 text-sm text-neutral-500">Artigos e documentação do ERP</p>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
           <Input className="pl-9" placeholder="Buscar artigos..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function ConhecimentoPage() {
         <button
           onClick={() => setCategoria(undefined)}
           className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
-            !categoria ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            !categoria ? "bg-primary-500 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
           }`}
         >
           Todas
@@ -65,7 +65,7 @@ export default function ConhecimentoPage() {
             key={key}
             onClick={() => setCategoria(key)}
             className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
-              categoria === key ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              categoria === key ? "bg-primary-500 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
             {label}
@@ -83,20 +83,20 @@ export default function ConhecimentoPage() {
                   {categoryLabels[artigo.categoria] || artigo.categoria}
                 </Badge>
               </div>
-              <h3 className="font-semibold text-gray-900">{artigo.titulo}</h3>
+              <h3 className="font-semibold text-neutral-900">{artigo.titulo}</h3>
               {artigo.conteudo && (
-                <p className="text-sm text-gray-500 line-clamp-3">{artigo.conteudo}</p>
+                <p className="text-sm text-neutral-500 line-clamp-3">{artigo.conteudo}</p>
               )}
               {artigo.tipo_arquivo && (
-                <p className="text-xs text-gray-400">Tipo: {artigo.tipo_arquivo}</p>
+                <p className="text-xs text-neutral-400">Tipo: {artigo.tipo_arquivo}</p>
               )}
             </CardContent>
           </Card>
         ))}
         {(!filtered || filtered.length === 0) && (
           <div className="col-span-full text-center py-12">
-            <BookOpen className="mx-auto h-12 w-12 text-gray-300" />
-            <p className="mt-2 text-sm text-gray-400">Nenhum artigo encontrado</p>
+            <BookOpen className="mx-auto h-12 w-12 text-neutral-300" />
+            <p className="mt-2 text-sm text-neutral-400">Nenhum artigo encontrado</p>
           </div>
         )}
       </div>

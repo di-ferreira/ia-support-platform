@@ -55,11 +55,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto bg-gray-50 p-6">
+        <main className="flex-1 overflow-auto bg-neutral-50 p-6">
           {acessoNegado ? (
             <div
               role="alert"
-              className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-status-danger-soft bg-status-danger-soft px-4 py-3 text-sm text-status-danger"
             >
               <p>
                 Você não tem acesso à página <strong>{acessoNegado}</strong> com o
@@ -68,7 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setAcessoNegado(null)}
-                className="shrink-0 rounded-md px-2 py-1 font-medium hover:bg-red-100"
+                className="shrink-0 rounded-md px-2 py-1 font-medium hover:bg-status-danger-soft"
               >
                 Fechar
               </button>

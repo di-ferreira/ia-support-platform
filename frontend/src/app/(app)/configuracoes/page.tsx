@@ -68,8 +68,8 @@ export default function ConfiguracoesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
-        <p className="text-gray-500 mt-1">Integração WhatsApp via Evolution API</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Configurações</h1>
+        <p className="text-neutral-500 mt-1">Integração WhatsApp via Evolution API</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -92,15 +92,15 @@ export default function ConfiguracoesPage() {
                 />
               </div>
               {statusLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
               ) : connected ? (
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <CheckCircle2 className="h-5 w-5 text-status-success" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-500" />
+                <XCircle className="h-5 w-5 text-status-danger" />
               )}
             </div>
             {statusData && (
-              <div className="text-sm text-gray-600 space-y-1">
+              <div className="text-sm text-neutral-600 space-y-1">
                 <p>
                   <span className="font-medium">Estado:</span>{" "}
                   {statusData.instance?.state || statusData.status || "desconhecido"}
@@ -108,7 +108,7 @@ export default function ConfiguracoesPage() {
               </div>
             )}
             {statusData?.error && (
-              <p className="text-sm text-red-500">{statusData.error}</p>
+              <p className="text-sm text-status-danger">{statusData.error}</p>
             )}
 
             <div className="flex flex-wrap gap-2">
@@ -186,12 +186,12 @@ export default function ConfiguracoesPage() {
                   alt="WhatsApp QR Code"
                   className="w-64 h-64 border rounded-lg"
                 />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-neutral-500">
                   Abra o WhatsApp no celular e escaneie o QR code
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col items-center py-8 text-gray-400">
+              <div className="flex flex-col items-center py-8 text-neutral-400">
                 <QrCode className="h-16 w-16 mb-3" />
                 <p className="text-sm">
                   {connected
@@ -207,7 +207,7 @@ export default function ConfiguracoesPage() {
       {/* Actions feedback */}
       {createInstance.isSuccess && (
         <Card>
-          <CardContent className="text-sm text-green-600 flex items-center gap-2 py-3">
+          <CardContent className="text-sm text-status-success flex items-center gap-2 py-3">
             <CheckCircle2 className="h-4 w-4" />
             Instância criada com sucesso! Escaneie o QR code para conectar.
           </CardContent>
@@ -215,7 +215,7 @@ export default function ConfiguracoesPage() {
       )}
       {setupWebhook.isSuccess && (
         <Card>
-          <CardContent className="text-sm text-green-600 flex items-center gap-2 py-3">
+          <CardContent className="text-sm text-status-success flex items-center gap-2 py-3">
             <CheckCircle2 className="h-4 w-4" />
             Webhook configurado para n8n!
           </CardContent>
@@ -223,7 +223,7 @@ export default function ConfiguracoesPage() {
       )}
       {disconnect.isSuccess && (
         <Card>
-          <CardContent className="text-sm text-green-600 flex items-center gap-2 py-3">
+          <CardContent className="text-sm text-status-success flex items-center gap-2 py-3">
             <CheckCircle2 className="h-4 w-4" />
             Desconectado com sucesso.
           </CardContent>
@@ -234,7 +234,7 @@ export default function ConfiguracoesPage() {
         disconnect.isError ||
         setupWebhook.isError) && (
         <Card>
-          <CardContent className="text-sm text-red-600 flex items-center gap-2 py-3">
+          <CardContent className="text-sm text-status-danger flex items-center gap-2 py-3">
             <XCircle className="h-4 w-4" />
             Erro: {(createInstance.error?.message ||
               showQrCode.error?.message ||

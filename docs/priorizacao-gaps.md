@@ -12,6 +12,7 @@ Atualizado em 2026-11-12: 08-9, 00-10 e 00-16 corrigidos — métricas de produt
 Atualizado em 2026-11-12: 04-3 e 07-11 corrigidos — guarda de rota e menu por perfil no frontend (Task F4.12, `lib/permissoes.ts`); 70 abertos.
 Atualizado em 2026-11-12: 03-8 e 07-3 corrigidos — eventos WS nas rotas de chat e reconexão com backoff + jitter (Task F4.7); 68 abertos.
 Atualizado em 2026-11-12: 07-5 corrigido — `chat-store` (Zustand) como fonte única do chat ativo (Task F4.6); 67 abertos.
+Atualizado em 2026-11-12: 07-4 e 07-6 corrigidos (Task F4.13) — selects Radix e cores via tokens `@theme`; 65 abertos.
 
 ## Critério de ordenação
 
@@ -149,7 +150,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 75 | 09-12 | Alembic/Postgres híbrido com runtime em Appwrite |
 | 76 | 09-18 | Sem runbook de rollout/rollback da integração Emsoft |
 | 77 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
-| 78 | 07-4 | Cores raw do Tailwind fora dos tokens `@theme` |
+| 78 | 07-4 (CORRIGIDO) | Cores raw do Tailwind fora dos tokens `@theme` |
 | 79 | 00-11 | Sem CSAT/NPS nem coleta de feedback |
 | 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
 | 81 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente |
@@ -165,7 +166,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 87 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
 | 88 | 05-19 | Dependência `openai` declarada e nunca importada |
 | 89 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
-| 90 | 07-6 | Selects de status/prioridade usam `<select>` nativo |
+| 90 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
 | 91 | 08-7 | `DATABASE_URL` default com credenciais em claro |
 | 92 | 09-3 | MinIO órfão no compose prod sem referência no código |
 | 93 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |

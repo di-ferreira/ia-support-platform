@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 
 const KPI_COLORS = [
-  "text-blue-600", "text-green-600", "text-orange-600", "text-purple-600",
-  "text-primary-600", "text-red-600", "text-indigo-600", "text-teal-600",
+  "text-status-info", "text-status-success", "text-accent-600", "text-primary-500",
+  "text-primary-600", "text-status-danger", "text-status-warning", "text-teal-600",
 ];
 
 const PIE_COLORS = [
@@ -79,8 +79,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">Visão geral do atendimento</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Dashboard</h1>
+        <p className="mt-1 text-sm text-neutral-500">Visão geral do atendimento</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -89,8 +89,8 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{kpi.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{kpi.value}</p>
+                  <p className="text-sm text-neutral-500">{kpi.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-neutral-900">{kpi.value}</p>
                 </div>
                 <kpi.icon className={`h-10 w-10 ${KPI_COLORS[i]} opacity-20`} />
               </div>
@@ -113,7 +113,7 @@ export default function DashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-gray-400 text-center py-8">Nenhum chamado</p>
+              <p className="text-sm text-neutral-400 text-center py-8">Nenhum chamado</p>
             )}
           </CardContent>
         </Card>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-gray-400 text-center py-8">Nenhum chamado</p>
+              <p className="text-sm text-neutral-400 text-center py-8">Nenhum chamado</p>
             )}
           </CardContent>
         </Card>
@@ -154,10 +154,10 @@ export default function DashboardPage() {
             {dash?.recentes?.map((chat: any) => (
               <div key={chat.id} className="flex items-center justify-between rounded-lg border p-3">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-neutral-900">
                     {chat.cliente_nome || `Cliente #${chat.cliente_id}`}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-neutral-500">
                     {STATUS_LABELS[chat.status] || chat.status}
                   </p>
                 </div>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
               </div>
             ))}
             {(!dash?.recentes || dash.recentes.length === 0) && (
-              <p className="text-sm text-gray-400 text-center py-4">Nenhum chamado recente</p>
+              <p className="text-sm text-neutral-400 text-center py-4">Nenhum chamado recente</p>
             )}
           </div>
         </CardContent>

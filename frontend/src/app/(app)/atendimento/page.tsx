@@ -483,7 +483,7 @@ export default function AtendimentoPage() {
       <div className="flex w-80 flex-col rounded-lg border bg-white">
         <div className="space-y-2 border-b p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">Conversas</h2>
+            <h2 className="font-semibold text-neutral-900">Conversas</h2>
             <Badge variant="neutral">{chats.length}</Badge>
           </div>
           <Select
@@ -537,14 +537,14 @@ export default function AtendimentoPage() {
             <button
               key={chat.id}
               onClick={() => setChatAtivo(chat)}
-              className={`w-full border-b p-4 text-left transition-colors hover:bg-gray-50 ${
+              className={`w-full border-b p-4 text-left transition-colors hover:bg-neutral-50 ${
                 chatAtivo?.id === chat.id
                   ? "border-l-4 border-l-primary-500 bg-primary-50"
                   : ""
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-sm font-medium text-gray-900">
+                <p className="truncate text-sm font-medium text-neutral-900">
                   {chat.cliente_nome || `Cliente #${chat.cliente_id}`}
                 </p>
                 <Badge
@@ -573,12 +573,12 @@ export default function AtendimentoPage() {
                 )}
               </div>
               {chat.departamento_id && nomeDepartamento(chat.departamento_id) && (
-                <p className="mt-1 truncate text-[11px] text-gray-500">
+                <p className="mt-1 truncate text-[11px] text-neutral-500">
                   {nomeDepartamento(chat.departamento_id)}
                 </p>
               )}
               {chat.ultima_mensagem && (
-                <p className="mt-1 truncate text-xs text-gray-400">
+                <p className="mt-1 truncate text-xs text-neutral-400">
                   {chat.ultima_mensagem}
                 </p>
               )}
@@ -611,7 +611,7 @@ export default function AtendimentoPage() {
             <div className="space-y-3 border-b p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="truncate font-semibold text-gray-900">
+                  <h3 className="truncate font-semibold text-neutral-900">
                     {chatSelecionado?.cliente_nome ||
                       `Cliente #${chatDetail?.cliente_id ?? ""}`}
                   </h3>
@@ -736,7 +736,7 @@ export default function AtendimentoPage() {
               {!mensagensQuery.isLoading &&
                 !mensagensQuery.isError &&
                 mensagens.length === 0 && (
-                  <p className="py-8 text-center text-sm text-gray-400">
+                  <p className="py-8 text-center text-sm text-neutral-400">
                     Nenhuma mensagem ainda
                   </p>
                 )}
@@ -753,7 +753,7 @@ export default function AtendimentoPage() {
                         ? "bg-primary-500 text-white"
                         : msg.remetente === "ia"
                           ? "bg-primary-50 text-primary-900"
-                          : "bg-gray-100 text-gray-900"
+                          : "bg-neutral-100 text-neutral-900"
                     }`}
                   >
                     <div className="mb-1 flex items-center gap-1">
@@ -822,10 +822,10 @@ export default function AtendimentoPage() {
         <div className="flex w-80 flex-col gap-4 overflow-auto">
           <section className="rounded-lg border bg-white">
             <div className="border-b p-4">
-              <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+              <h3 className="flex items-center gap-2 font-semibold text-neutral-900">
                 <Bot className="h-4 w-4 text-primary-500" /> Diagnóstico
               </h3>
-              <p className="mt-1 text-[11px] text-gray-500">
+              <p className="mt-1 text-[11px] text-neutral-500">
                 Sugestão automática da IA — confirme antes de usar.
               </p>
             </div>
@@ -839,7 +839,7 @@ export default function AtendimentoPage() {
               )}
               {roteamentoQuery.isError && (
                 <div className="space-y-2">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-neutral-500">
                     {mensagemErro(roteamentoQuery.error)}
                   </p>
                   <Button
@@ -852,7 +852,7 @@ export default function AtendimentoPage() {
                 </div>
               )}
               {roteamento && !roteamento.tem_diagnostico && (
-                <p className="py-4 text-center text-xs text-gray-400">
+                <p className="py-4 text-center text-xs text-neutral-400">
                   IA ainda não analisou este chamado.
                 </p>
               )}
@@ -888,10 +888,10 @@ export default function AtendimentoPage() {
                   {roteamento.confianca !== null &&
                     roteamento.confianca !== undefined && (
                       <div>
-                        <p className="text-xs font-medium uppercase text-gray-500">
+                        <p className="text-xs font-medium uppercase text-neutral-500">
                           Confiança (auxiliar)
                         </p>
-                        <div className="mt-1 h-2 rounded-full bg-gray-100">
+                        <div className="mt-1 h-2 rounded-full bg-neutral-100">
                           <div
                             className="h-2 rounded-full bg-primary-500"
                             style={{
@@ -904,7 +904,7 @@ export default function AtendimentoPage() {
                             }}
                           />
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-neutral-500">
                           {Math.round(roteamento.confianca * 100)}% — não é
                           prova de correção
                         </p>
@@ -913,18 +913,18 @@ export default function AtendimentoPage() {
                   {roteamento.artigos_consultados &&
                     roteamento.artigos_consultados.length > 0 && (
                       <div>
-                        <p className="text-xs font-medium uppercase text-gray-500">
+                        <p className="text-xs font-medium uppercase text-neutral-500">
                           Artigos consultados
                         </p>
                         <ul className="mt-1 space-y-1">
                           {roteamento.artigos_consultados.map((artigo, i) => (
                             <li
                               key={artigo.id || i}
-                              className="rounded border px-2 py-1 text-xs text-gray-700"
+                              className="rounded border px-2 py-1 text-xs text-neutral-700"
                             >
                               {artigo.titulo || artigo.id || "Artigo"}
                               {typeof artigo.score === "number" && (
-                                <span className="ml-1 text-gray-400">
+                                <span className="ml-1 text-neutral-400">
                                   ({Math.round(artigo.score * 100)}%)
                                 </span>
                               )}
@@ -944,10 +944,10 @@ export default function AtendimentoPage() {
               )}
               {chatDetail?.solucao_sugerida_ia && (
                 <div>
-                  <p className="text-xs font-medium uppercase text-gray-500">
+                  <p className="text-xs font-medium uppercase text-neutral-500">
                     Solução sugerida
                   </p>
-                  <p className="mt-1 whitespace-pre-line text-sm text-gray-900">
+                  <p className="mt-1 whitespace-pre-line text-sm text-neutral-900">
                     {chatDetail.solucao_sugerida_ia}
                   </p>
                 </div>
@@ -957,11 +957,11 @@ export default function AtendimentoPage() {
 
           <section className="rounded-lg border bg-white">
             <div className="border-b p-4">
-              <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+              <h3 className="flex items-center gap-2 font-semibold text-neutral-900">
                 <RefreshCw className="h-4 w-4 text-primary-500" /> Sincronização
               </h3>
               {possuiGestao && integracaoStatusQuery.data && (
-                <p className="mt-1 text-[11px] text-gray-500">
+                <p className="mt-1 text-[11px] text-neutral-500">
                   Integração Emsoft:{" "}
                   {integracaoAtiva ? "habilitada" : "desabilitada"}
                 </p>
@@ -969,7 +969,7 @@ export default function AtendimentoPage() {
             </div>
             <div className="space-y-3 p-4 text-sm">
               {!podeVerSync && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-neutral-500">
                   Detalhes de sincronização visíveis apenas para o atendente
                   responsável, supervisor ou admin.
                 </p>
@@ -983,7 +983,7 @@ export default function AtendimentoPage() {
               )}
 
               {podeVerSync && syncQuery.isError && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-neutral-500">
                   Não foi possível consultar o status de sincronização agora.
                 </p>
               )}
@@ -1010,11 +1010,11 @@ export default function AtendimentoPage() {
                           />
                           {sync.integracao.external_ticket_id && (
                             <div>
-                              <p className="text-xs font-medium uppercase text-gray-500">
+                              <p className="text-xs font-medium uppercase text-neutral-500">
                                 Chamado Emsoft
                               </p>
                               <div className="mt-1 flex items-center gap-2">
-                                <code className="rounded bg-gray-100 px-2 py-1 font-mono text-xs text-gray-800">
+                                <code className="rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-800">
                                   {sync.integracao.external_ticket_id}
                                 </code>
                                 <button
@@ -1022,7 +1022,7 @@ export default function AtendimentoPage() {
                                   onClick={() =>
                                     copiar(sync.integracao?.external_ticket_id || "")
                                   }
-                                  className="text-gray-400 hover:text-gray-600"
+                                  className="text-neutral-400 hover:text-neutral-600"
                                   aria-label="Copiar ID do chamado"
                                 >
                                   <ClipboardCopy className="h-3.5 w-3.5" />
@@ -1078,7 +1078,7 @@ export default function AtendimentoPage() {
                           )}
                         </>
                       ) : (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-neutral-500">
                           Chamado externo ainda não criado/sincronizado.
                         </p>
                       )}
@@ -1088,14 +1088,14 @@ export default function AtendimentoPage() {
                       />
                       {sync.eventos && sync.eventos.length > 0 && (
                         <details className="rounded border p-2">
-                          <summary className="cursor-pointer text-xs font-medium text-gray-700">
+                          <summary className="cursor-pointer text-xs font-medium text-neutral-700">
                             Eventos recentes ({sync.eventos.length})
                           </summary>
                           <ul className="mt-2 space-y-1">
                             {sync.eventos.slice(0, 8).map((evento) => (
                               <li
                                 key={evento.id}
-                                className="rounded bg-gray-50 px-2 py-1 text-[11px] text-gray-600"
+                                className="rounded bg-neutral-50 px-2 py-1 text-[11px] text-neutral-600"
                               >
                                 <span className="font-medium">
                                   {evento.event_type}
@@ -1134,7 +1134,7 @@ export default function AtendimentoPage() {
                         label="Pendências na fila"
                         valor={String(sync.pendencias)}
                       />
-                      <p className="text-[11px] text-gray-500">
+                      <p className="text-[11px] text-neutral-500">
                         Detalhes do chamado e erros são restritos a supervisor e
                         admin.
                       </p>
@@ -1153,7 +1153,7 @@ export default function AtendimentoPage() {
                 </Button>
               )}
 
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-neutral-400">
                 Integração pendente não bloqueia o atendimento.
               </p>
             </div>
@@ -1210,7 +1210,7 @@ export default function AtendimentoPage() {
             <div>
               <label
                 htmlFor="depto-destino"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Departamento de destino
               </label>
@@ -1236,7 +1236,7 @@ export default function AtendimentoPage() {
             <div>
               <label
                 htmlFor="motivo-transferencia"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Motivo (opcional)
               </label>
@@ -1246,19 +1246,19 @@ export default function AtendimentoPage() {
                 onChange={(e) => setMotivoTransferencia(e.target.value)}
                 maxLength={500}
                 rows={2}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
                 checked={preservarAtendente}
                 onChange={(e) => setPreservarAtendente(e.target.checked)}
               />
               Preservar atendente atual se ele pertence ao destino
             </label>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-neutral-500">
               A transferência remove o responsável atual e devolve o chamado à
               fila do departamento de destino.
             </p>
@@ -1297,7 +1297,7 @@ export default function AtendimentoPage() {
             <div>
               <label
                 htmlFor="atendente-destino"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Atendente
               </label>
@@ -1318,7 +1318,7 @@ export default function AtendimentoPage() {
             <div>
               <label
                 htmlFor="motivo-atribuicao"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Motivo
               </label>
@@ -1328,9 +1328,9 @@ export default function AtendimentoPage() {
                 onChange={(e) => setMotivoAtribuicao(e.target.value)}
                 maxLength={500}
                 rows={2}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-neutral-500">
                 Obrigatório quando o atendente é de outro departamento
                 (override auditável).
               </p>
@@ -1367,14 +1367,14 @@ export default function AtendimentoPage() {
           }
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-neutral-600">
               O chamado volta para a análise da IA. O mesmo chamado externo é
               atualizado — não é criado um segundo ticket (spec 11).
             </p>
             <div>
               <label
                 htmlFor="motivo-nao-resolveu"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Motivo (opcional)
               </label>
@@ -1384,7 +1384,7 @@ export default function AtendimentoPage() {
                 onChange={(e) => setMotivoNaoResolveu(e.target.value)}
                 maxLength={500}
                 rows={2}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             {erroModal && (
@@ -1421,14 +1421,14 @@ export default function AtendimentoPage() {
           }
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-neutral-600">
               Reaproveita o evento incompleto mais recente ou enfileira um novo
               pedido de sincronização. O motivo fica registrado na auditoria.
             </p>
             <div>
               <label
                 htmlFor="motivo-reprocesso"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Motivo (3 a 500 caracteres)
               </label>
@@ -1439,7 +1439,7 @@ export default function AtendimentoPage() {
                 maxLength={500}
                 rows={2}
                 required
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             {erroModal && (
@@ -1465,9 +1465,9 @@ function Campo({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase text-gray-500">{label}</p>
-      <div className="mt-1 break-words text-sm text-gray-900">{valor}</div>
-      {hint && <p className="mt-0.5 text-[11px] text-gray-400">{hint}</p>}
+      <p className="text-xs font-medium uppercase text-neutral-500">{label}</p>
+      <div className="mt-1 break-words text-sm text-neutral-900">{valor}</div>
+      {hint && <p className="mt-0.5 text-[11px] text-neutral-400">{hint}</p>}
     </div>
   );
 }
@@ -1496,11 +1496,11 @@ function ModalBase({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">{titulo}</h3>
+          <h3 className="text-lg font-semibold text-neutral-900">{titulo}</h3>
           <button
             onClick={onClose}
             aria-label="Fechar"
-            className="text-gray-400 hover:text-gray-600"
+            className="text-neutral-400 hover:text-neutral-600"
           >
             <X className="h-5 w-5" />
           </button>

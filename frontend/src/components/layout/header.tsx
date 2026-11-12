@@ -27,7 +27,7 @@ export function Header() {
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <button
         onClick={toggle}
-        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus-visible:outline-none"
+        className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-colors focus-visible:outline-none"
         aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
         title={collapsed ? "Expandir menu" : "Recolher menu"}
       >
@@ -45,19 +45,19 @@ export function Header() {
           >
             <span
               className={`h-2 w-2 rounded-full ${
-                whatsappConnected ? "bg-green-500" : "bg-red-400"
+                whatsappConnected ? "bg-status-success" : "bg-status-danger"
               }`}
             />
-            <span className="text-gray-400 hidden sm:inline">
+            <span className="text-neutral-400 hidden sm:inline">
               {whatsappConnected ? "WhatsApp" : "Desconectado"}
             </span>
           </div>
         )}
         <button
-          className="relative rounded-full p-2 hover:bg-gray-100"
+          className="relative rounded-full p-2 hover:bg-neutral-100"
           aria-label="Notificações"
         >
-          <Bell className="h-5 w-5 text-gray-600" />
+          <Bell className="h-5 w-5 text-neutral-600" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent-500" />
         </button>
         <div className="flex items-center gap-3">
@@ -65,8 +65,8 @@ export function Header() {
             {user?.nome?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div className="text-sm">
-            <p className="font-medium text-gray-900">{user?.nome}</p>
-            <p className="text-gray-500 capitalize text-xs">{user?.perfil}</p>
+            <p className="font-medium text-neutral-900">{user?.nome}</p>
+            <p className="text-neutral-500 capitalize text-xs">{user?.perfil}</p>
           </div>
         </div>
       </div>

@@ -28,6 +28,15 @@
   --color-danger: #dc2626;
   --color-info: #2563eb;
 
+  --color-status-success: #16a34a;
+  --color-status-success-soft: #dcfce7;
+  --color-status-danger: #dc2626;
+  --color-status-danger-soft: #fee2e2;
+  --color-status-warning: #d97706;
+  --color-status-warning-soft: #fef3c7;
+  --color-status-info: #2563eb;
+  --color-status-info-soft: #dbeafe;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }

@@ -20,8 +20,8 @@ export default function LoginPage() {
       <div className="flex w-full max-w-md flex-col justify-center px-8 mx-auto">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-accent-500" />
-          <h1 className="text-2xl font-bold text-gray-900">EMSoft Support</h1>
-          <p className="mt-1 text-sm text-gray-500">Plataforma de Atendimento Inteligente</p>
+          <h1 className="text-2xl font-bold text-neutral-900">EMSoft Support</h1>
+          <p className="mt-1 text-sm text-neutral-500">Plataforma de Atendimento Inteligente</p>
         </div>
         <form
           className="space-y-4"
@@ -51,25 +51,25 @@ export default function LoginPage() {
           }}
         >
           {erro && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{erro}</div>
+            <div className="rounded-md bg-status-danger-soft p-3 text-sm text-status-danger">{erro}</div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
             <input
               name="email"
               type="email"
               required
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="seu@email.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Senha</label>
             <input
               name="senha"
               type="password"
               required
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="••••••"
             />
           </div>

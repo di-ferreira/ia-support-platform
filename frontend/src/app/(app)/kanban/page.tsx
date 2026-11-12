@@ -93,8 +93,8 @@ export default function KanbanPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kanban</h1>
-          <p className="mt-1 text-sm text-gray-500">Gerencie o fluxo de atendimento</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Kanban</h1>
+          <p className="mt-1 text-sm text-neutral-500">Gerencie o fluxo de atendimento</p>
         </div>
       </div>
 
@@ -102,12 +102,12 @@ export default function KanbanPage() {
         {colunas.map((col: any) => (
           <div
             key={col.status}
-            className="flex flex-col rounded-lg bg-gray-100 min-h-[400px]"
+            className="flex flex-col rounded-lg bg-neutral-100 min-h-[400px]"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleDrop(e, col.status)}
           >
             <div className="flex items-center justify-between p-3 border-b bg-white rounded-t-lg">
-              <h3 className="text-sm font-semibold text-gray-700">{statusLabels[col.status] || col.status}</h3>
+              <h3 className="text-sm font-semibold text-neutral-700">{statusLabels[col.status] || col.status}</h3>
               <Badge variant="neutral">{col.cards.length}</Badge>
             </div>
             <div className="flex-1 space-y-2 p-2 overflow-auto">
@@ -120,7 +120,7 @@ export default function KanbanPage() {
                 >
                   <CardContent className="p-3 space-y-2">
                     <div className="flex items-start justify-between">
-                      <p className="text-sm font-medium text-gray-900">{card.cliente_nome}</p>
+                      <p className="text-sm font-medium text-neutral-900">{card.cliente_nome}</p>
                       {!card.atendente_id && (
                         <Button
                           size="sm"
@@ -142,7 +142,7 @@ export default function KanbanPage() {
                       )}
                     </div>
                     {card.resumo_problema && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{card.resumo_problema}</p>
+                      <p className="text-xs text-neutral-500 line-clamp-2">{card.resumo_problema}</p>
                     )}
                     <div className="flex items-center justify-between">
                       <Badge
@@ -157,7 +157,7 @@ export default function KanbanPage() {
                         {card.prioridade}
                       </Badge>
                       {card.nivel_confianca_ia !== null && card.nivel_confianca_ia !== undefined && (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-neutral-400">
                           IA: {Math.round(card.nivel_confianca_ia * 100)}%
                         </span>
                       )}
@@ -171,7 +171,7 @@ export default function KanbanPage() {
                       {card.atendente_nome ? (
                         <span className="text-xs text-primary-600">👤 {card.atendente_nome}</span>
                       ) : (
-                        <span className="text-xs text-gray-400">Sem atendente</span>
+                        <span className="text-xs text-neutral-400">Sem atendente</span>
                       )}
                       <Button
                         size="sm"
@@ -198,8 +198,8 @@ export default function KanbanPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="w-96 rounded-lg bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Transferir Chamado</h3>
-              <button onClick={() => setTransferModal(null)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-neutral-900">Transferir Chamado</h3>
+              <button onClick={() => setTransferModal(null)} className="text-neutral-400 hover:text-neutral-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -208,7 +208,7 @@ export default function KanbanPage() {
               <button
                 onClick={() => setTransferModal({ ...transferModal, tab: "atendente" })}
                 className={`px-3 py-1 text-sm rounded ${
-                  transferModal.tab === "atendente" ? "bg-primary-100 text-primary-700" : "text-gray-500"
+                  transferModal.tab === "atendente" ? "bg-primary-100 text-primary-700" : "text-neutral-500"
                 }`}
               >
                 Para Atendente
@@ -216,7 +216,7 @@ export default function KanbanPage() {
               <button
                 onClick={() => setTransferModal({ ...transferModal, tab: "grupo" })}
                 className={`px-3 py-1 text-sm rounded ${
-                  transferModal.tab === "grupo" ? "bg-primary-100 text-primary-700" : "text-gray-500"
+                  transferModal.tab === "grupo" ? "bg-primary-100 text-primary-700" : "text-neutral-500"
                 }`}
               >
                 Para Grupo
@@ -234,14 +234,14 @@ export default function KanbanPage() {
                         transferirMutation.mutate({ chatId: transferModal.chatId, atendente_id: a.id })
                       }
                       disabled={transferirMutation.isPending}
-                      className="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
+                      className="w-full text-left p-3 rounded-lg border hover:bg-neutral-50 transition-colors"
                     >
-                      <p className="text-sm font-medium text-gray-900">{a.nome}</p>
-                      <p className="text-xs text-gray-500">{a.perfil}{a.setor ? ` · ${a.setor}` : ""}</p>
+                      <p className="text-sm font-medium text-neutral-900">{a.nome}</p>
+                      <p className="text-xs text-neutral-500">{a.perfil}{a.setor ? ` · ${a.setor}` : ""}</p>
                     </button>
                   ))}
                 {(!atendentes || atendentes.length === 0) && (
-                  <p className="text-sm text-gray-400 text-center py-4">Nenhum atendente disponível</p>
+                  <p className="text-sm text-neutral-400 text-center py-4">Nenhum atendente disponível</p>
                 )}
               </div>
             ) : (
@@ -253,10 +253,10 @@ export default function KanbanPage() {
                       transferirGrupoMutation.mutate({ chatId: transferModal.chatId, setor })
                     }
                     disabled={transferirGrupoMutation.isPending}
-                    className="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
+                    className="w-full text-left p-3 rounded-lg border hover:bg-neutral-50 transition-colors"
                   >
-                    <p className="text-sm font-medium text-gray-900 capitalize">{setor}</p>
-                    <p className="text-xs text-gray-500">Transferir para grupo {setor}</p>
+                    <p className="text-sm font-medium text-neutral-900 capitalize">{setor}</p>
+                    <p className="text-xs text-neutral-500">Transferir para grupo {setor}</p>
                   </button>
                 ))}
               </div>

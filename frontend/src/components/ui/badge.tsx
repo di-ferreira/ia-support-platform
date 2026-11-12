@@ -5,11 +5,11 @@ type BadgeVariant = "primary" | "success" | "warning" | "danger" | "info" | "neu
 
 const variants: Record<BadgeVariant, string> = {
   primary: "bg-primary-100 text-primary-700",
-  success: "bg-green-100 text-green-700",
-  warning: "bg-yellow-100 text-yellow-700",
-  danger: "bg-red-100 text-red-700",
-  info: "bg-blue-100 text-blue-700",
-  neutral: "bg-gray-100 text-gray-700",
+  success: "bg-status-success-soft text-status-success",
+  warning: "bg-status-warning-soft text-status-warning",
+  danger: "bg-status-danger-soft text-status-danger",
+  info: "bg-status-info-soft text-status-info",
+  neutral: "bg-neutral-100 text-neutral-700",
 };
 
 export function Badge({

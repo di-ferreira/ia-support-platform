@@ -202,18 +202,18 @@ export default function DepartamentosPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Departamentos</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-neutral-900">Departamentos</h1>
+          <p className="mt-1 text-sm text-neutral-500">
             Cadastro, associação de atendentes, regras de roteamento e fila por
             departamento.
           </p>
         </div>
         <div className="flex items-center gap-2">
           {podeVerInativos && (
-            <label className="flex items-center gap-2 text-sm text-gray-600">
+            <label className="flex items-center gap-2 text-sm text-neutral-600">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
                 checked={incluirInativos}
                 onChange={(e) => setIncluirInativos(e.target.checked)}
               />
@@ -306,18 +306,18 @@ export default function DepartamentosPage() {
                 className={`w-full rounded-lg border p-3 text-left transition-colors ${
                   selecionadoId === depto.id
                     ? "border-primary-400 bg-primary-50"
-                    : "hover:bg-gray-50"
+                    : "hover:bg-neutral-50"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-sm font-medium text-gray-900">
+                  <span className="truncate text-sm font-medium text-neutral-900">
                     {depto.nome}
                   </span>
                   <Badge variant={depto.ativo ? "success" : "neutral"}>
                     {depto.ativo ? "Ativo" : "Inativo"}
                   </Badge>
                 </div>
-                <p className="mt-1 font-mono text-xs text-gray-500">{depto.codigo}</p>
+                <p className="mt-1 font-mono text-xs text-neutral-500">{depto.codigo}</p>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {depto.recebe_transferencias && (
                     <Badge variant="info">Recebe transferências</Badge>
@@ -348,11 +348,11 @@ export default function DepartamentosPage() {
               <CardHeader className="flex flex-row items-start justify-between gap-3">
                 <div>
                   <CardTitle>{selecionado.nome}</CardTitle>
-                  <p className="mt-1 font-mono text-xs text-gray-500">
+                  <p className="mt-1 font-mono text-xs text-neutral-500">
                     {selecionado.codigo}
                   </p>
                   {selecionado.descricao && (
-                    <p className="mt-2 max-w-xl text-sm text-gray-600">
+                    <p className="mt-2 max-w-xl text-sm text-neutral-600">
                       {selecionado.descricao}
                     </p>
                   )}
@@ -417,7 +417,7 @@ export default function DepartamentosPage() {
                       className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${
                         aba === valor
                           ? "bg-primary-100 text-primary-700"
-                          : "text-gray-500 hover:bg-gray-50"
+                          : "text-neutral-500 hover:bg-neutral-50"
                       }`}
                     >
                       <Icon className="h-4 w-4" /> {label}
@@ -427,7 +427,7 @@ export default function DepartamentosPage() {
 
                 {aba === "fila" && (
                   <div className="space-y-3">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-neutral-500">
                       Chamados sem atendente em estados humanos. A assunção
                       valida atividade, departamento e concorrência no backend.
                     </p>
@@ -462,15 +462,15 @@ export default function DepartamentosPage() {
                         className="flex items-start justify-between gap-3 rounded-lg border p-3"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-900">
+                          <p className="truncate text-sm font-medium text-neutral-900">
                             {chat.cliente_nome || `Cliente #${chat.cliente_id}`}
                           </p>
-                          <p className="mt-0.5 text-xs text-gray-500">
+                          <p className="mt-0.5 text-xs text-neutral-500">
                             {statusLabels[chat.status] || chat.status} ·{" "}
                             {chat.prioridade}
                           </p>
                           {chat.resumo_problema && (
-                            <p className="mt-1 truncate text-xs text-gray-400">
+                            <p className="mt-1 truncate text-xs text-neutral-400">
                               {chat.resumo_problema}
                             </p>
                           )}
@@ -491,7 +491,7 @@ export default function DepartamentosPage() {
                 {aba === "atendentes" && (
                   <div className="space-y-3">
                     {!podeVerAtendentes ? (
-                      <p className="rounded-lg border border-dashed p-4 text-sm text-gray-500">
+                      <p className="rounded-lg border border-dashed p-4 text-sm text-neutral-500">
                         A lista de atendentes associados é visível para admin e
                         supervisor (spec 10). Seu departamento aparece no seu
                         perfil.
@@ -521,8 +521,8 @@ export default function DepartamentosPage() {
                           className="flex items-center justify-between rounded-lg border p-3"
                         >
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{a.nome}</p>
-                            <p className="text-xs text-gray-500">{a.email}</p>
+                            <p className="text-sm font-medium text-neutral-900">{a.nome}</p>
+                            <p className="text-xs text-neutral-500">{a.email}</p>
                           </div>
                           <Badge variant="neutral" className="capitalize">
                             {a.perfil}
@@ -535,7 +535,7 @@ export default function DepartamentosPage() {
 
                 {aba === "regras" && (
                   <div className="space-y-3">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-neutral-500">
                       Regras determinísticas de intenção → departamento. A
                       categoria ERP refina a regra, mas não define o
                       departamento (spec 10).
@@ -579,7 +579,7 @@ export default function DepartamentosPage() {
                             {regra.ativo ? "Ativa" : "Inativa"}
                           </Badge>
                         </div>
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2 text-xs text-neutral-500">
                           Prioridade {regra.prioridade_regra}
                         </p>
                       </div>
@@ -685,7 +685,7 @@ function DepartamentoFormModal({
       >
         <h2
           id="departamento-form-title"
-          className="mb-4 text-lg font-semibold text-gray-900"
+          className="mb-4 text-lg font-semibold text-neutral-900"
         >
           {editando ? "Editar departamento" : "Novo departamento"}
         </h2>
@@ -693,7 +693,7 @@ function DepartamentoFormModal({
           <div>
             <label
               htmlFor="depto-codigo"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-neutral-700"
             >
               Código
             </label>
@@ -706,7 +706,7 @@ function DepartamentoFormModal({
               disabled={editando}
               required
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-neutral-500">
               Slug estável (letras minúsculas, números e _). Não pode ser
               alterado depois de referenciado por regras.
             </p>
@@ -714,7 +714,7 @@ function DepartamentoFormModal({
           <div>
             <label
               htmlFor="depto-nome"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-neutral-700"
             >
               Nome
             </label>
@@ -729,7 +729,7 @@ function DepartamentoFormModal({
           <div>
             <label
               htmlFor="depto-descricao"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-neutral-700"
             >
               Descrição
             </label>
@@ -740,14 +740,14 @@ function DepartamentoFormModal({
               onChange={(e) => setDescricao(e.target.value)}
               rows={3}
               maxLength={1000}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="depto-ordem"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-neutral-700"
               >
                 Ordem
               </label>
@@ -764,7 +764,7 @@ function DepartamentoFormModal({
               <div>
                 <label
                   htmlFor="depto-ativo"
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 block text-sm font-medium text-neutral-700"
                 >
                   Situação
                 </label>
@@ -779,19 +779,19 @@ function DepartamentoFormModal({
               </div>
             )}
           </div>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
               checked={recebeTransferencias}
               onChange={(e) => setRecebeTransferencias(e.target.checked)}
             />
             Recebe transferências de outros departamentos
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
               checked={atribuicaoAutomatica}
               onChange={(e) => setAtribuicaoAutomatica(e.target.checked)}
             />
