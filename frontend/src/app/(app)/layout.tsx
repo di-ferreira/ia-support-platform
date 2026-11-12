@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { api } from "@/lib/api";
+import { podeAcessarRota } from "@/lib/permissoes";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { token, setAuth, loadFromStorage } = useAuthStore();
+  const pathname = usePathname();
+  const { token, user, loading, setAuth, loadFromStorage } = useAuthStore();
+  const [acessoNegado, setAcessoNegado] = useState<string | null>(null);
 
   useEffect(() => {
     loadFromStorage();
@@ -33,6 +36,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
+  // Gaps 07-11/04-3: guarda de rota por perfil (conveniência de UI — o
+  // backend continua autorizando). Só decide com o perfil carregado, para
+  // não redirecionar durante o `/auth/me` inicial. `/atendimento` é
+  // liberado para todo perfil, então o fallback nunca cria loop.
+  useEffect(() => {
+    if (loading || !token || !user) return;
+    if (podeAcessarRota(user.perfil, pathname)) return;
+    if (pathname === "/atendimento") return;
+    setAcessoNegado(pathname);
+    router.replace("/atendimento");
+  }, [loading, token, user, pathname, router]);
+
   if (!token) return null;
 
   return (
@@ -40,7 +55,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
+        <main className="flex-1 overflow-auto bg-gray-50 p-6">
+          {acessoNegado ? (
+            <div
+              role="alert"
+              className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              <p>
+                Você não tem acesso à página <strong>{acessoNegado}</strong> com o
+                seu perfil.
+              </p>
+              <button
+                type="button"
+                onClick={() => setAcessoNegado(null)}
+                className="shrink-0 rounded-md px-2 py-1 font-medium hover:bg-red-100"
+              >
+                Fechar
+              </button>
+            </div>
+          ) : null}
+          {children}
+        </main>
       </div>
     </div>
   );

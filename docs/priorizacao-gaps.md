@@ -9,6 +9,7 @@ Atualizado em 2026-11-11: 03-19 corrigido — `/ai/classificar-intencao` já exi
 Atualizado em 2026-11-12: 02-17 e 12-7 corrigidos; contadores em 122 entregues / 77 abertos.
 Atualizado em 2026-11-12: 08-3 e 08-12 corrigidos (08-12 coberto por 08-3) — `/health/ready` com sondas e bootstrap degradado (R1.4); 75 abertos.
 Atualizado em 2026-11-12: 08-9, 00-10 e 00-16 corrigidos — métricas de produto e tempo de primeira resposta (R1.2/R1.3); 72 abertos.
+Atualizado em 2026-11-12: 04-3 e 07-11 corrigidos — guarda de rota e menu por perfil no frontend (Task F4.12, `lib/permissoes.ts`); 70 abertos.
 
 ## Critério de ordenação
 
@@ -111,8 +112,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 ### T9 — Média (40)
 | # | Gap | Descrição |
 |---|-----|-----------|
-| 43 | 04-3 | Frontend oculta ações por perfil, mas sem guarda de rota: digitando URL alcança `/usuarios` e `/configuracoes` |
-| 44 | 07-11 | Sem guarda de rota por perfil (= 04-3) |
+| 43 | 04-3 (CORRIGIDO) | Frontend oculta ações por perfil, mas sem guarda de rota: digitando URL alcança `/usuarios` e `/configuracoes` |
+| 44 | 07-11 (CORRIGIDO) | Sem guarda de rota por perfil (= 04-3) |
 | 45 | 03-8 | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) |
 | 46 | 01-8 | Sem tabela de auditoria: não há como saber quem mudou status/atribuição |
 | 47 | 02-20 | Sem trilha de auditoria de atribuição/transferência (= 01-8) |

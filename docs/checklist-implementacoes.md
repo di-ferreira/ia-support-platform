@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **127 entregues** `[x]` — gaps CORRIGIDO
-- **72 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **129 entregues** `[x]` — gaps CORRIGIDO
+- **70 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 199 itens
 
 ## Fases do plano (SPEC 13)
@@ -99,7 +99,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **04-1** — `GET /dashboard` não aplica filtro de visibilidade; atendente lê KPIs globais e nomes de clientes (**Alta**)
 - [x] **04-2** — `GET /chats/{id}`, `/chats/{id}/mensagens` e `/clientes/{id}` não checam posse (**Alta**)
-- [ ] **04-3** — Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` (Média)
+- [x] **04-3** — Frontend oculta ações por perfil e não tem guarda de rota; digitando a URL alcança `/usuarios` e `/configuracoes` (Média)
 - [ ] **04-4** — Regra "supervisor só cria `atendente`" está no serviço e sem teste (**Alta**)
 - [ ] **04-5** — Regra "só admin altera `perfil`" está no serviço e sem teste (**Alta**)
 - [ ] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
@@ -170,7 +170,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **07-8** — Manifest referenciava `ia-dashboard.html` fora de escopo (Média)
 - [x] **07-9** — Sem telas de departamento, fila por departamento e transferência por departamento (**Alta**)
 - [x] **07-10** — Sem painel de diagnóstico de intenção/roteamento nem status de sincronização do chamado (**Alta**)
-- [ ] **07-11** — Sem guarda de rota por perfil (Média)
+- [x] **07-11** — Sem guarda de rota por perfil (Média)
 
 ## SPEC 08 — Requisitos Não Funcionais, Segurança e Observabilidade
 

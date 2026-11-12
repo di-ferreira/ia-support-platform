@@ -14,28 +14,38 @@ import {
   Settings,
   Workflow,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useSidebarStore } from "@/lib/stores/sidebar-store";
+import { linksVisiveis } from "@/lib/permissoes";
+
+const ICONES: Record<string, LucideIcon> = {
+  "/dashboard": LayoutDashboard,
+  "/kanban": Columns3,
+  "/atendimento": MessageSquare,
+  "/cliente": Users,
+  "/usuarios": UserCog,
+  "/conhecimento": BookOpen,
+  "/configuracoes": Settings,
+  "/departamentos": Building2,
+};
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const collapsed = useSidebarStore((s) => s.collapsed);
 
+  // Gaps 07-11/04-3: os links usam a mesma matriz de permissões da guarda
+  // de rota (lib/permissoes.ts) — sem regra duplicada.
   const links = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/kanban", label: "Kanban", icon: Columns3 },
-    { href: "/atendimento", label: "Atendimento", icon: MessageSquare },
-    { href: "/cliente", label: "Clientes", icon: Users },
-    { href: "/departamentos", label: "Departamentos", icon: Building2 },
-    { href: "/conhecimento", label: "Base de Conhecimento", icon: BookOpen },
-    ...(user?.perfil === "admin" || user?.perfil === "supervisor"
-      ? [{ href: "/usuarios", label: "Usuários", icon: UserCog }]
-      : []),
+    ...linksVisiveis(user?.perfil).map((rota) => ({
+      href: rota.href,
+      label: rota.rotulo,
+      icon: ICONES[rota.href] ?? LayoutDashboard,
+    })),
     ...(user?.perfil === "admin"
       ? [
-          { href: "/configuracoes", label: "Configurações", icon: Settings },
           { href: "http://localhost:5678", label: "n8n", icon: Workflow, external: true as const },
         ]
       : []),
