@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     http_backoff_base_s: float = 0.5
     http_backoff_max_s: float = 8.0
 
+    # Observabilidade (spec 08, gap 08-6): token Bearer que protege GET
+    # /metrics (comparado em tempo constante). Vazio = rota aberta (dev).
+    metricas_token: str = ""
+
     cors_origins: list[str] = ["http://localhost:3000"]
     environment: str = "development"
 

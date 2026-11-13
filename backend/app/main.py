@@ -21,6 +21,7 @@ from app.api.routes import (
     kanban_router,
     knowledge_base_router,
     mensagens_router,
+    metricas_router,
     roteamento_router,
     usuarios_router,
     webhooks_router,
@@ -33,6 +34,7 @@ from app.core.appwrite import build_appwrite_client, build_appwrite_databases
 from app.core.config import settings
 from app.core.correlacao import CorrelacaoMiddleware
 from app.core.logging import configurar_logging
+from app.core.metricas_middleware import MetricasMiddleware
 from app.integrations.emsoft_chamados import build_emsoft_chamados_service
 from app.integrations.emsoft_chamados.exceptions import ContractNotValidatedError
 from app.integrations.outbox import OutboxWorker
@@ -132,8 +134,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Ordem: CORS por fora, correlacao por dentro — o log de acesso enxerga o
-# request ja com CORS aplicado (R1.1).
+# Ordem (externo → interno): CORS, correlacao, metricas. add_middleware insere
+# por fora, então o último adicionado fica mais externo: o log de acesso
+# (correlacao) enxerga o request ja com CORS aplicado e as métricas contam por
+# dentro da correlacao (R1.1, spec 08 gap 08-6).
+app.add_middleware(MetricasMiddleware)
 app.add_middleware(CorrelacaoMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -159,6 +164,9 @@ app.include_router(integracoes_router)
 app.include_router(ai_router)
 app.include_router(usuarios_router)
 app.include_router(whatsapp_router)
+# /metrics: métricas Prometheus sem auth por usuário (opcionalmente protegido
+# por settings.metricas_token — ver app/api/routes/metricas.py).
+app.include_router(metricas_router)
 
 
 @app.websocket("/ws/chat/{chat_id}")
