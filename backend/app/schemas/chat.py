@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 
 from app.models.chat import PrioridadeChat, StatusChat
+from app.models.enums import CanalAvaliacao
 
 
 class ChatCreate(BaseModel):
@@ -99,3 +100,20 @@ class ChatDetailResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class AvaliacaoCreate(BaseModel):
+    nota: int = Field(ge=1, le=5)
+    comentario: str | None = None
+    canal: CanalAvaliacao = CanalAvaliacao.interno
+
+
+class AvaliacaoResponse(BaseModel):
+    id: str
+    chat_id: str
+    nota: int
+    comentario: str | None = None
+    canal: str
+    atendente_id: str | None = None
+    departamento_id: str | None = None
+    created_at: datetime

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class KpiItem(BaseModel):
@@ -28,10 +28,20 @@ class ChatRecente(BaseModel):
     created_at: datetime
 
 
+class CsatResumo(BaseModel):
+    total: int = 0
+    media: float | None = None
+    satisfeitos_pct: float = 0.0
+    taxa_resposta: float = 0.0
+    distribuicao: dict[str, int] = Field(default_factory=dict)
+    por_atendente: list[dict] = Field(default_factory=list)
+
+
 class DashboardResponse(BaseModel):
     kpis: KpiItem
     por_status: list[StatusCount]
     recentes: list[ChatRecente]
+    csat: CsatResumo = Field(default_factory=CsatResumo)
 
 
 class MetricaDepartamento(BaseModel):

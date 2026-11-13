@@ -3,6 +3,7 @@ from datetime import datetime
 from app.appwrite.repositories import Repositories
 from app.models.chat import PrioridadeChat, StatusChat
 from app.models.mensagem import RemetenteMensagem
+from app.services.avaliacao_service import AvaliacaoService
 
 COLUNAS = [
     ("NOVO", "Novos"),
@@ -140,4 +141,5 @@ class DashboardService:
             },
             "por_status": por_status,
             "recentes": recentes,
+            "csat": await AvaliacaoService(self.repos).resumo(user),
         }

@@ -6,6 +6,8 @@ from app.appwrite.repositories import Repositories
 from app.models.chat import PrioridadeChat, StatusChat
 from app.schemas.auditoria import AuditoriaResponse
 from app.schemas.chat import (
+    AvaliacaoCreate,
+    AvaliacaoResponse,
     ChatAssign,
     ChatCreate,
     ChatDetailResponse,
@@ -17,6 +19,7 @@ from app.schemas.chat import (
     ChatUpdateStatus,
 )
 from app.services.auditoria_service import Ator
+from app.services.avaliacao_service import AvaliacaoService
 from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/chats", tags=["Chats"])
@@ -186,3 +189,37 @@ async def transferir_chat_grupo(
     service = ChatService(repos)
     destino = body.departamento_id or body.setor
     return await service.transferir_grupo(chat_id, destino, user, motivo=body.motivo)
+
+
+@router.get("/{chat_id}/avaliacao", response_model=AvaliacaoResponse | None)
+async def obter_avaliacao(
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Avaliação CSAT do chamado; devolve `null` (200) quando ainda não avaliado."""
+    await ChatService(repos).obter_com_escopo(chat_id, user)
+    return await AvaliacaoService(repos).obter(chat_id)
+
+
+@router.post("/{chat_id}/avaliacao", response_model=AvaliacaoResponse, status_code=201)
+async def registrar_avaliacao(
+    chat_id: str,
+    body: AvaliacaoCreate,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    await ChatService(repos).obter_com_escopo(chat_id, user)
+    return await AvaliacaoService(repos).registrar(
+        chat_id, body.nota, body.comentario, body.canal, user=user
+    )
+
+
+@router.post("/{chat_id}/solicitar-avaliacao")
+async def solicitar_avaliacao(
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    await ChatService(repos).obter_com_escopo(chat_id, user)
+    return await AvaliacaoService(repos).solicitar(chat_id, force=True)
