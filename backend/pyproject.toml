@@ -40,6 +40,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["."]
+markers = ["integracao: testes que exigem serviços reais (Appwrite/Qdrant/Evolution)"]
 
 # Piso de cobertura (gap 14-9): valor medido real da suíte em 2026-11-12
 # (450 testes, TOTAL 86%) — piso bloqueante de regressão, não meta.
