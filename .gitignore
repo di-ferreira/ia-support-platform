@@ -55,3 +55,5 @@ infra/.env
 infra/.env.prod
 infra/.env.local
 token_acesso.txt
+.node_modules.root.bak
+.mypy_cache
