@@ -46,3 +46,18 @@ export function podeAcessarRota(
 export function linksVisiveis(perfil: string | null | undefined): RotaApp[] {
   return ROTAS_APP.filter((rota) => podeAcessarRota(perfil, rota.href));
 }
+
+/**
+ * Spec 04 (gap 04-3): a ação "transferir chamado" depende de perfil E do
+ * vínculo com o chamado. Admin/supervisor transferem qualquer chamado;
+ * atendente só transfere o próprio (`chat.atendente_id === user.id`) —
+ * não transfere chamado de colega. Sem usuário, fail-closed: `false`.
+ */
+export function podeTransferirChat(
+  user: { id?: string; perfil?: string } | null | undefined,
+  chat: { atendente_id?: string | null } | null | undefined
+): boolean {
+  if (!user) return false;
+  if (user.perfil === "admin" || user.perfil === "supervisor") return true;
+  return chat?.atendente_id != null && chat.atendente_id === user.id;
+}

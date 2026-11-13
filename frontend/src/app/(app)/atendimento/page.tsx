@@ -21,6 +21,7 @@ import {
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChatStore } from "@/lib/stores/chat-store";
+import { podeTransferirChat } from "@/lib/permissoes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -457,8 +458,11 @@ export default function AtendimentoPage() {
     chatDetail?.atendente_id === user?.id ||
     possuiGestao;
 
+  // Spec 04 (gap 04-3): perfil + vínculo — atendente só transfere o próprio
+  // chamado; a condição de departamento vale para o gestor.
   const podeTransferirDepto =
-    possuiGestao || chatDetail?.atendente_id === user?.id;
+    podeTransferirChat(user, chatDetail) &&
+    (possuiGestao || chatDetail?.atendente_id === user?.id);
 
   const departamentosDestino = departamentos.filter(
     (d) => d.ativo && d.recebe_transferencias,

@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { podeTransferirChat } from "@/lib/permissoes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -173,17 +174,19 @@ export default function KanbanPage() {
                       ) : (
                         <span className="text-xs text-neutral-400">Sem atendente</span>
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 px-2 text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTransferModal({ chatId: card.id, tab: "atendente" });
-                        }}
-                      >
-                        Transferir
-                      </Button>
+                      {podeTransferirChat(user, card) && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTransferModal({ chatId: card.id, tab: "atendente" });
+                          }}
+                        >
+                          Transferir
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

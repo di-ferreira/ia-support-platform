@@ -33,6 +33,7 @@ Atualizado em 2026-11-13: 02-11, 08-7 e 09-12 corrigidos — caminho morto ORM/A
 Atualizado em 2026-11-13: 14-8 corrigido — suíte real de integração `backend/tests/integracao` (7 testes `pytest.mark.integracao`) agendada no CI como job noturno `integracao` com services Qdrant/Redis (cron 03:00 UTC, `schedule`/`workflow_dispatch`, sem bloquear push/PR); Appwrite/Evolution/Emsoft pulam sem credenciais; 35 abertos (166 entregues).
 Atualizado em 2026-11-13: 04-9 e 04-14 corrigidos — escopo por departamento em `GET /atendentes/ativos` (regra 6, spec 04) e checagem de posse em `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` (04-14 é gap novo, registrado e corrigido no mesmo commit); 34 abertos (168 entregues).
 Atualizado em 2026-11-13: 04-8 corrigido — 403 na criação de instância distingue instância já existente (`ja_existia` + status real) de credencial recusada (`EvolutionAuthError` → HTTP 403); 33 abertos (169 entregues).
+Atualizado em 2026-11-13: 04-3 (CORRIGIDO) — ação de transferência escondida por perfil + vínculo (`podeTransferirChat` em `lib/permissoes.ts`: admin/supervisor sempre; atendente só o próprio chamado; sem usuário, fail-closed), aplicando Kanban ("Transferir") e Atendimento ("Transferir depto"); a guarda de rota por URL já existia; 32 abertos (170 entregues).
 
 ## Critério de ordenação
 

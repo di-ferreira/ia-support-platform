@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { linksVisiveis, podeAcessarRota } from "@/lib/permissoes";
+import { linksVisiveis, podeAcessarRota, podeTransferirChat } from "@/lib/permissoes";
 
 describe("guarda de rota por perfil", () => {
   it("admin acessa todas as rotas mapeadas", () => {
@@ -41,5 +41,38 @@ describe("guarda de rota por perfil", () => {
     expect(hrefs).toContain("/atendimento");
     expect(hrefs).not.toContain("/usuarios");
     expect(hrefs).not.toContain("/configuracoes");
+  });
+});
+
+describe("podeTransferirChat (spec 04, gap 04-3)", () => {
+  const dono = { id: "at-1", perfil: "atendente" };
+  const deOutro = { id: "at-2", perfil: "atendente" };
+
+  it("admin transfere qualquer chamado", () => {
+    expect(podeTransferirChat({ id: "adm", perfil: "admin" }, { atendente_id: "at-2" })).toBe(true);
+    expect(podeTransferirChat({ id: "adm", perfil: "admin" }, { atendente_id: null })).toBe(true);
+  });
+
+  it("supervisor transfere qualquer chamado", () => {
+    expect(podeTransferirChat({ id: "sup", perfil: "supervisor" }, { atendente_id: "at-2" })).toBe(true);
+    expect(podeTransferirChat({ id: "sup", perfil: "supervisor" }, { atendente_id: null })).toBe(true);
+  });
+
+  it("atendente dono do chamado transfere", () => {
+    expect(podeTransferirChat(dono, { atendente_id: "at-1" })).toBe(true);
+  });
+
+  it("atendente nao transfere chamado de colega", () => {
+    expect(podeTransferirChat(deOutro, { atendente_id: "at-1" })).toBe(false);
+  });
+
+  it("chat sem atendente: atendente comum nao transfere", () => {
+    expect(podeTransferirChat(dono, { atendente_id: null })).toBe(false);
+    expect(podeTransferirChat(dono, undefined)).toBe(false);
+  });
+
+  it("sem usuario, fail-closed", () => {
+    expect(podeTransferirChat(null, { atendente_id: "at-1" })).toBe(false);
+    expect(podeTransferirChat(undefined, undefined)).toBe(false);
   });
 });

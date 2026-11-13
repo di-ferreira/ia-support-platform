@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **169 entregues** `[x]` — gaps CORRIGIDO
-- **33 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **170 entregues** `[x]` — gaps CORRIGIDO
+- **32 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
