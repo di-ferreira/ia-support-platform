@@ -11,8 +11,16 @@ test.describe("Login → Inbox", () => {
     await page.getByRole("button", { name: "Entrar" }).click();
     await page.waitForURL("**/dashboard");
 
-    // Inbox: espera a lista terminar de carregar (vazia ou com chats)
-    await page.goto("/atendimento");
+    // Estabiliza o dashboard antes do full-reload: o guard de auth dispara
+    // /auth/me ao carregar; navegar logo após o redirect o abortaria em voo,
+    // e o catch do layout derruba a sessão. networkidle assenta em <1s.
+    await page.waitForLoadState("networkidle");
+
+    // Inbox: navega no client-side (link da sidebar) em vez de full-reload —
+    // recarregar a página logo após o login pode abortar o /auth/me em voo e o
+    // catch do layout derruba a sessão (redireciona para /login).
+    await page.getByRole("link", { name: "Atendimento" }).click();
+    await page.waitForURL("**/atendimento");
     const primeiroChat = page.getByTestId("inbox-chat-item").first();
     const inboxVazia = page.getByText("Nenhuma conversa");
     await expect(primeiroChat.or(inboxVazia).first()).toBeVisible({

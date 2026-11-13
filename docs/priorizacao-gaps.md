@@ -22,6 +22,7 @@ Atualizado em 2026-11-12: 14-7 corrigido (T9) — harness `backend/tests/test_wo
 Atualizado em 2026-11-12: 14-12 corrigido (T6) — adapter com contrato congelado + ciclo do outbox (`tests/test_outbox_ciclo.py`: sucesso, retry com backoff, `FALHA_PERMANENTE`, lease, reprocessamento manual e evento obsoleto, com clock injetado); 53 abertos.
 Atualizado em 2026-11-12: 12-8 registrado (auditoria do worker: `event_version` só entra na `event_key` e o evento obsoleto não é descartado, spec 12 §Concorrência); 54 abertos.
 Atualizado em 2026-11-12: 12-8 corrigido — worker descarta evento obsoleto por `event_version` do agregado (descarte `FALHA_PERMANENTE`, sem status novo no enum) sem chamada externa; 53 abertos.
+Atualizado em 2026-11-13: 14-6 corrigido (T6) — frontend com Vitest (36 testes passando) e E2E Playwright `e2e/login-inbox.spec.ts` rodando o fluxo login→inbox contra a stack (envio real só com `E2E_ENVIA_WHATSAPP`); 52 abertos.
 
 ## Critério de ordenação
 
@@ -104,7 +105,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 31 | 14-3 (CORRIGIDO) | `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768 | Fundação do RAG sem teste |
 | 32 | 14-10 | Sem teste que garanta a dimensão de embedding (768 vs 1536) | Bloqueio OpenAI (ADR-0005) não é travado por teste |
 | 33 | 14-12 (CORRIGIDO) | Sem contract tests do adapter Emsoft e do ciclo outbox/reprocessamento | Integração (Fases 5/6) sem porta de regressão |
-| 34 | 14-6 | Frontend sem infraestrutura de teste (sem Vitest/Playwright) | Código da Fase 4 entraria sem teste |
+| 34 | 14-6 (CORRIGIDO) | Frontend sem infraestrutura de teste (sem Vitest/Playwright) | Código da Fase 4 entraria sem teste |
 
 ### T7 — Backup e resiliência (4)
 | # | Gap | Descrição | Justificativa |
