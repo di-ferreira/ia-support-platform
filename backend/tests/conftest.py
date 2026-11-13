@@ -101,6 +101,14 @@ class FakeAuditoria(FakeStore):
         )[:limite]
 
 
+class FakeAvaliacoes(FakeStore):
+    async def list_by_chat(self, chat_id: str, limite: int = 200) -> list[dict]:
+        registros = await self.list_by("chat_id", chat_id)
+        return sorted(
+            registros, key=lambda r: r.get("created_at") or "", reverse=True
+        )[:limite]
+
+
 class FakeIADiagnosticos(FakeStore):
     async def get_by_chat(self, chat_id: str) -> dict | None:
         execucoes = await self.list_by("chat_id", chat_id)
@@ -157,6 +165,7 @@ class FakeRepositories:
         self.integracao_chamados = FakeIntegracaoChamados("integracao_chamados")
         self.integration_outbox = FakeIntegrationOutbox("integration_outbox")
         self.auditoria = FakeAuditoria("auditoria")
+        self.avaliacoes = FakeAvaliacoes("avaliacoes")
 
 
 @pytest.fixture

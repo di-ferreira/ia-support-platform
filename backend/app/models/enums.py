@@ -143,3 +143,14 @@ class TipoEventoOutbox(enum.StrEnum):
     TICKET_ASSIGNMENT_CHANGED = "TICKET_ASSIGNMENT_CHANGED"
     TICKET_RESOLUTION_REQUESTED = "TICKET_RESOLUTION_REQUESTED"
     TICKET_REOPEN_REQUESTED = "TICKET_REOPEN_REQUESTED"
+
+
+class CanalAvaliacao(enum.StrEnum):
+    """Canal de origem de uma avaliação CSAT 1-5 (spec 00/00-11).
+
+    `whatsapp` cobre a nota capturada do texto do cliente via webhook;
+    `interno`, a nota registrada pela própria equipe no painel.
+    """
+
+    whatsapp = "whatsapp"
+    interno = "interno"

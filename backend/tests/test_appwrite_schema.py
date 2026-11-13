@@ -88,7 +88,7 @@ def fake_databases():
     return FakeDatabases()
 
 
-def test_schema_cobre_as_quatorze_collections():
+def test_schema_cobre_as_quinze_collections():
     assert set(COLLECTIONS) == {
         "atendentes",
         "clientes",
@@ -104,6 +104,7 @@ def test_schema_cobre_as_quatorze_collections():
         "regras_roteamento",
         "integracao_chamados",
         "integration_outbox",
+        "avaliacoes",
     }
 
 

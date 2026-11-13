@@ -17,6 +17,7 @@ aplicação (os services checam duplicidade antes de inserir), não por índice 
 
 from app.models.auditoria import AcaoAuditoria, TipoAtor
 from app.models.departamento import CategoriaERP, Intencao
+from app.models.enums import CanalAvaliacao
 from app.models.ia_diagnostico import StatusIA
 from app.models.knowledge_base import CategoriaConhecimento
 from app.models.outbox import StatusOutbox, TipoEventoOutbox
@@ -75,6 +76,9 @@ TIPO_ATOR = [t.value for t in TipoAtor]
 INTENCAO = [i.value for i in Intencao]
 CATEGORIA_ERP = [c.value for c in CategoriaERP]
 CATEGORIA_CONHECIMENTO = [c.value for c in CategoriaConhecimento]
+
+# Spec 00/00-11: canais de origem de uma avaliação CSAT 1-5.
+CSAT_CANAL = [c.value for c in CanalAvaliacao]
 
 
 def str_attr(key: str, size: int = 255, required: bool = True) -> dict:
@@ -177,6 +181,10 @@ COLLECTIONS: dict[str, dict] = {
             str_attr("setor_alvo", 50, required=False),
             str_attr("whatsapp_number", 20, required=False),
             datetime_attr("ultima_mensagem_em"),
+            # Spec 00/00-11: pedido de avaliação CSAT em andamento; limpo ao
+            # registrar a nota.
+            bool_attr("avaliacao_pendente", default=False),
+            datetime_attr("avaliacao_solicitada_em"),
         ],
     },
     "mensagens": {
@@ -329,6 +337,19 @@ COLLECTIONS: dict[str, dict] = {
             # a data é o `created_at` nativo do evento.
             str_attr("ator", 100, required=False),
             text_attr("motivo"),
+        ],
+    },
+    # Spec 00/00-11: avaliações CSAT 1-5 por chat; a nota pode vir do
+    # webhook WhatsApp (texto do cliente) ou ser registrada no painel.
+    "avaliacoes": {
+        "name": "Avaliacoes",
+        "attributes": [
+            fk_attr("chat_id"),
+            int_attr("nota", required=True),
+            enum_attr("canal", CSAT_CANAL, required=False, default="whatsapp"),
+            text_attr("comentario"),
+            fk_attr("atendente_id", required=False),
+            fk_attr("departamento_id", required=False),
         ],
     },
 }

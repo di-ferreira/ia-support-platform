@@ -58,6 +58,10 @@ class Settings(BaseSettings):
     # Spec 06 §Webhooks: URL padrão do webhook n8n configurável (documentada em
     # compose/env), nunca hardcode no código.
     evolution_default_webhook_url: str = "http://n8n:5678/webhook/emsoft-whatsapp"
+    # Instância Evolution usada pelo chatbot para enviar mensagens (CSAT).
+    evolution_instance_name: str = "emsoft-support"
+    # Spec 00/00-11: liga o pedido automático de avaliação ao encerrar o chat.
+    csat_enabled: bool = False
 
     cors_origins: list[str] = ["http://localhost:3000"]
     environment: str = "development"
