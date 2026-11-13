@@ -1,16 +1,12 @@
-import enum
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Enum, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.models.enums import PerfilAtendente  # noqa: F401 (reexport histórico)
 
-
-class PerfilAtendente(enum.StrEnum):
-    admin = "admin"
-    supervisor = "supervisor"
-    atendente = "atendente"
+__all__ = ["Atendente", "PerfilAtendente"]
 
 
 class Atendente(Base):

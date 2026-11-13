@@ -1,4 +1,3 @@
-import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,6 +5,7 @@ from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, Text,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import PrioridadeChat, StatusChat  # noqa: F401 (reexport histórico)
 
 if TYPE_CHECKING:
     from app.models.atendente import Atendente
@@ -15,22 +15,7 @@ if TYPE_CHECKING:
     from app.models.tag import Tag
 
 
-class StatusChat(enum.StrEnum):
-    novo = "NOVO"
-    ia_analisando = "IA_ANALISANDO"
-    aguardando_cliente = "AGUARDANDO_CLIENTE"
-    aguardando_humano_com_solucao = "AGUARDANDO_HUMANO_COM_SOLUCAO"
-    aguardando_humano_sem_solucao = "AGUARDANDO_HUMANO_SEM_SOLUCAO"
-    em_atendimento = "EM_ATENDIMENTO"
-    resolvido = "RESOLVIDO"
-    encerrado = "ENCERRADO"
-
-
-class PrioridadeChat(enum.StrEnum):
-    baixa = "baixa"
-    media = "media"
-    alta = "alta"
-    urgente = "urgente"
+__all__ = ["Chat", "PrioridadeChat", "StatusChat"]
 
 
 class Chat(Base):

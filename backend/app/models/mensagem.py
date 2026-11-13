@@ -1,4 +1,3 @@
-import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,23 +5,12 @@ from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import RemetenteMensagem, TipoMensagem  # noqa: F401 (reexport histórico)
 
 if TYPE_CHECKING:
     from app.models.chat import Chat
 
-
-class TipoMensagem(enum.StrEnum):
-    texto = "texto"
-    audio = "audio"
-    documento = "documento"
-    imagem = "imagem"
-
-
-class RemetenteMensagem(enum.StrEnum):
-    cliente = "cliente"
-    ia = "ia"
-    atendente = "atendente"
-    sistema = "sistema"
+__all__ = ["Mensagem", "RemetenteMensagem", "TipoMensagem"]
 
 
 class Mensagem(Base):

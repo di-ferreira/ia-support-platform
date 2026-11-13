@@ -1,4 +1,3 @@
-import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,16 +5,12 @@ from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Text,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import StatusIA  # noqa: F401 (reexport histórico)
 
 if TYPE_CHECKING:
     from app.models.chat import Chat
 
-
-class StatusIA(enum.StrEnum):
-    resolvido_pela_ia = "RESOLVIDO_PELA_IA"
-    transferir_com_solucao = "TRANSFERIR_COM_SOLUCAO"
-    transferir_sem_solucao = "TRANSFERIR_SEM_SOLUCAO"
-    esclarecimento = "ESCLARECIMENTO"
+__all__ = ["IADiagnostico", "StatusIA"]
 
 
 class IADiagnostico(Base):

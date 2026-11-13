@@ -1,19 +1,12 @@
-import enum
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Enum, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.models.enums import CategoriaConhecimento  # noqa: F401 (reexport histórico)
 
-
-class CategoriaConhecimento(enum.StrEnum):
-    fiscal = "fiscal"
-    estoque = "estoque"
-    compras = "compras"
-    vendas = "vendas"
-    financeiro = "financeiro"
-    multiempresa = "multiempresa"
+__all__ = ["CategoriaConhecimento", "KnowledgeBase"]
 
 
 class KnowledgeBase(Base):
