@@ -32,6 +32,7 @@ Atualizado em 2026-11-13: 02-14 corrigido — `scripts/seed_qdrant.py` lê artig
 Atualizado em 2026-11-13: 02-11, 08-7 e 09-12 corrigidos — caminho morto ORM/Alembic/Postgres removido do backend (`backend/alembic/`, `alembic.ini`, `app/core/database.py`, `scripts/migrate.sh`, `database_url*` no `Settings` e no compose prod; `app/models/` em reexports de `app.models.enums`; trava em `tests/test_remocao_orm.py`); 36 abertos (165 entregues).
 Atualizado em 2026-11-13: 14-8 corrigido — suíte real de integração `backend/tests/integracao` (7 testes `pytest.mark.integracao`) agendada no CI como job noturno `integracao` com services Qdrant/Redis (cron 03:00 UTC, `schedule`/`workflow_dispatch`, sem bloquear push/PR); Appwrite/Evolution/Emsoft pulam sem credenciais; 35 abertos (166 entregues).
 Atualizado em 2026-11-13: 04-9 e 04-14 corrigidos — escopo por departamento em `GET /atendentes/ativos` (regra 6, spec 04) e checagem de posse em `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` (04-14 é gap novo, registrado e corrigido no mesmo commit); 34 abertos (168 entregues).
+Atualizado em 2026-11-13: 04-8 corrigido — 403 na criação de instância distingue instância já existente (`ja_existia` + status real) de credencial recusada (`EvolutionAuthError` → HTTP 403); 33 abertos (169 entregues).
 
 ## Critério de ordenação
 
@@ -146,7 +147,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 50 | 04-11 (CORRIGIDO) | Identidade de serviço da IA / `actor_type` auditável não implementada |
 | 51 | 07-3 (CORRIGIDO) | WebSocket sem reconexão nem backoff |
 | 52 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR |
-| 53 | 04-8 | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |
+| 53 | 04-8 (CORRIGIDO) | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |
 | 54 | 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases` sem upload/download/storage |
 | 55 | 02-3 | `TipoMensagem` sem `sticker`/`local`; webhook mapeia sticker→imagem sem espelhar o enum |
 | 56 | 01-3 | Urgência da IA (`critica`) só no prompt, sem coluna |

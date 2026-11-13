@@ -7,7 +7,7 @@ from app.schemas.evolution import (
     SendTextRequest,
     WebhookConfig,
 )
-from app.services.evolution_service import EvolutionService
+from app.services.evolution_service import EvolutionAuthError, EvolutionService
 
 router = APIRouter(
     prefix="/evolution",
@@ -27,6 +27,11 @@ async def criar_instancia(
 ):
     try:
         return await service.criar_instancia(body.instanceName)
+    except EvolutionAuthError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Credencial da Evolution recusada (verifique EVOLUTION_API_KEY)",
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
