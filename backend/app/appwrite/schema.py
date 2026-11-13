@@ -15,6 +15,7 @@ A unicidade (ex.: `atendentes.email`, `clientes.documento`) continua garantida p
 aplicação (os services checam duplicidade antes de inserir), não por índice de banco.
 """
 
+from app.models.auditoria import AcaoAuditoria, TipoAtor
 from app.models.departamento import CategoriaERP, Intencao
 from app.models.ia_diagnostico import StatusIA
 from app.models.knowledge_base import CategoriaConhecimento
@@ -65,6 +66,11 @@ REMETENTE_MENSAGEM = ["cliente", "ia", "atendente", "sistema"]
 TIPO_MENSAGEM = ["texto", "audio", "documento", "imagem"]
 
 STATUS_IA = [s.value for s in StatusIA]
+
+# Spec 04 §Auditoria obrigatória: trilha de ações sobre o chat (ator, ação,
+# antes/depois e motivo). Sem senha, token ou conteúdo integral sensível.
+ACAO_AUDITORIA = [a.value for a in AcaoAuditoria]
+TIPO_ATOR = [t.value for t in TipoAtor]
 
 INTENCAO = [i.value for i in Intencao]
 CATEGORIA_ERP = [c.value for c in CategoriaERP]
@@ -218,6 +224,27 @@ COLLECTIONS: dict[str, dict] = {
             fk_attr("departamento_id", required=False),
             text_attr("motivo"),
             text_attr("artigos_consultados"),
+        ],
+    },
+    # Spec 04 §Auditoria obrigatória: registro append-only por ação relevante
+    # do chat (criação, status, atribuição, transferências, prioridade,
+    # reabertura, confirmação de resolução), com antes/depois e motivo.
+    "auditoria": {
+        "name": "Auditoria",
+        "attributes": [
+            fk_attr("chat_id"),
+            enum_attr("acao", ACAO_AUDITORIA, required=False, default="CRIACAO"),
+            enum_attr("ator_tipo", TIPO_ATOR, required=False, default="SISTEMA"),
+            str_attr("ator_id", 100, required=False),
+            str_attr("ator_nome", 255, required=False),
+            str_attr("modelo_ia", 100, required=False),
+            text_attr("motivo"),
+            str_attr("valor_anterior", 255, required=False),
+            str_attr("valor_novo", 255, required=False),
+            fk_attr("departamento_anterior_id", required=False),
+            fk_attr("departamento_novo_id", required=False),
+            fk_attr("atendente_anterior_id", required=False),
+            fk_attr("atendente_novo_id", required=False),
         ],
     },
     "knowledge_bases": {
