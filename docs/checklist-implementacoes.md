@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **149 entregues** `[x]` — gaps CORRIGIDO
-- **52 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **152 entregues** `[x]` — gaps CORRIGIDO
+- **49 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -25,7 +25,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **00-4** — Docs citavam Supabase Storage como armazenamento (Baixa)
 - [ ] **00-5** — Docs citavam stack NestJS/TypeScript/Prisma (Baixa)
 - [ ] **00-6** — Docs citavam workflow de 19 nós (Baixa)
-- [ ] **00-7** — Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod (**Alta**)
+- [x] **00-7** — Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod (**Alta**)
 - [x] **00-8** — Status do chat nunca saía de `NOVO` no fluxo real (**Crítica**)
 - [x] **00-9** — `ia_diagnosticos` nunca era populado (**Crítica**)
 - [x] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
@@ -194,8 +194,8 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **09-2** — Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) (**Crítica**)
 - [ ] **09-3** — MinIO órfão no compose prod sem referência no código (Baixa)
 - [x] **09-4** — Pilha do Appwrite em rede isolada; backend prod não a alcança (**Alta**)
-- [ ] **09-5** — Backup Qdrant usa bind mount divergente do volume named de prod (**Alta**)
-- [ ] **09-6** — Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente (**Alta**)
+- [x] **09-5** — Backup Qdrant usa bind mount divergente do volume named de prod (**Alta**)
+- [x] **09-6** — Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente (**Alta**)
 - [ ] **09-7** — `backup.sh` não é agendado (**Alta**)
 - [ ] **09-8** — Senha do Postgres em claro no compose/string da Evolution (Média)
 - [x] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)

@@ -97,8 +97,8 @@ Verificado contra o código em 2026-11-06.
 | 09-2 | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | `infra/docker-compose.prod.yml`; `core/config.py` | **Crítica** | **CORRIGIDO** (2026-11-10) — env block completo no compose prod (segredos, Appwrite, Qdrant, LLM, CORS) |
 | 09-3 | MinIO órfão no compose prod sem referência no código | `infra/docker-compose.prod.yml` | Baixa | **ABERTO** |
 | 09-4 | Pilha do Appwrite em rede isolada; backend prod não a alcança | `infra/appwrite/` vs `docker-compose.prod.yml` | **Alta** | **CORRIGIDO** (2026-11-10) — backend em `default` + `appwrite` (rede external fixa); pré-op: stack Appwrite subido ≥1× no host (a rede persiste no daemon) |
-| 09-5 | Backup Qdrant usa bind mount divergente do volume named de prod | `scripts/backup.sh` | **Alta** | **ABERTO** |
-| 09-6 | Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente | `scripts/backup.sh` | **Alta** | **ABERTO** |
+| 09-5 | Backup Qdrant usa bind mount divergente do volume named de prod | `scripts/backup.sh` | **Alta** | **CORRIGIDO** (2026-11-13) — snapshot via `tar` dentro do próprio container (`-C /qdrant storage`), sem bind mount |
+| 09-6 | Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente | `scripts/backup.sh` | **Alta** | **CORRIGIDO** (2026-11-13) — backup cobre Appwrite (mariadb-dump), n8n, evolution-db, Qdrant e MinIO; retenção, verificação e manifesto; bloco Supabase removido |
 | 09-7 | `backup.sh` não é agendado | `scripts/` | **Alta** | **ABERTO** |
 | 09-8 | Senha do Postgres em claro no compose/string da Evolution | `infra/docker-compose.prod.yml` | Média | **ABERTO** |
 | 09-9 | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` | `pyproject.toml`; `backend/Dockerfile`; `ci.yml` | Baixa | **CORRIGIDO** — backend/.python-version (3.12), pyproject ruff/mypy em py312/3.12, CI em 3.12, Dockerfile em 3.12-slim |
