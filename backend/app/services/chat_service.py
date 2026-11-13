@@ -3,7 +3,9 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 
 from app.appwrite.repositories import Repositories
+from app.models.auditoria import AcaoAuditoria
 from app.models.chat import PrioridadeChat, StatusChat
+from app.services.auditoria_service import Ator, AuditoriaService
 
 STATUS_TRANSITIONS = {
     StatusChat.novo: [StatusChat.ia_analisando],
@@ -33,6 +35,7 @@ STATUS_TRANSITIONS = {
 class ChatService:
     def __init__(self, repos: Repositories):
         self.repos = repos
+        self.auditoria = AuditoriaService(repos)
 
     def pode_ver_chat(self, chat: dict, user: dict) -> bool:
         """Regra única de posse/escopo reutilizada por listar e endpoints de detalhe."""
@@ -140,7 +143,7 @@ class ChatService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Departamento inativo não aceita novos chats",
                 )
-        return await self.repos.chats.create(
+        chat = await self.repos.chats.create(
             {
                 "cliente_id": data["cliente_id"],
                 "loja_id": data.get("loja_id"),
@@ -150,8 +153,30 @@ class ChatService:
                 "prioridade": PrioridadeChat.media.value,
             }
         )
+        await self.auditoria.registrar(
+            chat_id=chat["id"],
+            acao=AcaoAuditoria.CRIACAO,
+            ator=Ator.sistema(),
+            valor_novo=chat["status"],
+        )
+        return chat
 
-    async def atualizar_status(self, chat_id: str, novo_status: StatusChat) -> dict:
+    async def atualizar_status(
+        self,
+        chat_id: str,
+        novo_status: StatusChat,
+        ator: Ator | None = None,
+        *,
+        _acao: AcaoAuditoria = AcaoAuditoria.STATUS,
+        _motivo: str | None = None,
+    ) -> dict:
+        """Muda o status do chat e registra a transição na auditoria.
+
+        O registro acontece aqui, no único ponto onde o status é efetivamente
+        atualizado. `confirmar_resolucao` e `reabrir` reutilizam esse registro
+        apenas sobrescrevendo o tipo de ação (`_acao`) e o `motivo`: uma
+        mutação = um registro, sem duplicação.
+        """
         chat = await self.obter(chat_id)
         if novo_status not in STATUS_TRANSITIONS.get(chat["status"], []):
             raise HTTPException(
@@ -161,7 +186,16 @@ class ChatService:
         data = {"status": novo_status.value}
         if novo_status in (StatusChat.resolvido, StatusChat.encerrado):
             data["ultima_mensagem_em"] = datetime.now(UTC).isoformat()
-        return await self.repos.chats.update(chat_id, data)
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=_acao,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            motivo=_motivo,
+            valor_anterior=chat["status"],
+            valor_novo=novo_status.value,
+        )
+        return result
 
     async def confirmar_resolucao(self, chat_id: str, user: dict) -> dict:
         """Cenário A: o cliente confirma que a solução da IA funcionou."""
@@ -179,7 +213,12 @@ class ChatService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Chat pertence a outro atendente",
             )
-        return await self.atualizar_status(chat_id, StatusChat.resolvido)
+        return await self.atualizar_status(
+            chat_id,
+            StatusChat.resolvido,
+            Ator.humano(user),
+            _acao=AcaoAuditoria.CONFIRMACAO_RESOLUCAO,
+        )
 
     async def reabrir(
         self, chat_id: str, user: dict, motivo: str | None = None
@@ -202,9 +241,17 @@ class ChatService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Chat pertence a outro atendente",
             )
-        return await self.atualizar_status(chat_id, StatusChat.ia_analisando)
+        return await self.atualizar_status(
+            chat_id,
+            StatusChat.ia_analisando,
+            Ator.humano(user),
+            _acao=AcaoAuditoria.REABERTURA,
+            _motivo=motivo,
+        )
 
-    async def assinar(self, chat_id: str, atendente_id: str) -> dict:
+    async def assinar(
+        self, chat_id: str, atendente_id: str, ator: Ator | None = None
+    ) -> dict:
         chat = await self.obter(chat_id)
         if chat["status"] == StatusChat.encerrado.value:
             raise HTTPException(
@@ -214,15 +261,33 @@ class ChatService:
         data = {"atendente_id": atendente_id}
         if chat["status"] == StatusChat.novo:
             data["status"] = StatusChat.em_atendimento.value
-        return await self.repos.chats.update(chat_id, data)
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.ATRIBUICAO,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            atendente_anterior_id=chat["atendente_id"],
+            atendente_novo_id=atendente_id,
+        )
+        return result
 
     async def definir_prioridade(
-        self, chat_id: str, prioridade: PrioridadeChat
+        self, chat_id: str, prioridade: PrioridadeChat, ator: Ator | None = None
     ) -> dict:
-        await self.obter(chat_id)
-        return await self.repos.chats.update(chat_id, {"prioridade": prioridade.value})
+        chat = await self.obter(chat_id)
+        result = await self.repos.chats.update(chat_id, {"prioridade": prioridade.value})
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.PRIORIDADE,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            valor_anterior=chat["prioridade"],
+            valor_novo=prioridade.value,
+        )
+        return result
 
-    async def pegar(self, chat_id: str, atendente_id: str) -> dict:
+    async def pegar(
+        self, chat_id: str, atendente_id: str, ator: Ator | None = None
+    ) -> dict:
         chat = await self.obter(chat_id)
         if chat["status"] == StatusChat.encerrado.value:
             raise HTTPException(
@@ -237,9 +302,26 @@ class ChatService:
         data = {"atendente_id": atendente_id, "setor_alvo": None}
         if chat["status"] == StatusChat.novo:
             data["status"] = StatusChat.em_atendimento.value
-        return await self.repos.chats.update(chat_id, data)
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.ATRIBUICAO,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            atendente_anterior_id=chat["atendente_id"],
+            atendente_novo_id=atendente_id,
+            valor_anterior=chat["status"] if "status" in data else None,
+            valor_novo=data.get("status") if "status" in data else None,
+        )
+        return result
 
-    async def transferir(self, chat_id: str, novo_atendente_id: str, user: dict) -> dict:
+    async def transferir(
+        self,
+        chat_id: str,
+        novo_atendente_id: str,
+        user: dict,
+        motivo: str | None = None,
+        ator: Ator | None = None,
+    ) -> dict:
         chat = await self.obter(chat_id)
         if user["perfil"] == "atendente" and chat["atendente_id"] != user["id"]:
             raise HTTPException(
@@ -257,7 +339,18 @@ class ChatService:
             StatusChat.novo.value,
         ):
             data["status"] = StatusChat.em_atendimento.value
-        return await self.repos.chats.update(chat_id, data)
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.TRANSFERENCIA,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            motivo=motivo,
+            atendente_anterior_id=chat["atendente_id"],
+            atendente_novo_id=novo_atendente_id,
+            valor_anterior=chat["status"] if "status" in data else None,
+            valor_novo=data.get("status") if "status" in data else None,
+        )
+        return result
 
     async def transferir_grupo(
         self, chat_id: str, destino, user: dict, motivo: str | None = None
@@ -329,8 +422,19 @@ class ChatService:
 
         # `motivo` NAO vai para o documento: o schema Appwrite de producao nao
         # declara `motivo_transferencia` (gap 02-10) e o fake aceitaria algo que
-        # producao rejeita. O chamador registra o motivo no log (correlacao da R1.1).
-        return await self.repos.chats.update(chat_id, data)
+        # producao rejeita. O motivo fica registrado na auditoria abaixo.
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.TRANSFERENCIA_DEPARTAMENTO,
+            ator=Ator.humano(user),
+            motivo=motivo,
+            departamento_anterior_id=chat.get("departamento_id"),
+            departamento_novo_id=departamento_id,
+            atendente_anterior_id=chat["atendente_id"],
+            atendente_novo_id=data.get("atendente_id"),
+        )
+        return result
 
     async def atribuir_atendente(
         self,
@@ -338,6 +442,7 @@ class ChatService:
         atendente_id: str,
         user: dict,
         motivo: str | None = None,
+        ator: Ator | None = None,
     ) -> dict:
         """Assunção/atribuição (spec 10 §Processo de assunção).
 
@@ -392,4 +497,13 @@ class ChatService:
         data: dict = {"atendente_id": atendente_id}
         if chat["status"] == StatusChat.novo.value:
             data["status"] = StatusChat.em_atendimento.value
-        return await self.repos.chats.update(chat_id, data)
+        result = await self.repos.chats.update(chat_id, data)
+        await self.auditoria.registrar(
+            chat_id=chat_id,
+            acao=AcaoAuditoria.ATRIBUICAO,
+            ator=ator if ator is not None else Ator.sistema("interno"),
+            motivo=motivo,
+            atendente_anterior_id=chat["atendente_id"],
+            atendente_novo_id=atendente_id,
+        )
+        return result
