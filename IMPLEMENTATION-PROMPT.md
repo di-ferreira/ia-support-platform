@@ -4,7 +4,7 @@ Você é responsável por implementar a IA Support Platform respeitando a fonte 
 
 ## Regras obrigatórias
 
-1. Antes de editar, leia `README.md`, `docs/specs/00` a `13`, todos os ADRs disponíveis, `AGENTS.md`, `.ai/AGENT.md` e skills do repositório.
+1. Antes de editar, leia `README.md`, `docs/specs/00` a `13`, todos os ADRs disponíveis, `AGENTS.md`, `docs/specs/` e `.ai/PROJECT.md` e skills do repositório.
 2. Inspecione os arquivos reais; não assuma que documentação e código estão sincronizados.
 3. Implemente somente uma fase/tarefa por vez. Não desenvolva todo o pacote em uma única alteração.
 4. Preserve stack e arquitetura: FastAPI, Appwrite, Redis, Qdrant, n8n, Evolution API, Next.js. Não introduza microserviços, CQRS ou agentes autônomos sem decisão aprovada.

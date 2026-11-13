@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **174 entregues** `[x]` — gaps CORRIGIDO
-- **28 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **177 entregues** `[x]` — gaps CORRIGIDO
+- **25 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
@@ -23,8 +23,8 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **00-2** — RAG inalcançável: `/ai/solucionar` não era chamado pelo fluxo (**Crítica**)
 - [x] **00-3** — Workflow n8n de 8 nós sem RAG/roteamento (**Alta**)
 - [x] **00-4** — Docs citavam Supabase Storage como armazenamento (Baixa)
-- [ ] **00-5** — Docs citavam stack NestJS/TypeScript/Prisma (Baixa)
-- [ ] **00-6** — Docs citavam workflow de 19 nós (Baixa)
+- [x] **00-5** — Docs citavam stack NestJS/TypeScript/Prisma (Baixa)
+- [x] **00-6** — Docs citavam workflow de 19 nós (Baixa)
 - [x] **00-7** — Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod (**Alta**)
 - [x] **00-8** — Status do chat nunca saía de `NOVO` no fluxo real (**Crítica**)
 - [x] **00-9** — `ia_diagnosticos` nunca era populado (**Crítica**)
@@ -38,7 +38,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 ## SPEC 01 — Domínio, Glossário e Máquina de Estados
 
-- [ ] **01-1** — `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) (Baixa)
+- [x] **01-1** — `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) (Baixa)
 - [x] **01-2** — `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` (**Alta**)
 - [ ] **01-3** — Urgência da IA (`critica`) não tem coluna; existe só no prompt (Média)
 - [x] **01-4** — Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma (**Alta**)

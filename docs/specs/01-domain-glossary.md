@@ -130,7 +130,7 @@ Verificado contra o código em 2026-11-06.
 
 | # | Gap | Onde | Severidade | Status |
 |---|---|---|---|---|
-| 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) | `.ai/AGENT.md`, `.ai/PROJECT_CONTEXT.md` | Baixa | **ABERTO** |
+| 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (`EM_ATENDIMENTO_HUMANO`, stack antiga) | `.ai/AGENT.md`, `.ai/PROJECT_CONTEXT.md` | Baixa | **CORRIGIDO (2026-11-13)** — `.ai/PROJECT_CONTEXT.md` lista os 8 estados reais; `TODO_LIST` e `specs.backup` removidos |
 | 01-2 | `PATCH /webhooks/chat/status` **não** valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | `api/routes/webhooks.py`; `services/webhook_service.py:79-86` | **Alta** | **CORRIGIDO** (2026-11-10) — status delegado à `ChatService.atualizar_status` (validação de `STATUS_TRANSITIONS`; 400 em transição inválida, 404 em chat inexistente); diagnóstico em chat `ENCERRADO` bloqueado (400) → [03](03-api-contract.md) |
 | 01-3 | Urgência da IA (`critica`) não tem coluna; existe só no prompt | `ai/prompts.py` vs `PRIORIDADE_CHAT` | Média | **ABERTO** → [02](02-data-model.md) |
 | 01-4 | Cenário A não alcança `RESOLVIDO` pela IA: `resolvido_pela_ia` leva a `AGUARDANDO_CLIENTE` e ninguém confirma | `services/ai_pipeline.py:27-31` | **Alta** | **CORRIGIDO (backend)** — `ChatService.confirmar_resolucao` fecha o ciclo A; botão na Task F4.11 |

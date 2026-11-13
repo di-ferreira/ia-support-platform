@@ -1,61 +1,26 @@
-# Projeto
+# Projeto — Ponteiro
 
-Sistema de Atendimento WhatsApp com IA para ERP Autopeças
+Sistema de atendimento WhatsApp com IA para suporte técnico do ERP EMSoft.
 
 ## Objetivo
 
-Automatizar suporte técnico através de:
+Automatizar suporte técnico via WhatsApp com IA, RAG, kanban e escala para humano.
 
-- WhatsApp
-- Evolution API
-- N8N
-- IA
-- RAG
+## Stack real
 
-## Fluxos
+Backend FastAPI (Python) + Appwrite + Redis + Qdrant + Evolution API + n8n + Next.js 15.
 
-### Cenário A
+## Estados reais (`StatusChat`)
 
-IA resolve diretamente.
+Fonte: `backend/app/models/enums.py` → `StatusChat`.
 
-### Cenário B
+1. `NOVO`
+2. `IA_ANALISANDO`
+3. `AGUARDANDO_CLIENTE`
+4. `AGUARDANDO_HUMANO_COM_SOLUCAO`
+5. `AGUARDANDO_HUMANO_SEM_SOLUCAO`
+6. `EM_ATENDIMENTO`
+7. `RESOLVIDO`
+8. `ENCERRADO`
 
-IA encontra solução.
-
-Humano executa.
-
-### Cenário C
-
-IA não encontra solução.
-
-Humano investiga.
-
-## Componentes
-
-- Backend
-- Frontend
-- Evolution API
-- N8N
-- LLM
-- Banco Vetorial
-
-## Estados
-
-- NOVO
-- IA_ANALISANDO
-- AGUARDANDO_CLIENTE
-- AGUARDANDO_HUMANO_COM_SOLUCAO
-- AGUARDANDO_HUMANO_SEM_SOLUCAO
-- EM_ATENDIMENTO_HUMANO
-- RESOLVIDO
-- ENCERRADO
-
-## Requisitos
-
-- Multiatendimento
-- Kanban
-- Histórico completo
-- IA assistiva
-- RAG
-- Auditoria
-
+> Glossário de domínio completo: [`docs/specs/01-domain-glossary.md`](../docs/specs/01-domain-glossary.md).

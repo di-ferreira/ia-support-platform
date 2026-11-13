@@ -36,6 +36,7 @@ Atualizado em 2026-11-13: 04-8 corrigido — 403 na criação de instância dist
 Atualizado em 2026-11-13: 04-3 (CORRIGIDO) — ação de transferência escondida por perfil + vínculo (`podeTransferirChat` em `lib/permissoes.ts`: admin/supervisor sempre; atendente só o próprio chamado; sem usuário, fail-closed), aplicando Kanban ("Transferir") e Atendimento ("Transferir depto"); a guarda de rota por URL já existia; 32 abertos (170 entregues).
 Atualizado em 2026-11-13: 00-11 (CORRIGIDO) — CSAT 1-5 na coleção `avaliacoes` (captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off); 31 abertos (171 entregues).
 Atualizado em 2026-11-13: 00-12, 02-6 e 06-17 (CORRIGIDO) — mídia baixada via `getBase64FromMediaMessage`, salva no bucket `midias` do Appwrite (`StorageService` + rota de download autenticada; nó "Extrair" do n8n repassa `midia`); 28 abertos (174 entregues).
+Atualizado em 2026-11-13: 00-5, 00-6 e 01-1 (CORRIGIDO) — legado documental divergente eliminado: `.ai/PROJECT.md` e `.ai/PROJECT_CONTEXT.md` reduzidos a ponteiro (stack real FastAPI/Appwrite + 8 estados reais de `StatusChat`), `TODO_LIST.md`/`.ai/TODO_LIST.md` e `docs/specs.backup/` removidos; 25 abertos (177 entregues).
 
 ## Critério de ordenação
 
@@ -197,9 +198,9 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 93 | 09-3 (CORRIGIDO) | MinIO órfão no compose prod sem referência no código |
 | 94 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
 | 95 | 09-16 (CORRIGIDO) | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
-| 96 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
-| 97 | 00-5 | Docs citavam stack NestJS/TypeScript/Prisma |
-| 98 | 00-6 | Docs citavam workflow de 19 nós |
+| 96 | 01-1 (CORRIGIDO) | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
+| 97 | 00-5 (CORRIGIDO) | Docs citavam stack NestJS/TypeScript/Prisma |
+| 98 | 00-6 (CORRIGIDO) | Docs citavam workflow de 19 nós |
 
 ## Nota
 

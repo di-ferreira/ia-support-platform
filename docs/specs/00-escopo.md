@@ -121,8 +121,8 @@ Verificado contra o código em 2026-11-06. Ver [13-plano-implementacao.md](13-pl
 | 00-2 | RAG inalcançável: `/ai/solucionar` não era chamado pelo fluxo | `ai/router.py`; `workflow-support-ai.json` | **Crítica** | **CORRIGIDO** — n8n chama `POST /webhooks/ai/solucionar`; RAG real provado em runtime |
 | 00-3 | Workflow n8n de 8 nós sem RAG/roteamento | `infra/n8n/workflow-support-ai.json` | **Alta** | **CORRIGIDO** — workflow delega classificação/solução ao backend |
 | 00-4 | Docs citavam Supabase Storage como armazenamento | docs históricos | Baixa | **CORRIGIDO (doc)** |
-| 00-5 | Docs citavam stack NestJS/TypeScript/Prisma | `.ai/PROJECT.md` | Baixa | **ABERTO** → 01-1 (docs legados ainda no repo) |
-| 00-6 | Docs citavam workflow de 19 nós | `.ai/TODO_LIST.md` | Baixa | **ABERTO** → 01-1 |
+| 00-5 | Docs citavam stack NestJS/TypeScript/Prisma | `.ai/PROJECT.md` | Baixa | **CORRIGIDO (2026-11-13)** — docs legados reduzidos a ponteiro / `TODO_LIST` removido; a stack real está em `docs/specs/` |
+| 00-6 | Docs citavam workflow de 19 nós | `.ai/TODO_LIST.md` | Baixa | **CORRIGIDO (2026-11-13)** — docs legados reduzidos a ponteiro / `TODO_LIST` removido; a stack real está em `docs/specs/` |
 | 00-7 | Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod | `scripts/backup.sh`; `infra/docker-compose.prod.yml` | **Alta** | **ABERTO** → [09](09-infra-deploy.md) |
 | 00-8 | Status do chat nunca saía de `NOVO` no fluxo real | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO (verificado)** — `_finalizar` transiciona via `ChatService.atualizar_status`; teste `test_cenario_b_grava_snapshot_e_aplica_departamento` |
 | 00-9 | `ia_diagnosticos` nunca era populado | `services/ai_pipeline.py` | **Crítica** | **CORRIGIDO** — `_finalizar` grava o diagnóstico |
