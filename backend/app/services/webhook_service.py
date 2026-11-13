@@ -114,43 +114,9 @@ class WebhookService:
             await self.repos.clientes.update(cliente["id"], update)
         return cast("dict", await self.repos.clientes.get(cliente["id"]))
 
-    async def salvar_diagnostico(self, data: dict) -> dict:
-        chat_id = cast("str", data.get("chat_id"))
-        chat = await self.repos.chats.get(chat_id)
-        if not chat:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
-            )
-        # Spec 03: diagnóstico registrado pela IA precisa obedecer à máquina de
-        # estados; chat encerrado não recebe novos diagnósticos.
-        if chat["status"] == StatusChat.encerrado.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Não é possível registrar diagnóstico em chat encerrado",
-            )
-
-        diagnostico = await self.repos.ia_diagnosticos.create(
-            {
-                "chat_id": chat_id,
-                "status_ia": _val(data["status_ia"]),
-                "resumo": data.get("resumo"),
-                "solucao": data.get("solucao"),
-                "causa_provavel": data.get("causa_provavel"),
-                "confianca": data.get("confianca"),
-                "modelo_usado": data.get("modelo_usado"),
-                "tokens_usados": data.get("tokens_usados"),
-            }
-        )
-        await self.repos.chats.update(
-            chat_id,
-            {
-                "resumo_problema": data.get("resumo"),
-                "solucao_sugerida_ia": data.get("solucao"),
-                "causa_provavel": data.get("causa_provavel"),
-                "nivel_confianca_ia": data.get("confianca"),
-            },
-        )
-        return diagnostico
+    # 03-18: `salvar_diagnostico` foi removido — o diagnóstico passou a ser
+    # gravado pelo backend em `ai_pipeline._finalizar` (gap 05-2); o webhook
+    # de diagnóstico ficou sem chamador e duplicava a escrita.
 
     async def obter_contexto(self, chat_id: str) -> dict | None:
         chat = await self.repos.chats.get(chat_id)

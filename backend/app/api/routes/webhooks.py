@@ -14,7 +14,6 @@ from app.models.mensagem import TipoMensagem
 from app.schemas.webhook import (
     WebhookClienteUpdate,
     WebhookContexto,
-    WebhookDiagnostico,
     WebhookMensagem,
     WebhookSolucaoRequest,
     WebhookSolucaoResponse,
@@ -216,19 +215,9 @@ async def webhook_status(
     return chat
 
 
-@router.post("/chat/diagnostico")
-async def webhook_diagnostico(
-    body: WebhookDiagnostico,
-    repos: Repositories = Depends(get_repositories),
-    webhook_auth: None = Depends(verify_webhook),
-):
-    service = WebhookService(repos)
-    diagnostico = await service.salvar_diagnostico(body.model_dump())
-    await manager.send_event(
-        body.chat_id, "diagnostico",
-        {"chat_id": body.chat_id, "diagnostico_id": diagnostico["id"]},
-    )
-    return diagnostico
+# 03-18: o webhook de diagnóstico foi removido — o diagnóstico passou a ser
+# gravado pelo backend em `ai_pipeline._finalizar` (gap 05-2); o webhook
+# ficou sem chamador e duplicava a escrita.
 
 
 @router.post("/ai/solucionar", response_model=WebhookSolucaoResponse)

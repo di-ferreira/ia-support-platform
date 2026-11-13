@@ -7,7 +7,6 @@ from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
 from app.appwrite.storage import StorageService
 from app.core.config import settings
-from app.models.chat import StatusChat
 from app.models.mensagem import RemetenteMensagem
 from app.schemas.mensagem import (
     EnviarWhatsAppRequest,
@@ -18,6 +17,7 @@ from app.schemas.mensagem import (
 from app.services.chat_service import ChatService
 from app.services.evolution_service import EvolutionService
 from app.services.mensagem_service import MensagemService
+from app.services.whatsapp_service import WhatsappEnvioError, WhatsappService
 
 logger = logging.getLogger(__name__)
 
@@ -121,52 +121,19 @@ async def enviar_whatsapp(
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(get_current_user),
 ):
-    cliente = await repos.clientes.get_by_telefone(body.numero)
-    if not cliente:
-        cliente = await repos.clientes.create({
-            "nome": f"Novo {body.numero[-8:]}",
-            "documento": body.numero,
-            "telefone": body.numero,
-        })
-
-    ativas = [
-        c
-        for c in await repos.chats.list_by("cliente_id", cliente["id"])
-        if c["status"] not in (StatusChat.encerrado.value, StatusChat.resolvido.value)
-    ]
-    ativas.sort(key=lambda c: c["created_at"] or "", reverse=True)
-    chat = ativas[0] if ativas else None
-    if chat is None:
-        chat = await repos.chats.create({
-            "cliente_id": cliente["id"],
-            "whatsapp_number": body.numero,
-        })
-
-    service = MensagemService(repos)
-    mensagem = await service.enviar({
-        "chat_id": chat["id"],
-        "remetente": RemetenteMensagem.atendente,
-        "tipo": "texto",
-        "conteudo": body.conteudo,
-    })
-
     try:
-        evolution = EvolutionService()
-        await evolution.enviar_texto(
-            instance_name=settings.evolution_instance_name,
-            number=body.numero,
-            text=body.conteudo,
+        chat_id, mensagem_id = await WhatsappService(repos).enviar_para_numero(
+            body.numero, body.conteudo
         )
-    except Exception as e:
-        logger.warning("Falha ao enviar mensagem via WhatsApp: %s", e)
+    except WhatsappEnvioError:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Mensagem salva, mas o envio pelo WhatsApp falhou",
         )
 
     await manager.send_event(
-        chat["id"], "nova_mensagem",
-        {"chat_id": chat["id"], "mensagem_id": mensagem["id"]},
+        chat_id, "nova_mensagem",
+        {"chat_id": chat_id, "mensagem_id": mensagem_id},
     )
 
-    return EnviarWhatsAppResponse(chat_id=chat["id"], mensagem_id=mensagem["id"])
+    return EnviarWhatsAppResponse(chat_id=chat_id, mensagem_id=mensagem_id)
