@@ -14,6 +14,7 @@ class WebhookMensagem(BaseModel):
     tipo: TipoMensagem = TipoMensagem.texto
     url_arquivo: str | None = None
     whatsapp_message_id: str | None = None
+    midia: dict | str | None = None
 
 
 class WebhookStatusUpdate(BaseModel):

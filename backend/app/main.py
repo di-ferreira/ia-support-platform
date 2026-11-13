@@ -2,6 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+from appwrite.services.storage import Storage
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -50,7 +51,9 @@ async def lifespan(app: FastAPI):
     app.state.appwrite_databases = build_appwrite_databases(app.state.appwrite)
     app.state.repositories = Repositories(app.state.appwrite_databases)
     try:
-        ensure_appwrite_schema(app.state.appwrite_databases)
+        ensure_appwrite_schema(
+            app.state.appwrite_databases, Storage(app.state.appwrite)
+        )
         # Schema coerente com o declarativo: nenhum drift (spec 08).
         app.state.schema_drifts = []
         app.state.bootstrap = {"ok": True, "erro": None}

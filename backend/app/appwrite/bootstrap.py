@@ -9,8 +9,10 @@ from __future__ import annotations
 import logging
 
 from appwrite.services.databases import Databases
+from appwrite.services.storage import Storage
 
 from app.appwrite.schema import COLLECTIONS, DB_ID, DB_NAME, ENUM
+from app.appwrite.storage import ensure_bucket
 
 logger = logging.getLogger(__name__)
 
@@ -135,14 +137,20 @@ def _create_attribute(databases: Databases, collection_id: str, spec: dict) -> N
     logger.info("Appwrite: atributo criado (%s.%s)", collection_id, key)
 
 
-def ensure_appwrite_schema(databases: Databases) -> None:
+def ensure_appwrite_schema(databases: Databases, storage: Storage | None = None) -> None:
     """Cria database, collections e attributes se ainda não existirem.
 
     Drifts de enum (espec vs. Appwrite real) são agregados de todas as
     collections e levantados em uma única `SchemaDriftError` — o boot continua
     e o /health passa a reportar o app como degradado (spec 08).
+
+    `storage` (opcional) garante o bucket `midias` de mídia (gap 02-6). O bucket
+    é criado logo após a database, antes do drift de enum ser avaliado, para que
+    o armazenamento de mídia exista mesmo que o boot continue degradado.
     """
     ensure_database(databases)
+    if storage is not None:
+        ensure_bucket(storage)
     drifts: list[str] = []
     for collection_id, spec in COLLECTIONS.items():
         ensure_collection(databases, collection_id, spec["name"])

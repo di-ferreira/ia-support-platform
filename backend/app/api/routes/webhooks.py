@@ -24,6 +24,7 @@ from app.services.ai_pipeline import AIPipelineService
 from app.services.auditoria_service import Ator
 from app.services.avaliacao_service import AvaliacaoService
 from app.services.evolution_service import EvolutionService
+from app.services.midia_service import MidiaService
 from app.services.webhook_service import WebhookService
 
 router = APIRouter(
@@ -31,6 +32,8 @@ router = APIRouter(
     tags=["Webhooks (n8n)"],
     dependencies=[Depends(rate_limit(120, 60))],
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def verify_webhook(request: Request) -> None:
@@ -130,8 +133,23 @@ async def webhook_mensagem(
     if payload.get("tipo") not in TIPOS_VALIDOS + (None,):
         payload["tipo"] = "texto"
     validated = WebhookMensagem(**payload)
+    data = validated.model_dump(exclude={"midia": True})
+    if validated.midia is not None:
+        data["url_arquivo"] = None
+        try:
+            resultado = await MidiaService().armazenar(
+                validated.midia,
+                validated.tipo.value,
+                whatsapp_message_id=validated.whatsapp_message_id,
+                conteudo=validated.conteudo,
+            )
+        except Exception as exc:
+            logger.warning("Midia: falha ao processar no webhook: %s", exc)
+            resultado = None
+        if resultado:
+            data["url_arquivo"], data["conteudo"] = resultado
     service = WebhookService(repos)
-    mensagem = await service.receber_mensagem(validated.model_dump())
+    mensagem = await service.receber_mensagem(data)
     duplicada = bool(mensagem.get("duplicada"))
     if not duplicada:
         await manager.send_event(

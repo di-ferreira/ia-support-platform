@@ -18,13 +18,14 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from appwrite.id import ID
+from appwrite.services.databases import Databases
+from appwrite.services.storage import Storage
 
 from app.appwrite.bootstrap import ensure_appwrite_schema
 from app.appwrite.schema import DB_ID
 from app.core.appwrite import build_appwrite_client
 from app.core.config import settings
 from app.core.security import hash_password
-from appwrite.services.databases import Databases
 
 DEFAULT_EMAIL = "admin@emsoft.app"
 DEFAULT_SENHA = "admin123"
@@ -50,8 +51,8 @@ def main() -> None:
     client = build_appwrite_client()
     databases = Databases(client)
 
-    print("Garantindo schema Appwrite (database + collections + attributes)...")
-    ensure_appwrite_schema(databases)
+    print("Garantindo schema Appwrite (database + collections + attributes + bucket)...")
+    ensure_appwrite_schema(databases, Storage(client))
 
     if _existing_email(databases, email):
         print(f"Atendente com e-mail {email} já existe — seed ignorado.")
