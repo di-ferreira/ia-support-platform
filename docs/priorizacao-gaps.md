@@ -27,6 +27,7 @@ Atualizado em 2026-11-13: 00-7, 09-5 e 09-6 corrigidos — `scripts/backup.sh` c
 Atualizado em 2026-11-13: 09-7 corrigido — `infra/systemd/emsoft-backup.{service,timer}` (diário 03:30, `Persistent=true`) + `scripts/install-backup-timer.sh` (modo user/system, idempotente, env em `~/.config/emsoft-backup.env`); 48 abertos (153 entregues).
 Atualizado em 2026-11-13: 09-3 e 09-8 corrigidos — MinIO órfão removido do compose prod (serviço, volume e env) e senha do Postgres via `${POSTGRES_PASSWORD}` (com `.env.example` documentado); 46 abertos (155 entregues).
 Atualizado em 2026-11-13: 01-8, 02-20, 04-11, 04-12 e 10-12 corrigidos — trilha de auditoria exposta via `GET /chats/{id}/auditoria` com ator tipado (`Ator`: humano/IA/sistema/serviço) nas rotas REST e webhook de status (coleção `auditoria`); 41 abertos (160 entregues).
+Atualizado em 2026-11-13: 09-16 corrigido — start-prod.sh aguarda healthcheck real e não roda mais Alembic; 40 abertos (161 entregues).
 
 ## Critério de ordenação
 
@@ -186,7 +187,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 92 | 08-7 | `DATABASE_URL` default com credenciais em claro |
 | 93 | 09-3 (CORRIGIDO) | MinIO órfão no compose prod sem referência no código |
 | 94 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
-| 95 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
+| 95 | 09-16 (CORRIGIDO) | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
 | 96 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |
 | 97 | 00-5 | Docs citavam stack NestJS/TypeScript/Prisma |
 | 98 | 00-6 | Docs citavam workflow de 19 nós |

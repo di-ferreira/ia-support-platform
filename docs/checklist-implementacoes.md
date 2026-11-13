@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **160 entregues** `[x]` — gaps CORRIGIDO
-- **41 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **161 entregues** `[x]` — gaps CORRIGIDO
+- **40 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -205,7 +205,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **09-13** — Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env (**Alta**)
 - [x] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
 - [x] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)
-- [ ] **09-16** — `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic (Baixa)
+- [x] **09-16** — `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic (Baixa)
 - [ ] **09-17** — Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração (**Alta**) *(parcial)*
 - [ ] **09-18** — Sem runbook de rollout/rollback da integração Emsoft (Média)
 
