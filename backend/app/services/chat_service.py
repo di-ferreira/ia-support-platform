@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 
 from app.appwrite.repositories import Repositories
+from app.core.config import settings
 from app.models.auditoria import AcaoAuditoria
 from app.models.chat import PrioridadeChat, StatusChat
 from app.services.auditoria_service import Ator, AuditoriaService
@@ -214,6 +215,20 @@ class ChatService:
             valor_anterior=chat["status"],
             valor_novo=novo_status.value,
         )
+        if novo_status in (StatusChat.resolvido, StatusChat.encerrado) and settings.csat_enabled:
+            import logging
+
+            from app.services.avaliacao_service import AvaliacaoService
+
+            logger = logging.getLogger(__name__)
+            try:
+                await AvaliacaoService(self.repos).solicitar(chat_id)
+            except Exception as exc:
+                # Best-effort: a falha na solicitação CSAT nunca impede a
+                # transição de status acima, que já foi confirmada.
+                logger.warning(
+                    "Falha ao solicitar avaliação CSAT do chat %s: %s", chat_id, exc
+                )
         return result
 
     async def confirmar_resolucao(self, chat_id: str, user: dict) -> dict:

@@ -1,4 +1,5 @@
 import hmac
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -8,6 +9,7 @@ from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
 from app.core.config import settings
 from app.core.rate_limit import rate_limit
+from app.models.enums import CanalAvaliacao
 from app.models.mensagem import TipoMensagem
 from app.schemas.webhook import (
     WebhookClienteUpdate,
@@ -20,6 +22,8 @@ from app.schemas.webhook import (
 )
 from app.services.ai_pipeline import AIPipelineService
 from app.services.auditoria_service import Ator
+from app.services.avaliacao_service import AvaliacaoService
+from app.services.evolution_service import EvolutionService
 from app.services.webhook_service import WebhookService
 
 router = APIRouter(
@@ -134,8 +138,41 @@ async def webhook_mensagem(
             mensagem["chat_id"], "nova_mensagem",
             {"chat_id": mensagem["chat_id"], "mensagem_id": mensagem["id"]},
         )
+        if mensagem.get("remetente") == "cliente":
+            await _capturar_avaliacao_csat(repos, mensagem)
     code = status.HTTP_200_OK if duplicada else status.HTTP_201_CREATED
     return JSONResponse(status_code=code, content=mensagem)
+
+
+async def _capturar_avaliacao_csat(repos: Repositories, mensagem: dict) -> None:
+    """Captura a nota CSAT respondida pelo cliente no webhook (best-effort).
+
+    Toda falha é registrada como warning e nunca propaga: o salvamento da
+    mensagem já aconteceu e a resposta continua a ser devolvida normalmente.
+    Mensagens que não são nota (ex.: "quero falar com atendente") não consomem
+    a pendência nem alteram a resposta.
+    """
+    logger = logging.getLogger(__name__)
+    try:
+        chat = await repos.chats.get(mensagem["chat_id"])
+        if not chat or not chat.get("avaliacao_pendente"):
+            return
+        nota = AvaliacaoService.validar_nota(mensagem.get("conteudo"))
+        if nota is None:
+            return
+        await AvaliacaoService(repos).registrar(
+            mensagem["chat_id"],
+            nota,
+            canal=CanalAvaliacao.whatsapp,
+        )
+        await EvolutionService().enviar_texto(
+            instance_name=settings.evolution_instance_name,
+            number=chat["whatsapp_number"],
+            text="Obrigado pela sua avaliação!",
+        )
+        mensagem["avaliacao_registrada"] = nota
+    except Exception as exc:
+        logger.warning("Falha ao capturar avaliação CSAT no webhook: %s", exc)
 
 
 @router.patch("/chat/status")
