@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import require_perfil
@@ -14,6 +16,9 @@ router = APIRouter(
     tags=["Evolution API"],
     dependencies=[Depends(require_perfil("admin"))],
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_evolution_service() -> EvolutionService:
@@ -33,9 +38,10 @@ async def criar_instancia(
             detail="Credencial da Evolution recusada (verifique EVOLUTION_API_KEY)",
         )
     except Exception as e:
+        logger.warning("Erro ao criar instância na Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao criar instância na Evolution API: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -47,9 +53,10 @@ async def obter_qrcode(
     try:
         return await service.obter_qrcode(instance_name)
     except Exception as e:
+        logger.warning("Erro ao obter QR code da Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao obter QR code: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -61,9 +68,10 @@ async def get_instance_status(
     try:
         return await service.get_status(instance_name)
     except Exception as e:
+        logger.warning("Erro ao obter status da Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao obter status: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -78,9 +86,10 @@ async def configurar_webhook(
             instance_name, body.webhookUrl, body.events
         )
     except Exception as e:
+        logger.warning("Erro ao configurar webhook na Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao configurar webhook: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -94,9 +103,10 @@ async def configurar_webhook_default(
     try:
         return await service.configurar_webhook(instance_name, webhook_url)
     except Exception as e:
+        logger.warning("Erro ao configurar webhook padrão na Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao configurar webhook padrão: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -111,9 +121,10 @@ async def enviar_texto(
             instance_name, body.number, body.text, body.delay
         )
     except Exception as e:
+        logger.warning("Erro ao enviar mensagem na Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao enviar mensagem: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )
 
 
@@ -125,7 +136,8 @@ async def desconectar(
     try:
         return await service.desconectar(instance_name)
     except Exception as e:
+        logger.warning("Erro ao desconectar na Evolution API: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Erro ao desconectar: {e}",
+            detail="Falha ao comunicar com a Evolution API",
         )

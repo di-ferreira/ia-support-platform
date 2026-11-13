@@ -1,8 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from app.core.config import settings
 
 
 class InstanceCreate(BaseModel):
-    instanceName: str = "emsoft-support"  # noqa: N815
+    instanceName: str = Field(  # noqa: N815
+        default_factory=lambda: settings.evolution_instance_name
+    )
 
 
 class InstanceResponse(BaseModel):

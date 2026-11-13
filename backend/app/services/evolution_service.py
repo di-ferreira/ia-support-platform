@@ -29,7 +29,8 @@ class EvolutionService:
             response.raise_for_status()
             return response.json()
 
-    async def criar_instancia(self, instance_name: str = "emsoft-support") -> dict:
+    async def criar_instancia(self, instance_name: str | None = None) -> dict:
+        instance_name = instance_name or settings.evolution_instance_name
         try:
             return await self._request(
                 "POST", "/instance/create",

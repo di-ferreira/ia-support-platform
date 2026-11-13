@@ -1,9 +1,12 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.api.deps import get_current_user, get_repositories
 from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
 from app.appwrite.storage import StorageService
+from app.core.config import settings
 from app.models.chat import StatusChat
 from app.models.mensagem import RemetenteMensagem
 from app.schemas.mensagem import (
@@ -15,6 +18,8 @@ from app.schemas.mensagem import (
 from app.services.chat_service import ChatService
 from app.services.evolution_service import EvolutionService
 from app.services.mensagem_service import MensagemService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/chats/{chat_id}/mensagens", tags=["Mensagens"])
 whatsapp_router = APIRouter(prefix="/chats", tags=["WhatsApp"])
@@ -91,14 +96,15 @@ async def enviar_mensagem(
             try:
                 evolution = EvolutionService()
                 await evolution.enviar_texto(
-                    instance_name="emsoft-support",
+                    instance_name=settings.evolution_instance_name,
                     number=chat["whatsapp_number"],
                     text=f"*{user['nome']}:*\n{body.conteudo}",
                 )
             except Exception as e:
+                logger.warning("Falha ao enviar mensagem via WhatsApp: %s", e)
                 raise HTTPException(
                     status_code=status.HTTP_502_BAD_GATEWAY,
-                    detail=f"Mensagem salva, mas erro ao enviar via WhatsApp: {e}",
+                    detail="Mensagem salva, mas o envio pelo WhatsApp falhou",
                 )
 
     await manager.send_event(
@@ -147,14 +153,15 @@ async def enviar_whatsapp(
     try:
         evolution = EvolutionService()
         await evolution.enviar_texto(
-            instance_name="emsoft-support",
+            instance_name=settings.evolution_instance_name,
             number=body.numero,
             text=body.conteudo,
         )
     except Exception as e:
+        logger.warning("Falha ao enviar mensagem via WhatsApp: %s", e)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Mensagem salva, mas erro ao enviar via WhatsApp: {e}",
+            detail="Mensagem salva, mas o envio pelo WhatsApp falhou",
         )
 
     await manager.send_event(

@@ -3,11 +3,12 @@ import logging
 from contextlib import asynccontextmanager
 
 from appwrite.services.storage import Storage
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
+from fastapi import Depends, FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.ai.router import router as ai_router
+from app.api.deps import get_current_user
 from app.api.routes import (
     atendentes_router,
     auth_router,
@@ -172,7 +173,7 @@ async def websocket_chat(websocket: WebSocket, chat_id: str, token: str | None =
 
 
 @app.get("/settings/ia-name")
-async def get_ia_name():
+async def get_ia_name(user: dict = Depends(get_current_user)):
     return {"name": settings.ia_name}
 
 
