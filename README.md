@@ -168,7 +168,7 @@ Com o backend rodando, acesse:
 | GET | `/kanban` | Kanban com 7 colunas |
 | CRUD | `/knowledge-base` | Base de conhecimento |
 | POST | `/webhooks/mensagem` | Webhook n8n (mensagem) |
-| POST | `/webhooks/chat/diagnostico` | Webhook n8n (diagnóstico IA) |
+| POST | `/webhooks/n8n/erro` | Falha do workflow n8n |
 | POST | `/ai/classificar` | Classificar problema |
 | POST | `/ai/classificar-intencao` | Classificar intenção (read-only, não transfere) |
 | POST | `/ai/analisar?tipo=sumarizar\|diagnosticar` | Sumarizar ou diagnosticar |

@@ -131,7 +131,7 @@ Com base nas informações acima, classifique e responda APENAS com JSON:
 Converte a string JSON de saída da IA em campos estruturados usando `JSON.parse()`.
 
 ### 10. Salvar Diagnóstico
-`POST {{API_URL}}/webhooks/chat/diagnostico`
+`POST {{API_URL}}/webhooks/n8n/erro` — registro estruturado de falha (`event=n8n_falha`)
 
 Envia o diagnóstico completo da IA para a API:
 ```json

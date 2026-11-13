@@ -38,6 +38,7 @@ Atualizado em 2026-11-13: 00-11 (CORRIGIDO) — CSAT 1-5 na coleção `avaliacoe
 Atualizado em 2026-11-13: 00-12, 02-6 e 06-17 (CORRIGIDO) — mídia baixada via `getBase64FromMediaMessage`, salva no bucket `midias` do Appwrite (`StorageService` + rota de download autenticada; nó "Extrair" do n8n repassa `midia`); 28 abertos (174 entregues).
 Atualizado em 2026-11-13: 00-5, 00-6 e 01-1 (CORRIGIDO) — legado documental divergente eliminado: `.ai/PROJECT.md` e `.ai/PROJECT_CONTEXT.md` reduzidos a ponteiro (stack real FastAPI/Appwrite + 8 estados reais de `StatusChat`), `TODO_LIST.md`/`.ai/TODO_LIST.md` e `docs/specs.backup/` removidos; 25 abertos (177 entregues).
 Atualizado em 2026-11-13: 03-7, 03-15, 03-17, 05-19, 05-14, 09-10 e 02-3 (CORRIGIDO) — 502 com mensagem fixa (erro só no log), nome da instância em `settings.evolution_instance_name`, `GET /settings/ia-name` autenticado, modelo `llama3.2` alinhado nos `.env.example`, `openai` removido do lock e `TipoMensagem` com `sticker`/`local` (deploy roda `scripts/atualizar_enum_tipo_mensagem.py`); 18 abertos (184 entregues).
+Atualizado em 2026-11-13: 03-11, 03-12, 03-18, 06-18 e 08-11 (CORRIGIDO) — lógica do WhatsApp movida para `WhatsappService.enviar_para_numero` (`WhatsappEnvioError` → 502 mensagem fixa), `AtendenteService.listar_ativos`, `POST /webhooks/chat/diagnostico` removido (diagnóstico gravado por `ai_pipeline._finalizar`, 05-2), nós HTTP do n8n com `retryOnFail` 3×/2s + `onError: continueErrorOutput` → `POST /webhooks/n8n/erro` e retry/backoff em `app/core/resiliencia.py::requisitar`; 13 abertos (189 entregues).
 
 ## Critério de ordenação
 
@@ -90,7 +91,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 |---|-----|-----------|---------------|
 | 14 | 03-19 (CORRIGIDO) | Endpoints-alvo inexistentes: `/departamentos*`, `transferir-departamento`, `atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | Superfície de API das Fases 4/5 inexistente |
 | 15 | 02-17 (CORRIGIDO) | Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes | Sem persistência para departamentos, roteamento e integração |
-| 16 | 08-11 | Timeout/retry/backoff explícitos de integrações externas não implementados | Toda chamada externa (Evolution/Emsoft) é frágil |
+| 16 | 08-11 (CORRIGIDO) | Timeout/retry/backoff explícitos de integrações externas não implementados | Toda chamada externa (Evolution/Emsoft) é frágil |
 | 17 | 08-10 | Degradação da integração Emsoft/outbox não implementada | Falha na integração derruba o fluxo sem fallback |
 | 18 | 09-17 | Sem variáveis `EMSOFT_CHAMADOS_*` nem serviço de worker de integração | Integração não sobe em prod |
 | 19 | 00-14 | Integração com a API interna de chamados Emsoft não existe | Escopo de produto (SPEC 00) ainda ausente |
@@ -160,8 +161,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 58 | 02-5 | `chats.loja_id` nunca é populado (= 01-5) |
 | 59 | 08-3 (CORRIGIDO) | `/health` não checa dependências; sem readiness |
 | 60 | 08-12 (CORRIGIDO) | Health check degradado do bootstrap (= 08-3) |
-| 61 | 03-18 | `/webhooks/chat/diagnostico` sem chamador |
-| 62 | 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado |
+| 61 | 03-18 (CORRIGIDO) | `/webhooks/chat/diagnostico` sem chamador |
+| 62 | 06-18 (CORRIGIDO) | `onError: continue` silencia falhas sem retry/registro estruturado |
 | 63 | 03-7 (CORRIGIDO) | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution |
 | 64 | 08-5 | Sem logging estruturado nem request-id/correlação |
 | 65 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável |
@@ -176,7 +177,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 74 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado |
 | 75 | 09-12 (CORRIGIDO) | Alembic/Postgres híbrido com runtime em Appwrite |
 | 76 | 09-18 | Sem runbook de rollout/rollback da integração Emsoft |
-| 77 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
+| 77 | 03-11 (CORRIGIDO) | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
 | 78 | 07-4 (CORRIGIDO) | Cores raw do Tailwind fora dos tokens `@theme` |
 | 79 | 00-11 (CORRIGIDO) | Sem CSAT/NPS nem coleta de feedback |
 | 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
@@ -189,7 +190,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 |---|-----|-----------|
 | 84 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) |
 | 85 | 03-9 (CORRIGIDO) | `POST /chats/{id}/assinar` existe sem chamador no frontend |
-| 86 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota |
+| 86 | 03-12 (CORRIGIDO) | `GET /atendentes/ativos` tem a lógica dentro da rota |
 | 87 | 03-17 (CORRIGIDO) | `GET /settings/ia-name` é público e não requer autenticação |
 | 88 | 04-9 (CORRIGIDO) | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
 | 89 | 05-19 (CORRIGIDO) | Dependência `openai` declarada e nunca importada |

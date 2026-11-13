@@ -97,4 +97,4 @@ Verificado contra o código em 2026-11-06. O workflow ativo tem 10 nós e delega
 | 06-15 | `extra_hosts: host.docker.internal` ausente | `infra/docker-compose.dev.yml` | Média | **CORRIGIDO** |
 | 06-16 | `remoteJid` cru usado em pontos sensíveis | `workflow-support-ai.json`; backend normaliza | Média | **CORRIGIDO** |
 | 06-17 | Mídia não é preservada (URL/arquivo): apenas caption é extraída | `workflow-support-ai.json`; `services/webhook_service.py` | **Alta** | **CORRIGIDO** — nó "Extrair" repassa `midia` (base64 + metadata) e o backend persiste no storage |
-| 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado | `workflow-support-ai.json` | Média | **ABERTO** → [12](12-confiabilidade-integracoes.md) |
+| 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado | `workflow-support-ai.json` | Média | **CORRIGIDO (2026-11-13)** — nós HTTP com `retryOnFail` 3×/2s e `onError: continueErrorOutput`; saída de erro `[1]` conecta ao nó `Registrar falha` → `POST /webhooks/n8n/erro` → [12](12-confiabilidade-integracoes.md) |

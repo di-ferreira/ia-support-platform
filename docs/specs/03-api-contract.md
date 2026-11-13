@@ -47,8 +47,10 @@ Worker interno não usa JWT de atendente nem o segredo do n8n. Executa dentro do
 | GET | `/dashboard` | JWT | KPIs filtrados pelo escopo de acesso |
 | CRUD | `/knowledge-base` | JWT/admin-supervisor para escrita | Artigos |
 | POST | `/webhooks/mensagem` | X-Webhook-Secret | Receber mensagem Evolution |
-| POST | `/webhooks/chat/diagnostico` | X-Webhook-Secret | Registrar diagnóstico |
+| POST | `/webhooks/n8n/erro` | X-Webhook-Secret | Registrar falha do workflow n8n (log estruturado) |
 | GET | `/webhooks/chat/{id}/contexto` | X-Webhook-Secret | Contexto mínimo para processamento IA |
+
+`POST /webhooks/chat/diagnostico` foi removido em 2026-11-13 (sem chamador; o diagnóstico é gravado por `ai_pipeline._finalizar`).
 
 Atualizar endpoints existentes para obedecer à máquina de estados; nenhum endpoint de status pode fazer update direto ignorando `STATUS_TRANSITIONS`.
 
@@ -168,12 +170,12 @@ Verificado contra o código em 2026-11-06; re-verificado em 2026-11-11 (03-19 fe
 | 03-8 | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) | `api/routes/chats.py`, `kanban.py` | Média | **CORRIGIDO** (2026-11-12) — as 7 rotas emitem `chat_atualizado` (payload `chat_id`/`status`/`prioridade`/`departamento_id`/`atendente_id`) via `manager.send_event` após o commit; helper `emitir_chat_atualizado` em `api/realtime.py` (também emite `status_update` legado quando o status muda); coberto por `tests/test_ws_eventos_chat.py` |
 | 03-9 | `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend | `api/routes/chats.py:67-75` | Baixa | **CORRIGIDO** (2026-11-12) — rota `PATCH /chats/{id}/assinar` deprecada (`deprecated=True` + docstring); caminho único é `PATCH /chats/{id}/atribuir-atendente`, que registra ator e motivo (spec 04/01) |
 | 03-10 | `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend | `api/routes/auth.py` | **Alta** | **CORRIGIDO** (2026-11-10) — frontend persiste `refresh_token` e renova via `POST /auth/refresh` em 401 (retry único); decisão: `PATCH /auth/password` segue sem chamador no frontend (troca de senha fora do escopo do produto) → [07](07-frontend.md) |
-| 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota | `api/routes/mensagens.py:69-122` | Média | **ABERTO** |
-| 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota | `api/routes/atendentes.py` | Baixa | **ABERTO** |
+| 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota | `api/routes/mensagens.py:69-122` | Média | **CORRIGIDO (2026-11-13)** — lógica movida para `WhatsappService.enviar_para_numero`; `WhatsappEnvioError` → 502 com mensagem fixa |
+| 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota | `api/routes/atendentes.py` | Baixa | **CORRIGIDO (2026-11-13)** — `AtendenteService.listar_ativos` |
 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR | `services/evolution_service.py:31-34` | Média | **ABERTO** |
 | 03-14 | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | `api/routes/evolution.py:86` | **Alta** | **CORRIGIDO** (2026-11-10) — URL do webhook padrão configurável via `EVOLUTION_DEFAULT_WEBHOOK_URL` (default `http://n8n:5678/webhook/emsoft-whatsapp`) → [06](06-n8n-workflow.md) |
 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution | `api/routes/mensagens.py:51,107`; `evolution_service.py:25` | Média | **CORRIGIDO (2026-11-13)** — `settings.evolution_instance_name`; `InstanceCreate` usa `default_factory` |
 | 03-16 | `WEBHOOK_SECRET` sem validação no startup | `core/config.py:50-62` | Média | **CORRIGIDO** — `validate_production_secrets` exige segredo em produção |
 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação | `main.py:85-87` | Baixa | **CORRIGIDO (2026-11-13)** — `GET /settings/ia-name` exige autenticação |
-| 03-18 | `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) | `api/routes/webhooks.py` | Média | **ABERTO** → [05](05-ai-pipeline.md) |
+| 03-18 | `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) | `api/routes/webhooks.py` | Média | **CORRIGIDO (2026-11-13)** — endpoint removido; o diagnóstico é gravado pelo backend em `ai_pipeline._finalizar` (gap 05-2) → [05](05-ai-pipeline.md) |
 | 03-19 | Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` | `api/routes/` | **Alta** | **CORRIGIDO** (2026-11-11) — todos implementados: `/departamentos*` (`routes/departamentos.py`), `/chats/{id}/transferir-departamento` e `/atribuir-atendente` (`routes/roteamento.py`), `/roteamento`, `/ai/classificar-intencao` (`ai/router.py:94`, incluído em `main.py`) e `/integracoes/chamados/*` (scaffold 11-1) → [10](10-departamentos-e-roteamento.md), [11](11-integracao-api-emsoft.md) |

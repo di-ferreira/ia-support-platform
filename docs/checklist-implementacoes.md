@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **184 entregues** `[x]` — gaps CORRIGIDO
-- **18 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **189 entregues** `[x]` — gaps CORRIGIDO
+- **13 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
@@ -85,14 +85,14 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
 - [x] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
 - [x] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
-- [ ] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média)
-- [ ] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa)
+- [x] **03-11** — `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota (Média) — CORRIGIDO (2026-11-13): lógica movida para `WhatsappService.enviar_para_numero`; `WhatsappEnvioError` → 502 mensagem fixa
+- [x] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa) — CORRIGIDO (2026-11-13): `AtendenteService.listar_ativos`
 - [ ] **03-13** — `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR (Média)
 - [x] **03-14** — Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` (**Alta**)
 - [x] **03-15** — Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution (Média) — CORRIGIDO (2026-11-13): `settings.evolution_instance_name`; `InstanceCreate` usa `default_factory`
 - [x] **03-16** — `WEBHOOK_SECRET` sem validação no startup (Média)
 - [x] **03-17** — `GET /settings/ia-name` é público e não requer autenticação (Baixa) — CORRIGIDO (2026-11-13): `GET /settings/ia-name` exige autenticação
-- [ ] **03-18** — `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) (Média)
+- [x] **03-18** — `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) (Média) — CORRIGIDO (2026-11-13): endpoint removido; diagnóstico gravado por `ai_pipeline._finalizar` (05-2)
 - [x] **03-19** — Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` (**Alta**)
 
 ## SPEC 04 — Matriz de Permissões (RBAC)
@@ -158,7 +158,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **06-15** — `extra_hosts: host.docker.internal` ausente (Média)
 - [x] **06-16** — `remoteJid` cru usado em pontos sensíveis (Média)
 - [x] **06-17** — Mídia não é preservada (URL/arquivo): apenas caption é extraída (**Alta**) — CORRIGIDO: nó "Extrair" repassa `midia` e o backend persiste no storage
-- [ ] **06-18** — `onError: continue` silencia falhas sem retry/registro estruturado (Média)
+- [x] **06-18** — `onError: continue` silencia falhas sem retry/registro estruturado (Média) — CORRIGIDO (2026-11-13): `retryOnFail` 3×/2s + `onError: continueErrorOutput` → `POST /webhooks/n8n/erro`
 
 ## SPEC 07 — Frontend (Painel de Atendimento)
 
@@ -186,7 +186,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **08-8** — WebSocket aceitava token por query string (**Alta**)
 - [x] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
 - [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
-- [ ] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**)
+- [x] **08-11** — Timeout/retry/backoff explícitos de integrações externas não implementados (**Alta**) — CORRIGIDO (2026-11-13): `resiliencia.py::requisitar` (retry transporte/429/5xx, backoff + jitter, piso `Retry-After`)
 - [x] **08-12** — Health check degradado do bootstrap não implementado (Média) (coberto por 08-3)
 
 ## SPEC 09 — Infraestrutura, Configuração e Deploy
