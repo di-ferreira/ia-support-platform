@@ -14,11 +14,13 @@ import {
   RefreshCw,
   Send,
   ShieldAlert,
+  Star,
   User,
   UserPlus,
   X,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { rotuloNota } from "@/lib/csat";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChatStore } from "@/lib/stores/chat-store";
 import { podeTransferirChat } from "@/lib/permissoes";
@@ -124,11 +126,21 @@ type Sincronizacao = {
   eventos?: EventoSync[];
 };
 
+interface Avaliacao {
+  id: string;
+  chat_id: string;
+  nota: number;
+  comentario?: string | null;
+  canal: string;
+  created_at?: string;
+}
+
 type Modal =
   | "transferir-departamento"
   | "atribuir"
   | "nao-resolveu"
   | "reprocessar"
+  | "registrar-avaliacao"
   | null;
 
 const statusLabels: Record<string, string> = {
@@ -198,6 +210,8 @@ export default function AtendimentoPage() {
   const [motivoAtribuicao, setMotivoAtribuicao] = useState("");
   const [motivoNaoResolveu, setMotivoNaoResolveu] = useState("");
   const [motivoReprocesso, setMotivoReprocesso] = useState("");
+  const [notaAvaliacao, setNotaAvaliacao] = useState("");
+  const [comentarioAvaliacao, setComentarioAvaliacao] = useState("");
 
   const possuiGestao =
     user?.perfil === "admin" || user?.perfil === "supervisor";
@@ -253,6 +267,13 @@ export default function AtendimentoPage() {
     retry: false,
   });
   const roteamento = roteamentoQuery.data;
+
+  const avaliacaoQuery = useQuery({
+    queryKey: ["avaliacao", chatAtivoId],
+    queryFn: () => api.get<Avaliacao | null>(`/chats/${chatAtivoId}/avaliacao`),
+    enabled: !!chatAtivoId,
+  });
+  const avaliacao = avaliacaoQuery.data ?? null;
 
   // Spec 03 L76: atendente só vê detalhes de sincronização do próprio chat.
   const podeVerSync =
@@ -449,6 +470,34 @@ export default function AtendimentoPage() {
         tipo: "sucesso",
         texto: "Reprocessamento da sincronização solicitado.",
       });
+    },
+    onError: (err) => setErroModal(mensagemErro(err)),
+  });
+
+  const solicitarAvaliacao = useMutation({
+    mutationFn: () => api.post(`/chats/${chatAtivoId}/solicitar-avaliacao`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["avaliacao", chatAtivoId] });
+      setAviso({ tipo: "sucesso", texto: "Avaliação solicitada ao cliente." });
+    },
+    onError: (err) => setAviso({ tipo: "erro", texto: mensagemErro(err) }),
+  });
+
+  const registrarAvaliacao = useMutation({
+    mutationFn: () =>
+      api.post(`/chats/${chatAtivoId}/avaliacao`, {
+        nota: Number(notaAvaliacao),
+        ...(comentarioAvaliacao.trim()
+          ? { comentario: comentarioAvaliacao.trim() }
+          : {}),
+        canal: "interno",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["avaliacao", chatAtivoId] });
+      fecharModal();
+      setNotaAvaliacao("");
+      setComentarioAvaliacao("");
+      setAviso({ tipo: "sucesso", texto: "Avaliação registrada." });
     },
     onError: (err) => setErroModal(mensagemErro(err)),
   });
@@ -719,6 +768,57 @@ export default function AtendimentoPage() {
                   >
                     <LifeBuoy className="h-4 w-4" /> Solicitar humano
                   </Button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium uppercase text-neutral-500">
+                  Avaliação
+                </span>
+                {avaliacao ? (
+                  <>
+                    <span
+                      aria-label={`Nota ${avaliacao.nota} de 5`}
+                      className="text-sm leading-none text-warning"
+                    >
+                      {"★".repeat(avaliacao.nota)}
+                      {"☆".repeat(Math.max(0, 5 - avaliacao.nota))}
+                    </span>
+                    <span className="text-sm text-neutral-700">
+                      {rotuloNota(avaliacao.nota)}
+                    </span>
+                    {avaliacao.comentario && (
+                      <span className="text-xs text-neutral-500">
+                        “{avaliacao.comentario}”
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs text-neutral-400">
+                      Aguardando avaliação
+                    </span>
+                    {(chatDetail?.status === "RESOLVIDO" ||
+                      chatDetail?.status === "ENCERRADO") && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => solicitarAvaliacao.mutate()}
+                          disabled={solicitarAvaliacao.isPending}
+                        >
+                          <Star className="h-4 w-4" /> Solicitar avaliação
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => abrirModal("registrar-avaliacao")}
+                        >
+                          <Star className="h-4 w-4" /> Registrar nota
+                        </Button>
+                      </>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -1274,6 +1374,78 @@ export default function AtendimentoPage() {
             <p className="text-xs text-neutral-500">
               A transferência remove o responsável atual e devolve o chamado à
               fila do departamento de destino.
+            </p>
+            {erroModal && (
+              <p role="alert" className="text-sm text-danger">
+                {erroModal}
+              </p>
+            )}
+          </div>
+        </ModalBase>
+      )}
+
+      {/* Modal: registrar avaliação */}
+      {modal === "registrar-avaliacao" && (
+        <ModalBase
+          titulo="Registrar avaliação"
+          onClose={fecharModal}
+          footer={
+            <>
+              <Button variant="ghost" onClick={fecharModal}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => registrarAvaliacao.mutate()}
+                disabled={!notaAvaliacao || registrarAvaliacao.isPending}
+              >
+                {registrarAvaliacao.isPending && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Registrar
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="nota-avaliacao"
+                className="mb-1 block text-sm font-medium text-neutral-700"
+              >
+                Nota
+              </label>
+              <Select
+                id="nota-avaliacao"
+                valor={notaAvaliacao}
+                onValorChange={(valor) => setNotaAvaliacao(valor)}
+                placeholder="Selecione…"
+              >
+                {[5, 4, 3, 2, 1].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n} — {rotuloNota(n)}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label
+                htmlFor="comentario-avaliacao"
+                className="mb-1 block text-sm font-medium text-neutral-700"
+              >
+                Comentário (opcional)
+              </label>
+              <textarea
+                id="comentario-avaliacao"
+                value={comentarioAvaliacao}
+                onChange={(e) => setComentarioAvaliacao(e.target.value)}
+                maxLength={500}
+                rows={2}
+                className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <p className="text-xs text-neutral-500">
+              O registro interno é usado quando o cliente não avaliou o
+              atendimento.
             </p>
             {erroModal && (
               <p role="alert" className="text-sm text-danger">

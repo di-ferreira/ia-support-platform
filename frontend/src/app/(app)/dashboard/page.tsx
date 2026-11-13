@@ -2,18 +2,21 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { formatarCsat, percentualSatisfeitos } from "@/lib/csat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import {
-  MessageSquare, Bot, Users, Clock, TrendingUp, AlertTriangle, Brain,
+  MessageSquare, Bot, Users, Clock, TrendingUp, AlertTriangle, Brain, Star,
+  ThumbsUp,
 } from "lucide-react";
 
 const KPI_COLORS = [
   "text-status-info", "text-status-success", "text-accent-600", "text-primary-500",
   "text-primary-600", "text-status-danger", "text-status-warning", "text-teal-600",
+  "text-status-warning", "text-status-info",
 ];
 
 const PIE_COLORS = [
@@ -66,6 +69,16 @@ export default function DashboardPage() {
           icon: Brain,
         },
         { label: "Sugestões Feitas", value: kpis.sugestoes_feitas, icon: Brain },
+        {
+          label: "CSAT",
+          value: formatarCsat(dash?.csat?.media),
+          icon: Star,
+        },
+        {
+          label: "Satisfação",
+          value: percentualSatisfeitos(dash?.csat?.satisfeitos_pct),
+          icon: ThumbsUp,
+        },
       ]
     : [];
 
