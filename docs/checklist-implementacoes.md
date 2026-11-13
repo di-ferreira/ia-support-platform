@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **162 entregues** `[x]` — gaps CORRIGIDO
-- **39 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **165 entregues** `[x]` — gaps CORRIGIDO
+- **36 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -62,7 +62,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **02-8** — CRUD da base de conhecimento não sincronizava o Qdrant (**Alta**)
 - [ ] **02-9** — `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) (Baixa)
 - [x] **02-10** — Bootstrap aditivo **não propaga mudança de enum**; health degradado não implementado (**Alta**)
-- [ ] **02-11** — `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual (**Alta**)
+- [x] **02-11** — `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual (**Alta**) — removido (2026-11-13): ORM e Alembic eliminados, `app/models/` ficou em reexports de `app.models.enums`
 - [x] **02-12** — Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida (Média)
 - [x] **02-13** — `scripts/seed_knowledge_base.py` importava `async_session` inexistente (**Alta**)
 - [x] **02-14** — `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant (**Alta**)
@@ -181,7 +181,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **08-4** — Sem rate limiting em login/webhooks (**Alta**)
 - [x] **08-5** — Sem logging estruturado nem request-id/correlação (Média)
 - [ ] **08-6** — Sem métricas/tracing/APM; nenhum SLO observável (Média) *(parcial)*
-- [ ] **08-7** — `DATABASE_URL` default com credenciais em claro (Baixa)
+- [x] **08-7** — `DATABASE_URL` default com credenciais em claro (Baixa) — removido (2026-11-13): `database_url`/`database_url_prod` saíram do `Settings` e do compose de produção
 - [x] **08-8** — WebSocket aceitava token por query string (**Alta**)
 - [x] **08-9** — Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada (**Alta**)
 - [ ] **08-10** — Degradação da integração Emsoft/outbox não implementada (outbox não existe) (**Alta**) *(parcial)*
@@ -201,7 +201,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)
 - [ ] **09-10** — Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média)
 - [x] **09-11** — `infra/.env.prod` não era gitignored (**Alta**)
-- [ ] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média)
+- [x] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média) — removido (2026-11-13): caminho morto Alembic/ORM/Postgres eliminado do backend
 - [x] **09-13** — Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env (**Alta**)
 - [x] **09-14** — CI: mypy e lint do frontend report-only; sem job de teste do frontend (Média)
 - [x] **09-15** — Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` (**Crítica**)

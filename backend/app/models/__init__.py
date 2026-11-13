@@ -1,19 +1,8 @@
-from app.models.atendente import Atendente
-from app.models.chat import Chat
-from app.models.cliente import Cliente, Loja
-from app.models.ia_diagnostico import IADiagnostico
-from app.models.knowledge_base import KnowledgeBase
-from app.models.mensagem import Mensagem
-from app.models.tag import Tag, chat_tag
+"""Pacote de modelos de domínio.
 
-__all__ = [
-    "Atendente",
-    "Chat",
-    "Cliente",
-    "IADiagnostico",
-    "KnowledgeBase",
-    "Loja",
-    "Mensagem",
-    "Tag",
-    "chat_tag",
-]
+Os enums de domínio vivem em `app.models.enums` (fonte canônica); os
+módulos `app.models.<x>` reexportam cada enum por compatibilidade
+histórica. A persistência é feita pelo Appwrite
+(`app/appwrite/schema.py`); a camada ORM/Postgres foi removida
+(gaps 02-11, 08-7 e 09-12).
+"""

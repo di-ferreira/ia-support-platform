@@ -89,7 +89,7 @@ Verificado contra o código em 2026-11-06.
 | 08-4 | Sem rate limiting em login/webhooks | `core/rate_limit.py` | **Alta** | **CORRIGIDO** — limiter in-memory (login 60/60s, webhooks 120/60s) |
 | 08-5 | Sem logging estruturado nem request-id/correlação | `app/**` | Média | **CORRIGIDO** — `core/logging.py` (`JsonFormatter`) + `core/correlacao.py` (`CorrelacaoMiddleware`, `X-Request-Id`) |
 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável | `app/**` | Média | **ABERTO (parcial)** — limiar de relevância do RAG é configurável e testado; APM/SLO seguem na Trilha R1 |
-| 08-7 | `DATABASE_URL` default com credenciais em claro | `core/config.py:10` | Baixa | **ABERTO** |
+| 08-7 | `DATABASE_URL` default com credenciais em claro | `core/config.py:10` | Baixa | **CORRIGIDO** (2026-11-13) — `database_url`/`database_url_prod` e a property `active_database_url` removidos do `Settings`; `DATABASE_URL_PROD` saiu do compose de produção (o backend não consome Postgres) |
 | 08-8 | WebSocket aceitava token por query string | `api/websocket_manager.py` | **Alta** | **CORRIGIDO** → 07-1 |
 | 08-9 | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação; `tempo_medio_resposta` com semântica errada | `services/dashboard_service.py` | **Alta** | **CORRIGIDO** — `MetricasService.calcular` + `GET /dashboard/metricas` (Tasks R1.2/R1.3) |
 | 08-10 | Degradação da integração Emsoft/outbox não implementada (outbox não existe) | `app/` | **Alta** | **ABERTO (parcial)** — degradação da integração existe (off por padrão; contrato ausente/inválido desliga; tentativas e último erro registrados em `integracao_chamados`); outbox ainda não existe → [12](12-confiabilidade-integracoes.md) |

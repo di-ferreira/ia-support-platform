@@ -8,9 +8,6 @@ class Settings(BaseSettings):
     app_name: str = "EMSoft Support API"
     debug: bool = False
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
-    database_url_prod: str | None = None
-
     appwrite_endpoint: str = "http://127.0.0.1:8020/v1"
     appwrite_project_id: str = ""
     appwrite_api_key: str = ""
@@ -66,12 +63,6 @@ class Settings(BaseSettings):
     environment: str = "development"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
-
-    @property
-    def active_database_url(self) -> str:
-        if self.environment == "production" and self.database_url_prod:
-            return self.database_url_prod
-        return self.database_url
 
     def validate_production_secrets(self) -> None:
         if self.environment != "production":

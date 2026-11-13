@@ -29,6 +29,7 @@ Atualizado em 2026-11-13: 09-3 e 09-8 corrigidos — MinIO órfão removido do c
 Atualizado em 2026-11-13: 01-8, 02-20, 04-11, 04-12 e 10-12 corrigidos — trilha de auditoria exposta via `GET /chats/{id}/auditoria` com ator tipado (`Ator`: humano/IA/sistema/serviço) nas rotas REST e webhook de status (coleção `auditoria`); 41 abertos (160 entregues).
 Atualizado em 2026-11-13: 09-16 corrigido — start-prod.sh aguarda healthcheck real e não roda mais Alembic; 40 abertos (161 entregues).
 Atualizado em 2026-11-13: 02-14 corrigido — `scripts/seed_qdrant.py` lê artigos ativos do Appwrite (`Repositories.knowledge_bases.list_all()`, `id` ULID como ponto Qdrant) e `seed_knowledge_base.py` legado removido; 39 abertos (162 entregues).
+Atualizado em 2026-11-13: 02-11, 08-7 e 09-12 corrigidos — caminho morto ORM/Alembic/Postgres removido do backend (`backend/alembic/`, `alembic.ini`, `app/core/database.py`, `scripts/migrate.sh`, `database_url*` no `Settings` e no compose prod; `app/models/` em reexports de `app.models.enums`; trava em `tests/test_remocao_orm.py`); 36 abertos (165 entregues).
 
 ## Critério de ordenação
 
@@ -124,7 +125,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 ### T8 — Legado e métricas de produto (4)
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 39 | 02-11 | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | Caminho de migração legado pode causar operações erradas |
+| 39 | 02-11 (CORRIGIDO) | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | Caminho de migração legado pode causar operações erradas |
 | 40 | 02-14 (CORRIGIDO) | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | Seed quebrado contra a fonte real (Appwrite) |
 | 41 | 08-9 (CORRIGIDO) | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação | Produto não é mensurável |
 | 42 | 00-10 (CORRIGIDO) | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente | Mesma raiz de 08-9 (view do escopo) |
@@ -164,7 +165,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 72 | 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` |
 | 73 | 09-10 | Drift de modelo Ollama (= 05-14) |
 | 74 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado |
-| 75 | 09-12 | Alembic/Postgres híbrido com runtime em Appwrite |
+| 75 | 09-12 (CORRIGIDO) | Alembic/Postgres híbrido com runtime em Appwrite |
 | 76 | 09-18 | Sem runbook de rollout/rollback da integração Emsoft |
 | 77 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
 | 78 | 07-4 (CORRIGIDO) | Cores raw do Tailwind fora dos tokens `@theme` |
@@ -185,7 +186,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 89 | 05-19 | Dependência `openai` declarada e nunca importada |
 | 90 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
 | 91 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
-| 92 | 08-7 | `DATABASE_URL` default com credenciais em claro |
+| 92 | 08-7 (CORRIGIDO) | `DATABASE_URL` default com credenciais em claro |
 | 93 | 09-3 (CORRIGIDO) | MinIO órfão no compose prod sem referência no código |
 | 94 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
 | 95 | 09-16 (CORRIGIDO) | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
