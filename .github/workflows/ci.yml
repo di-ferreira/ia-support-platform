@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC — job noturno de integração
 
 jobs:
   backend:
@@ -36,7 +38,8 @@ jobs:
         run: uv run mypy app/ --ignore-missing-imports
 
       - name: Testes (pytest + cobertura)
-        run: uv run pytest tests/ -q --cov=app --cov-report=term-missing --cov-fail-under=86
+        # A suíte de integração (tests/integracao) roda só no job noturno `integracao`.
+        run: uv run pytest tests/ --ignore=tests/integracao -q --cov=app --cov-report=term-missing --cov-fail-under=86
 
   frontend:
     name: Frontend
@@ -96,6 +99,70 @@ jobs:
         env:
           E2E_BASE_URL: ${{ vars.E2E_BASE_URL || 'http://localhost:3000' }}
         run: npx playwright test
+
+  integracao:
+    name: Integração (noturno)
+    # Não roda em push/PR: depende de serviços reais (Qdrant/Redis como
+    # services) e de credenciais externas (Appwrite/Evolution/Emsoft, vindas
+    # de secrets — vazios pulam o teste, não falham); a suíte unitária cobre
+    # o resto sem rede e continua bloqueando o merge.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      QDRANT_URL: http://localhost:6333
+      REDIS_URL: redis://localhost:6379/0
+      # Sem credencial o teste correspondente é pulado (skip), não falha.
+      APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT }}
+      APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID }}
+      APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+      EVOLUTION_API_URL: ${{ secrets.EVOLUTION_API_URL }}
+      EVOLUTION_API_KEY: ${{ secrets.EVOLUTION_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: uv sync --frozen --extra dev
+
+      # A imagem do Qdrant não tem shell/curl para healthcheck de service;
+      # esperamos o readyz manualmente, como os outros testes de Qdrant.
+      - name: Esperar Qdrant (readyz)
+        run: |
+          for i in $(seq 1 60); do
+            if curl --fail -s http://localhost:6333/readyz; then
+              echo "Qdrant pronto"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Qdrant não respondeu a /readyz em 60s" >&2
+          exit 1
+
+      - name: Testes de integração
+        run: uv run pytest tests/integracao -q --no-header -m integracao
 
   docker:
     name: Build imagens

@@ -30,6 +30,7 @@ Atualizado em 2026-11-13: 01-8, 02-20, 04-11, 04-12 e 10-12 corrigidos — trilh
 Atualizado em 2026-11-13: 09-16 corrigido — start-prod.sh aguarda healthcheck real e não roda mais Alembic; 40 abertos (161 entregues).
 Atualizado em 2026-11-13: 02-14 corrigido — `scripts/seed_qdrant.py` lê artigos ativos do Appwrite (`Repositories.knowledge_bases.list_all()`, `id` ULID como ponto Qdrant) e `seed_knowledge_base.py` legado removido; 39 abertos (162 entregues).
 Atualizado em 2026-11-13: 02-11, 08-7 e 09-12 corrigidos — caminho morto ORM/Alembic/Postgres removido do backend (`backend/alembic/`, `alembic.ini`, `app/core/database.py`, `scripts/migrate.sh`, `database_url*` no `Settings` e no compose prod; `app/models/` em reexports de `app.models.enums`; trava em `tests/test_remocao_orm.py`); 36 abertos (165 entregues).
+Atualizado em 2026-11-13: 14-8 corrigido — suíte real de integração `backend/tests/integracao` (7 testes `pytest.mark.integracao`) agendada no CI como job noturno `integracao` com services Qdrant/Redis (cron 03:00 UTC, `schedule`/`workflow_dispatch`, sem bloquear push/PR); Appwrite/Evolution/Emsoft pulam sem credenciais; 35 abertos (166 entregues).
 
 ## Critério de ordenação
 
@@ -158,7 +159,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 65 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável |
 | 66 | 12-7 (CORRIGIDO) | Sem painel de pendência/reprocessamento para operador |
 | 67 | 14-7 (CORRIGIDO) | n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env |
-| 68 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes |
+| 68 | 14-8 (CORRIGIDO) | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes |
 | 69 | 14-9 (CORRIGIDO) | CI sem threshold de cobertura; regressões em IA não bloqueiam merge |
 | 70 | 09-14 (CORRIGIDO) | CI: mypy e lint do frontend report-only; sem job de teste do frontend |
 | 71 | 09-8 (CORRIGIDO) | Senha do Postgres em claro no compose/string da Evolution |
