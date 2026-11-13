@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.api.deps import get_current_user, get_repositories
 from app.api.websocket_manager import manager
 from app.appwrite.repositories import Repositories
+from app.appwrite.storage import StorageService
 from app.models.chat import StatusChat
 from app.models.mensagem import RemetenteMensagem
 from app.schemas.mensagem import (
@@ -30,6 +31,46 @@ async def listar_mensagens(
     await ChatService(repos).obter_com_escopo(chat_id, user)
     service = MensagemService(repos)
     return await service.listar(chat_id, skip, limit)
+
+
+@router.get("/{mensagem_id}/arquivo")
+async def baixar_arquivo(
+    chat_id: str,
+    mensagem_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Download autenticado da mídia da mensagem (gap 02-6).
+
+    Restringe o acesso ao escopo do usuário e devolve os bytes do Appwrite
+    Storage com o mime original e `Content-Disposition: inline`.
+    """
+    await ChatService(repos).obter_com_escopo(chat_id, user)
+    mensagem = await repos.mensagens.get(mensagem_id)
+    if not mensagem or mensagem["chat_id"] != chat_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Mensagem não encontrada"
+        )
+
+    url = mensagem.get("url_arquivo") or ""
+    if not url.startswith("appwrite://midias/"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Mensagem sem arquivo"
+        )
+
+    file_id = url.rsplit("/", 1)[-1]
+    try:
+        data, mime = await StorageService().baixar_com_mime(file_id)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo não encontrado"
+        )
+
+    return Response(
+        content=data,
+        media_type=mime,
+        headers={"Content-Disposition": f'inline; filename="{mensagem_id}"'},
+    )
 
 
 @router.post("", response_model=MensagemResponse, status_code=201)

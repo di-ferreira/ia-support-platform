@@ -7,6 +7,9 @@ referência `appwrite://midias/<file_id>` a persistir em `mensagens.url_arquivo`
 - `dict {key, message}`: envelope bruto da Evolution — os bytes são baixados
   via `getBase64FromMediaMessage` da API da Evolution;
 - `str`: base64 ou data URL — decodificado diretamente, sem chamar a Evolution.
+  Uma `str` que começa com `{` é tratada como o envelope JSON serializado
+  (o n8n/HTTP pode serializar o payload) e é normalizada de volta a `dict`
+  antes do fluxo; se a conversão falhar, cai no caminho base64.
 
 Best-effort: qualquer falha loga warning e devolve `None` — o webhook segue
 201 sem `url_arquivo`.
@@ -16,6 +19,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import json
 import logging
 import re
 from uuid import uuid4
@@ -106,6 +110,21 @@ class MidiaService:
         return _nome_gerado(tipo), _mime_padrao(tipo)
 
     @staticmethod
+    def _normalizar_midia(midia: dict | str) -> dict | str:
+        """Normaliza um envelope serializado em string JSON para `dict`.
+
+        O n8n/HTTP pode serializar o payload antes de chegar aqui; base64
+        puro não começa com `{`, então `json.loads` que falha cai de volta
+        no caminho base64.
+        """
+        if isinstance(midia, str) and midia.strip().startswith("{"):
+            try:
+                return json.loads(midia)
+            except json.JSONDecodeError:
+                logger.warning("Midia: payload string não é JSON válido; tentando base64")
+        return midia
+
+    @staticmethod
     def _decodificar_str(midia: str) -> bytes | None:
         try:
             return base64.b64decode(_limpar_base64(midia))
@@ -118,12 +137,16 @@ class MidiaService:
     ) -> bytes | None:
         """Baixa os bytes da mídia pela API da Evolution (best-effort)."""
         try:
+            # A API v2 da Evolution exige a `key` DENTRO de `message`
+            # (`message.key.id`); fora de `message` a chamada é rejeitada.
             resposta = await self.evolution._request(
                 "POST",
                 f"/chat/getBase64FromMediaMessage/{settings.evolution_instance_name}",
                 json={
-                    "message": midia["message"],
-                    "key": midia.get("key") or {"id": message_id},
+                    "message": {
+                        **(midia.get("message") or {}),
+                        "key": midia.get("key") or {"id": message_id},
+                    },
                     "convertToMp4": False,
                 },
             )
@@ -157,6 +180,7 @@ class MidiaService:
         `[áudio]`/`[documento]` quando vazio.
         """
         try:
+            midia = self._normalizar_midia(midia)
             if isinstance(midia, str):
                 dados = self._decodificar_str(midia)
             else:

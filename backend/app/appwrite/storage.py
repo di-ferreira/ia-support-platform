@@ -49,5 +49,16 @@ class StorageService:
     async def baixar(self, file_id: str) -> bytes:
         return await asyncio.to_thread(self._storage.get_file_download, BUCKET_MIDIAS, file_id)
 
+    async def baixar_com_mime(self, file_id: str) -> tuple[bytes, str]:
+        """Devolve `(bytes, mime)` do arquivo para download autenticado.
+
+        O mime vem do metadado do arquivo (`get_file`); se ausente, usa
+        `application/octet-stream`.
+        """
+        arquivo = await asyncio.to_thread(self._storage.get_file, BUCKET_MIDIAS, file_id)
+        data = await asyncio.to_thread(self._storage.get_file_download, BUCKET_MIDIAS, file_id)
+        mime = getattr(arquivo, "mime_type", None) or "application/octet-stream"
+        return data, mime
+
     async def remover(self, file_id: str) -> None:
         await asyncio.to_thread(self._storage.delete_file, BUCKET_MIDIAS, file_id)
