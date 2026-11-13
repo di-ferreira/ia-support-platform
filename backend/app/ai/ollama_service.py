@@ -4,6 +4,7 @@ import httpx
 
 from app.ai.openai_service import Message
 from app.core.config import settings
+from app.core.resiliencia import requisitar
 
 
 class OllamaService:
@@ -12,8 +13,11 @@ class OllamaService:
         self.model = settings.ollama_model
 
     async def chat(self, messages: list[Message], temperature: float = 0.3) -> str:
+        # Timeout maior que o padrão: inferência local pode demorar.
         async with httpx.AsyncClient(timeout=120) as client:
-            resp = await client.post(
+            resp = await requisitar(
+                client,
+                "POST",
                 f"{self.base_url}/api/chat",
                 json={
                     "model": self.model,
@@ -35,8 +39,10 @@ class OllamaService:
         return json.loads(cleaned)
 
     async def embed(self, text: str) -> list[float]:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
+        async with httpx.AsyncClient(timeout=settings.http_timeout_s) as client:
+            resp = await requisitar(
+                client,
+                "POST",
                 f"{self.base_url}/api/embeddings",
                 json={"model": settings.ollama_embed_model, "prompt": text},
             )

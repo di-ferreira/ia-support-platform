@@ -1,6 +1,7 @@
 import httpx
 
 from app.core.config import settings
+from app.core.resiliencia import requisitar
 
 
 class EvolutionAuthError(Exception):
@@ -21,10 +22,10 @@ class EvolutionService:
     ) -> dict:
         url = f"{self.base_url}{path}"
         async with httpx.AsyncClient(
-            timeout=30, transport=self._transport
+            timeout=settings.http_timeout_s, transport=self._transport
         ) as client:
-            response = await client.request(
-                method, url, headers=self.headers, **kwargs
+            response = await requisitar(
+                client, method, url, headers=self.headers, **kwargs
             )
             response.raise_for_status()
             return response.json()

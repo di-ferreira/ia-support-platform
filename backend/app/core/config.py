@@ -63,6 +63,13 @@ class Settings(BaseSettings):
     # Spec 00/00-11: liga o pedido automático de avaliação ao encerrar o chat.
     csat_enabled: bool = False
 
+    # Resiliencia de integracoes HTTP externas (08-11): retry com backoff
+    # exponencial e jitter em falhas transitorias (transporte e 429/5xx).
+    http_timeout_s: float = 30.0
+    http_max_tentativas: int = 3
+    http_backoff_base_s: float = 0.5
+    http_backoff_max_s: float = 8.0
+
     cors_origins: list[str] = ["http://localhost:3000"]
     environment: str = "development"
 

@@ -4,6 +4,7 @@ from typing import Literal
 import httpx
 
 from app.core.config import settings
+from app.core.resiliencia import requisitar
 
 Role = Literal["system", "user", "assistant"]
 
@@ -24,8 +25,11 @@ class OpenAIService:
         self.base_url = "https://api.openai.com/v1"
 
     async def chat(self, messages: list[Message], temperature: float = 0.3) -> str:
+        # Timeout maior que o padrão: inferência de LLM pode demorar.
         async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.post(
+            resp = await requisitar(
+                client,
+                "POST",
                 f"{self.base_url}/chat/completions",
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
@@ -42,8 +46,10 @@ class OpenAIService:
             return data["choices"][0]["message"]["content"]
 
     async def embed(self, text: str) -> list[float]:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
+        async with httpx.AsyncClient(timeout=settings.http_timeout_s) as client:
+            resp = await requisitar(
+                client,
+                "POST",
                 f"{self.base_url}/embeddings",
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
