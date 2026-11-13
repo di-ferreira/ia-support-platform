@@ -35,6 +35,7 @@ Atualizado em 2026-11-13: 04-9 e 04-14 corrigidos — escopo por departamento em
 Atualizado em 2026-11-13: 04-8 corrigido — 403 na criação de instância distingue instância já existente (`ja_existia` + status real) de credencial recusada (`EvolutionAuthError` → HTTP 403); 33 abertos (169 entregues).
 Atualizado em 2026-11-13: 04-3 (CORRIGIDO) — ação de transferência escondida por perfil + vínculo (`podeTransferirChat` em `lib/permissoes.ts`: admin/supervisor sempre; atendente só o próprio chamado; sem usuário, fail-closed), aplicando Kanban ("Transferir") e Atendimento ("Transferir depto"); a guarda de rota por URL já existia; 32 abertos (170 entregues).
 Atualizado em 2026-11-13: 00-11 (CORRIGIDO) — CSAT 1-5 na coleção `avaliacoes` (captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off); 31 abertos (171 entregues).
+Atualizado em 2026-11-13: 00-12, 02-6 e 06-17 (CORRIGIDO) — mídia baixada via `getBase64FromMediaMessage`, salva no bucket `midias` do Appwrite (`StorageService` + rota de download autenticada; nó "Extrair" do n8n repassa `midia`); 28 abertos (174 entregues).
 
 ## Critério de ordenação
 
@@ -104,8 +105,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 ### T5 — Mídia (2)
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
-| 24 | 00-12 | Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada | Formatos não-texto chegam em vazio na conversa |
-| 25 | 06-17 | Mídia não é preservada (URL/arquivo); apenas caption é extraída | Mesma raiz de 00-12 (view n8n/transporte) |
+| 24 | 00-12 (CORRIGIDO) | Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada | Formatos não-texto chegam em vazio na conversa |
+| 25 | 06-17 (CORRIGIDO) | Mídia não é preservada (URL/arquivo); apenas caption é extraída | Mesma raiz de 00-12 (view n8n/transporte) |
 
 ### T6 — Testes (9)
 | # | Gap | Descrição | Justificativa |
@@ -150,7 +151,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 51 | 07-3 (CORRIGIDO) | WebSocket sem reconexão nem backoff |
 | 52 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR |
 | 53 | 04-8 (CORRIGIDO) | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |
-| 54 | 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases` sem upload/download/storage |
+| 54 | 02-6 (CORRIGIDO) | `url_arquivo` existe em `mensagens`/`knowledge_bases` sem upload/download/storage |
 | 55 | 02-3 | `TipoMensagem` sem `sticker`/`local`; webhook mapeia sticker→imagem sem espelhar o enum |
 | 56 | 01-3 | Urgência da IA (`critica`) só no prompt, sem coluna |
 | 57 | 01-5 | `chats.loja_id` nunca é populado |

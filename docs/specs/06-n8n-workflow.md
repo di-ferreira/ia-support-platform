@@ -94,5 +94,5 @@ Verificado contra o código em 2026-11-06. O workflow ativo tem 10 nós e delega
 | 06-14 | `pinData` do webhook com `fromMe: true` | `workflow-support-ai.json` | Baixa | **CORRIGIDO** — `fromMe: false` |
 | 06-15 | `extra_hosts: host.docker.internal` ausente | `infra/docker-compose.dev.yml` | Média | **CORRIGIDO** |
 | 06-16 | `remoteJid` cru usado em pontos sensíveis | `workflow-support-ai.json`; backend normaliza | Média | **CORRIGIDO** |
-| 06-17 | Mídia não é preservada (URL/arquivo): apenas caption é extraída | `workflow-support-ai.json`; `services/webhook_service.py` | **Alta** | **ABERTO** → 02-6 |
+| 06-17 | Mídia não é preservada (URL/arquivo): apenas caption é extraída | `workflow-support-ai.json`; `services/webhook_service.py` | **Alta** | **CORRIGIDO** — nó "Extrair" repassa `midia` (base64 + metadata) e o backend persiste no storage |
 | 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado | `workflow-support-ai.json` | Média | **ABERTO** → [12](12-confiabilidade-integracoes.md) |

@@ -222,7 +222,7 @@ Verificado contra o código em 2026-11-06.
 | 02-3 | `TipoMensagem` sem `sticker`/`local`; o normalizador do webhook mapeia sticker→imagem, mas o enum não espelha a Evolution | `appwrite/schema.py:48`; `api/routes/webhooks.py:102-111` | Média | **ABERTO** |
 | 02-4 | `atendentes.setor` e `chats.setor_alvo` são string livre, sem enum/validação (legado a migrar para departamento) | `appwrite/schema.py:107,144` | Média | **CORRIGIDO (departamento_id)** — leitura/escrita canônica por ID em `ChatService`; legado preservado |
 | 02-5 | `chats.loja_id` nunca é populado | `appwrite/schema.py:135` | Média | **ABERTO** |
-| 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage | `appwrite/schema.py:156,194` | Média | **ABERTO** |
+| 02-6 | `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage | `appwrite/schema.py:156,194` | Média | **CORRIGIDO** — bucket `midias` garantido no boot, `StorageService` (salvar/baixar/remover) + rota de download autenticada (`appwrite://midias/<file_id>`); mídia exibida no frontend |
 | 02-7 | `ia_diagnosticos` nunca era populado; `get_by_chat` sem chamador | `appwrite/repositories/ia_diagnostico.py` | **Crítica** | **CORRIGIDO** — `AIPipelineService._finalizar` grava o diagnóstico (o `get_by_chat` ainda não tem chamador → 05-18) |
 | 02-8 | CRUD da base de conhecimento não sincronizava o Qdrant | `services/knowledge_base_service.py` | **Alta** | **CORRIGIDO** — criar/atualizar embute+upsert; desativar/remover apaga o ponto |
 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) | `appwrite/schema.py:160-173` | Baixa | **ABERTO** |

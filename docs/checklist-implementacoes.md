@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **171 entregues** `[x]` — gaps CORRIGIDO
-- **31 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **174 entregues** `[x]` — gaps CORRIGIDO
+- **28 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
@@ -30,7 +30,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **00-9** — `ia_diagnosticos` nunca era populado (**Crítica**)
 - [x] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
 - [x] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média) *(CSAT 1-5 na coleção `avaliacoes`; captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off)*
-- [ ] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**)
+- [x] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**) — CORRIGIDO (2026-11-13): mídia baixada via `getBase64FromMediaMessage` e salva no bucket `midias`; não-texto sem caption recebe rótulo
 - [x] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
 - [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**) *(parcial)*
 - [ ] **00-15** — Sem outbox/idempotência para chamados externos (**Alta**)
@@ -57,7 +57,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **02-3** — `TipoMensagem` sem `sticker`/`local`; o normalizador do webhook mapeia sticker→imagem, mas o enum não espelha a Evolution (Média)
 - [x] **02-4** — `atendentes.setor` e `chats.setor_alvo` são string livre, sem enum/validação (legado a migrar para departamento) (Média)
 - [ ] **02-5** — `chats.loja_id` nunca é populado (Média)
-- [ ] **02-6** — `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage (Média)
+- [x] **02-6** — `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage (Média) — CORRIGIDO: bucket `midias` + `StorageService` + rota de download autenticada; mídia exibida no frontend
 - [x] **02-7** — `ia_diagnosticos` nunca era populado; `get_by_chat` sem chamador (**Crítica**)
 - [x] **02-8** — CRUD da base de conhecimento não sincronizava o Qdrant (**Alta**)
 - [ ] **02-9** — `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) (Baixa)
@@ -157,7 +157,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **06-14** — `pinData` do webhook com `fromMe: true` (Baixa)
 - [x] **06-15** — `extra_hosts: host.docker.internal` ausente (Média)
 - [x] **06-16** — `remoteJid` cru usado em pontos sensíveis (Média)
-- [ ] **06-17** — Mídia não é preservada (URL/arquivo): apenas caption é extraída (**Alta**)
+- [x] **06-17** — Mídia não é preservada (URL/arquivo): apenas caption é extraída (**Alta**) — CORRIGIDO: nó "Extrair" repassa `midia` e o backend persiste no storage
 - [ ] **06-18** — `onError: continue` silencia falhas sem retry/registro estruturado (Média)
 
 ## SPEC 07 — Frontend (Painel de Atendimento)
