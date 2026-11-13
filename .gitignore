@@ -54,6 +54,7 @@ logs/
 infra/.env
 infra/.env.prod
 infra/.env.local
+backups/
 token_acesso.txt
 .node_modules.root.bak
 .mypy_cache

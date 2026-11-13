@@ -24,6 +24,7 @@ Atualizado em 2026-11-12: 12-8 registrado (auditoria do worker: `event_version` 
 Atualizado em 2026-11-12: 12-8 corrigido — worker descarta evento obsoleto por `event_version` do agregado (descarte `FALHA_PERMANENTE`, sem status novo no enum) sem chamada externa; 53 abertos.
 Atualizado em 2026-11-13: 14-6 corrigido (T6) — frontend com Vitest (36 testes passando) e E2E Playwright `e2e/login-inbox.spec.ts` rodando o fluxo login→inbox contra a stack (envio real só com `E2E_ENVIA_WHATSAPP`); 52 abertos.
 Atualizado em 2026-11-13: 00-7, 09-5 e 09-6 corrigidos — `scripts/backup.sh` cobre Appwrite, n8n, evolution-db, Qdrant e MinIO com retenção, verificação e manifesto; 49 abertos (152 entregues).
+Atualizado em 2026-11-13: 09-7 corrigido — `infra/systemd/emsoft-backup.{service,timer}` (diário 03:30, `Persistent=true`) + `scripts/install-backup-timer.sh` (modo user/system, idempotente, env em `~/.config/emsoft-backup.env`); 48 abertos (153 entregues).
 
 ## Critério de ordenação
 
@@ -114,7 +115,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 35 | 00-7 (CORRIGIDO) | Backup cobre só Postgres/Supabase; MinIO órfão e backup do Qdrant nunca dispara em prod | Perda de vetores/bancos sem restore |
 | 36 | 09-6 (CORRIGIDO) | Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente | Store primário sem backup |
 | 37 | 09-5 (CORRIGIDO) | Backup Qdrant usa bind mount divergente do volume named de prod | Backup aponta para dados errados |
-| 38 | 09-7 | `backup.sh` não é agendado | Backup simplesmente não roda |
+| 38 | 09-7 (CORRIGIDO) | `backup.sh` não é agendado | Backup simplesmente não roda |
 
 ### T8 — Legado e métricas de produto (4)
 | # | Gap | Descrição | Justificativa |

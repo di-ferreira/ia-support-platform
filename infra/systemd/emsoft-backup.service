@@ -1,0 +1,30 @@
+# emsoft-backup.service — EMSoft Support: backup diário da stack.
+#
+# NOTA (placeholder __REPO__): este arquivo é um TEMPLATE versionado.
+# O caminho do repositório NÃO é hardcoded aqui de propósito (a máquina
+# e o usuário que rodam o backup variam). `scripts/install-backup-timer.sh`
+# substitui `__REPO__` pelo `realpath` do repo na hora de instalar
+# (modo user: ~/.config/systemd/user/; modo system: /etc/systemd/system/).
+# A unit instalada nunca deve ser editada à mão: reinstale o timer.
+#
+# Configuração (BACKUP_DIR, BACKUP_RETENTION_DAYS, COMPOSE_FILE,
+# DOCKER_CONFIG): o usuário define em ~/.config/emsoft-backup.env
+# (model: infra/systemd/backup.env.example). O prefixo `-` torna o
+# arquivo opcional: sem ele, scripts/backup.sh usa seus defaults.
+
+[Unit]
+Description=EMSoft Support — backup da stack
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=__REPO__
+EnvironmentFile=-%h/.config/emsoft-backup.env
+ExecStart=/usr/bin/env bash __REPO__/scripts/backup.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=30min
+StandardOutput=journal
+StandardError=journal

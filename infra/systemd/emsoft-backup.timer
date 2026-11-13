@@ -1,0 +1,19 @@
+# emsoft-backup.timer — EMSoft Support: dispara emsoft-backup.service
+# diariamente às 03:30. Persistent=true: se o host estava desligado na
+# hora agendada, o backup roda na próxima sessão. RandomizedDelaySec
+# espalha o disparo em até 5 min (menos picos na rede/disco).
+#
+# Instalado por scripts/install-backup-timer.sh (substitui __REPO__ na
+# unit de serviço; o timer não usa placeholder).
+
+[Unit]
+Description=EMSoft Support — backup diário das 03:30
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=emsoft-backup.service
+
+[Install]
+WantedBy=timers.target
