@@ -33,10 +33,17 @@ class PerfilAtendente(enum.StrEnum):
 
 
 class TipoMensagem(enum.StrEnum):
+    """Tipos de mensagem, espelhando os blocos da Evolution.
+
+    `sticker` (stickerMessage) e `local` (locationMessage) fecham o 02-3.
+    """
+
     texto = "texto"
     audio = "audio"
     documento = "documento"
     imagem = "imagem"
+    sticker = "sticker"
+    local = "local"
 
 
 class RemetenteMensagem(enum.StrEnum):

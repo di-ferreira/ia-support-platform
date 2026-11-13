@@ -58,7 +58,7 @@ export function MidiaMensagem({
   }
   if (carregando || !objectUrl) return null;
 
-  if (mensagem.tipo === "imagem") {
+  if (mensagem.tipo === "imagem" || mensagem.tipo === "sticker") {
     return (
       <img
         src={objectUrl}

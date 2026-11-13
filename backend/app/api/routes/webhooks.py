@@ -67,11 +67,14 @@ def _extrair_mensagem_bruta(message: dict) -> tuple[str | None, str, str | None]
         ("videoMessage", "documento"),
         ("audioMessage", "audio"),
         ("documentMessage", "documento"),
-        ("stickerMessage", "imagem"),
     ):
         bloco = message.get(campo) or {}
         if bloco:
             return bloco.get("caption") or "", tipo, None
+    if message.get("stickerMessage"):
+        return "", "sticker", None
+    if message.get("locationMessage"):
+        return "[localização]", "local", None
     return None, "texto", None
 
 
@@ -118,7 +121,8 @@ TIPO_MENSAGEM_EVOLUTION = {
     "audioMessage": "audio",
     "documentMessage": "documento",
     "documentWithCaptionMessage": "documento",
-    "stickerMessage": "imagem",
+    "stickerMessage": "sticker",
+    "locationMessage": "local",
 }
 TIPOS_VALIDOS = tuple(e.value for e in TipoMensagem)
 

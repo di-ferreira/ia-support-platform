@@ -17,7 +17,7 @@ aplicação (os services checam duplicidade antes de inserir), não por índice 
 
 from app.models.auditoria import AcaoAuditoria, TipoAtor
 from app.models.departamento import CategoriaERP, Intencao
-from app.models.enums import CanalAvaliacao
+from app.models.enums import CanalAvaliacao, TipoMensagem
 from app.models.ia_diagnostico import StatusIA
 from app.models.knowledge_base import CategoriaConhecimento
 from app.models.outbox import StatusOutbox, TipoEventoOutbox
@@ -64,7 +64,7 @@ ASSIGNEE_KIND = ["AI", "HUMANO"]
 
 REMETENTE_MENSAGEM = ["cliente", "ia", "atendente", "sistema"]
 
-TIPO_MENSAGEM = ["texto", "audio", "documento", "imagem"]
+TIPO_MENSAGEM = [t.value for t in TipoMensagem]
 
 STATUS_IA = [s.value for s in StatusIA]
 
