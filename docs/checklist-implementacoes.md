@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **170 entregues** `[x]` — gaps CORRIGIDO
-- **32 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **171 entregues** `[x]` — gaps CORRIGIDO
+- **31 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
@@ -29,7 +29,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **00-8** — Status do chat nunca saía de `NOVO` no fluxo real (**Crítica**)
 - [x] **00-9** — `ia_diagnosticos` nunca era populado (**Crítica**)
 - [x] **00-10** — `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente, não o tempo de primeira resposta (**Alta**)
-- [ ] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média)
+- [x] **00-11** — Sem CSAT/NPS nem coleta de feedback (Média) *(CSAT 1-5 na coleção `avaliacoes`; captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off)*
 - [ ] **00-12** — Mídia no WhatsApp: backend e workflow extraem `extendedText`/caption, mas a mídia não é armazenada e formatos não-texto caem em vazio (**Alta**)
 - [x] **00-13** — Departamentos, roteamento e pedido explícito por humano/setor não existem (**Alta**)
 - [ ] **00-14** — Integração com a API interna de chamados Emsoft não existe (**Alta**) *(parcial)*

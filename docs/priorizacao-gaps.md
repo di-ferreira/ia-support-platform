@@ -34,6 +34,7 @@ Atualizado em 2026-11-13: 14-8 corrigido — suíte real de integração `backen
 Atualizado em 2026-11-13: 04-9 e 04-14 corrigidos — escopo por departamento em `GET /atendentes/ativos` (regra 6, spec 04) e checagem de posse em `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` (04-14 é gap novo, registrado e corrigido no mesmo commit); 34 abertos (168 entregues).
 Atualizado em 2026-11-13: 04-8 corrigido — 403 na criação de instância distingue instância já existente (`ja_existia` + status real) de credencial recusada (`EvolutionAuthError` → HTTP 403); 33 abertos (169 entregues).
 Atualizado em 2026-11-13: 04-3 (CORRIGIDO) — ação de transferência escondida por perfil + vínculo (`podeTransferirChat` em `lib/permissoes.ts`: admin/supervisor sempre; atendente só o próprio chamado; sem usuário, fail-closed), aplicando Kanban ("Transferir") e Atendimento ("Transferir depto"); a guarda de rota por URL já existia; 32 abertos (170 entregues).
+Atualizado em 2026-11-13: 00-11 (CORRIGIDO) — CSAT 1-5 na coleção `avaliacoes` (captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off); 31 abertos (171 entregues).
 
 ## Critério de ordenação
 
@@ -174,7 +175,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 76 | 09-18 | Sem runbook de rollout/rollback da integração Emsoft |
 | 77 | 03-11 | `POST /chats/enviar-whatsapp` tem lógica de negócio dentro da rota |
 | 78 | 07-4 (CORRIGIDO) | Cores raw do Tailwind fora dos tokens `@theme` |
-| 79 | 00-11 | Sem CSAT/NPS nem coleta de feedback |
+| 79 | 00-11 (CORRIGIDO) | Sem CSAT/NPS nem coleta de feedback |
 | 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
 | 81 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente |
 | 82 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution |
