@@ -28,6 +28,7 @@ Atualizado em 2026-11-13: 09-7 corrigido — `infra/systemd/emsoft-backup.{servi
 Atualizado em 2026-11-13: 09-3 e 09-8 corrigidos — MinIO órfão removido do compose prod (serviço, volume e env) e senha do Postgres via `${POSTGRES_PASSWORD}` (com `.env.example` documentado); 46 abertos (155 entregues).
 Atualizado em 2026-11-13: 01-8, 02-20, 04-11, 04-12 e 10-12 corrigidos — trilha de auditoria exposta via `GET /chats/{id}/auditoria` com ator tipado (`Ator`: humano/IA/sistema/serviço) nas rotas REST e webhook de status (coleção `auditoria`); 41 abertos (160 entregues).
 Atualizado em 2026-11-13: 09-16 corrigido — start-prod.sh aguarda healthcheck real e não roda mais Alembic; 40 abertos (161 entregues).
+Atualizado em 2026-11-13: 02-14 corrigido — `scripts/seed_qdrant.py` lê artigos ativos do Appwrite (`Repositories.knowledge_bases.list_all()`, `id` ULID como ponto Qdrant) e `seed_knowledge_base.py` legado removido; 39 abertos (162 entregues).
 
 ## Critério de ordenação
 
@@ -124,7 +125,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
 | 39 | 02-11 | `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual | Caminho de migração legado pode causar operações erradas |
-| 40 | 02-14 | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | Seed quebrado contra a fonte real (Appwrite) |
+| 40 | 02-14 (CORRIGIDO) | `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant | Seed quebrado contra a fonte real (Appwrite) |
 | 41 | 08-9 (CORRIGIDO) | Métricas de produto (resolução confirmada, transbordo, roteamento, duplicidade) sem instrumentação | Produto não é mensurável |
 | 42 | 00-10 (CORRIGIDO) | `tempo_medio_resposta` mede intervalo entre mensagens do mesmo atendente | Mesma raiz de 08-9 (view do escopo) |
 

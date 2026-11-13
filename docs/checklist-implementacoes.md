@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **161 entregues** `[x]` — gaps CORRIGIDO
-- **40 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **162 entregues** `[x]` — gaps CORRIGIDO
+- **39 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -65,7 +65,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **02-11** — `backend/alembic/`, `app/models/*.py` (ORM) e `scripts/migrate.sh` apontam para PostgreSQL, que não é a fonte atual (**Alta**)
 - [x] **02-12** — Sem índice único: unicidade de `email`/`documento` é check-then-insert, vulnerável a corrida (Média)
 - [x] **02-13** — `scripts/seed_knowledge_base.py` importava `async_session` inexistente (**Alta**)
-- [ ] **02-14** — `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant (**Alta**)
+- [x] **02-14** — `scripts/seed_qdrant.py` lê do PostgreSQL e usa id inteiro como ponto Qdrant (**Alta**)
 - [x] **02-15** — `dashboard_service.py` chama `clientes.get` dentro do loop de recentes (Média)
 - [ ] **02-16** — Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente (Média)
 - [x] **02-17** — Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes (**Alta**)

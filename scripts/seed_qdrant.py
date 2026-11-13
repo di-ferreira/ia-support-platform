@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Gera embeddings para artigos da base de conhecimento e popula o Qdrant."""
+"""Gera embeddings para artigos da base de conhecimento e popula o Qdrant.
+
+Lê os artigos direto do Appwrite (fonte atual), filtra pelos ativos e faz
+upsert no Qdrant usando embeddings gerados pelo Ollama.
+"""
 
 import asyncio
 import os
@@ -8,12 +12,11 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 import httpx
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from appwrite.services.databases import Databases
 
+from app.appwrite.repositories import Repositories
+from app.core.appwrite import build_appwrite_client
 from app.core.config import settings
-from app.models.knowledge_base import KnowledgeBase
 from app.services.qdrant_service import COLLECTION_NAME, ensure_collection, upsert_article
 
 OLLAMA_EMBED_URL = f"{settings.ollama_base_url}/api/embeddings"
@@ -31,36 +34,43 @@ async def generate_embedding(text: str) -> list[float]:
 
 
 async def seed():
-    engine = create_async_engine(settings.active_database_url)
-    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    if not settings.appwrite_project_id or not settings.appwrite_api_key:
+        sys.exit(
+            "APPWRITE_PROJECT_ID / APPWRITE_API_KEY ausentes em backend/.env — "
+            "crie o project e a API key no console (http://localhost:8020) e preencha o .env."
+        )
+
+    client = build_appwrite_client()
+    databases = Databases(client)
+    repos = Repositories(databases)
 
     await ensure_collection()
 
-    async with async_session() as session:
-        result = await session.execute(
-            select(KnowledgeBase).where(KnowledgeBase.ativo)
+    documentos = await repos.knowledge_bases.list_all()
+    artigos = [artigo for artigo in documentos if artigo.get("ativo")]
+
+    if not artigos:
+        print("Nenhum artigo ativo encontrado na base de conhecimento.")
+        return
+
+    print(f"Gerando embeddings para {len(artigos)} artigos...")
+
+    for artigo in artigos:
+        titulo = artigo.get("titulo") or ""
+        conteudo = artigo.get("conteudo")
+        categoria = artigo.get("categoria") or ""
+        texto = f"{titulo}\n\n{conteudo or ''}"
+        embedding = await generate_embedding(texto)
+        await upsert_article(
+            article_id=artigo["id"],
+            titulo=titulo,
+            conteudo=conteudo,
+            categoria=categoria,
+            embedding=embedding,
         )
-        artigos = result.scalars().all()
+        print(f"  [{categoria:12}] {titulo}")
 
-        if not artigos:
-            print("Nenhum artigo ativo encontrado na base de conhecimento.")
-            return
-
-        print(f"Gerando embeddings para {len(artigos)} artigos...")
-
-        for artigo in artigos:
-            texto = f"{artigo.titulo}\n\n{artigo.conteudo or ''}"
-            embedding = await generate_embedding(texto)
-            await upsert_article(
-                article_id=artigo.id,
-                titulo=artigo.titulo,
-                conteudo=artigo.conteudo,
-                categoria=artigo.categoria.value,
-                embedding=embedding,
-            )
-            print(f"  [{artigo.categoria.value:12}] {artigo.titulo}")
-
-        print(f"\nSeed Qdrant completed: {len(artigos)} artigos indexados no `{COLLECTION_NAME}`.")
+    print(f"\nSeed Qdrant completed: {len(artigos)} artigos indexados no `{COLLECTION_NAME}`.")
 
 
 if __name__ == "__main__":
