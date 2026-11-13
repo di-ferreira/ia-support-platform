@@ -31,6 +31,7 @@ Atualizado em 2026-11-13: 09-16 corrigido — start-prod.sh aguarda healthcheck 
 Atualizado em 2026-11-13: 02-14 corrigido — `scripts/seed_qdrant.py` lê artigos ativos do Appwrite (`Repositories.knowledge_bases.list_all()`, `id` ULID como ponto Qdrant) e `seed_knowledge_base.py` legado removido; 39 abertos (162 entregues).
 Atualizado em 2026-11-13: 02-11, 08-7 e 09-12 corrigidos — caminho morto ORM/Alembic/Postgres removido do backend (`backend/alembic/`, `alembic.ini`, `app/core/database.py`, `scripts/migrate.sh`, `database_url*` no `Settings` e no compose prod; `app/models/` em reexports de `app.models.enums`; trava em `tests/test_remocao_orm.py`); 36 abertos (165 entregues).
 Atualizado em 2026-11-13: 14-8 corrigido — suíte real de integração `backend/tests/integracao` (7 testes `pytest.mark.integracao`) agendada no CI como job noturno `integracao` com services Qdrant/Redis (cron 03:00 UTC, `schedule`/`workflow_dispatch`, sem bloquear push/PR); Appwrite/Evolution/Emsoft pulam sem credenciais; 35 abertos (166 entregues).
+Atualizado em 2026-11-13: 04-9 e 04-14 corrigidos — escopo por departamento em `GET /atendentes/ativos` (regra 6, spec 04) e checagem de posse em `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` (04-14 é gap novo, registrado e corrigido no mesmo commit); 34 abertos (168 entregues).
 
 ## Critério de ordenação
 
@@ -50,7 +51,7 @@ Gaps que são a mesma raiz aparecem juntos; o duplicado (outra view do mesmo gap
 é marcado `(= gap)`. Os tiers são critério de impacto e podem não coincidir com o
 rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baixa).
 
-## Ordem de importância (1–98)
+## Ordem de importância (1–99)
 
 ### T0 — Bloqueante (1)
 | # | Gap | Descrição | Justificativa |
@@ -65,7 +66,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 4 | 09-2 (CORRIGIDO) | Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) | Sem env o backend não sobe em prod |
 | 5 | 09-15 (CORRIGIDO) | Sem serviço de LLM (Ollama) na pilha prod nem `OLLAMA_URL` | Prod não roda IA sem LLM |
 
-### T2 — Integridade de dados e segurança (8) — todos corrigidos em 2026-11-10
+### T2 — Integridade de dados e segurança (9) — todos corrigidos em 2026-11-13
 | # | Gap | Descrição | Justificativa |
 |---|-----|-----------|---------------|
 | 6 | 01-2 (CORRIGIDO) | `PATCH /webhooks/chat/status` não valida `STATUS_TRANSITIONS` — atualiza direto, inclusive saindo de `ENCERRADO` | Máquina de estados violada por ator externo → corrupção de chats |
@@ -76,6 +77,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 11 | 07-2 (CORRIGIDO) | Sem refresh token/renovação; sessão cai após 60 min | Mesma raiz de 03-10 (view do frontend) |
 | 12 | 03-14 (CORRIGIDO) | Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` | Instância mal configurada envia dados para alvo errado em prod |
 | 13 | 02-10 (CORRIGIDO) | Bootstrap aditivo não propaga mudança de enum; health degradado não implementado | Drift de schema silencioso quebra validações da máquina de estados |
+| 14 | 04-14 (CORRIGIDO) | `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` não checam posse — atendente de outro departamento podia mudar status/prioridade | Ator interno contorna o escopo de departamento (spec 04) |
 
 ### T3 — Integração Emsoft e escopo (6)
 | # | Gap | Descrição | Justificativa |
@@ -183,7 +185,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 85 | 03-9 (CORRIGIDO) | `POST /chats/{id}/assinar` existe sem chamador no frontend |
 | 86 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota |
 | 87 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação |
-| 88 | 04-9 | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
+| 88 | 04-9 (CORRIGIDO) | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
 | 89 | 05-19 | Dependência `openai` declarada e nunca importada |
 | 90 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
 | 91 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |

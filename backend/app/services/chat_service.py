@@ -179,6 +179,7 @@ class ChatService:
         *,
         _acao: AcaoAuditoria = AcaoAuditoria.STATUS,
         _motivo: str | None = None,
+        user: dict | None = None,
     ) -> dict:
         """Muda o status do chat e registra a transição na auditoria.
 
@@ -186,8 +187,16 @@ class ChatService:
         atualizado. `confirmar_resolucao` e `reabrir` reutilizam esse registro
         apenas sobrescrevendo o tipo de ação (`_acao`) e o `motivo`: uma
         mutação = um registro, sem duplicação.
+
+        Quando `user` é informado (chamada humana), exige posse do chat;
+        chamadas internas/webhooks chegam sem `user` e pulam a checagem.
         """
         chat = await self.obter(chat_id)
+        if user is not None and not self.pode_ver_chat(chat, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Sem acesso a este chamado",
+            )
         if novo_status not in STATUS_TRANSITIONS.get(chat["status"], []):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -282,9 +291,19 @@ class ChatService:
         return result
 
     async def definir_prioridade(
-        self, chat_id: str, prioridade: PrioridadeChat, ator: Ator | None = None
+        self,
+        chat_id: str,
+        prioridade: PrioridadeChat,
+        ator: Ator | None = None,
+        *,
+        user: dict | None = None,
     ) -> dict:
         chat = await self.obter(chat_id)
+        if user is not None and not self.pode_ver_chat(chat, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Sem acesso a este chamado",
+            )
         result = await self.repos.chats.update(chat_id, {"prioridade": prioridade.value})
         await self.auditoria.registrar(
             chat_id=chat_id,

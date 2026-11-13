@@ -2,9 +2,9 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **166 entregues** `[x]` — gaps CORRIGIDO
-- **35 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
-- Total: 201 itens
+- **168 entregues** `[x]` — gaps CORRIGIDO
+- **34 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- Total: 202 itens
 
 ## Fases do plano (SPEC 13)
 
@@ -105,11 +105,12 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **04-6** — `ChatService` cobre transições, mas `pegar`/`transferir`/`transferir_grupo`/`assinar`/`definir_prioridade`/`listar` (filtro) seguem sem teste (**Alta**)
 - [x] **04-7** — `WEBHOOK_SECRET` ainda força status de qualquer chat (pulando a máquina de estados) e cria diagnóstico; mitigado por fail-closed e rate limit (**Alta**)
 - [ ] **04-8** — `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR (Média)
-- [ ] **04-9** — `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado (Baixa)
+- [x] **04-9** — `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado (Baixa)
 - [x] **04-10** — Escopo por departamento não é aplicado (departamento não existe) (**Alta**)
 - [x] **04-11** — Identidade de serviço da IA / `actor_type` auditável não implementada (Média)
 - [x] **04-12** — Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (Média)
 - [x] **04-13** — chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) (Média)
+- [x] **04-14** — `PATCH /chats/{id}/status` e `PATCH /chats/{id}/prioridade` não exigiam posse: atendente de outro departamento mutava chamado alheio (**Alta**)
 
 ## SPEC 05 — Pipeline de IA, Classificação, RAG e Decisão
 

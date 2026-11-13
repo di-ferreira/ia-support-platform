@@ -114,6 +114,12 @@ async def test_departamento_inexistente_retorna_404(client, admin_token):
 @pytest.mark.asyncio
 async def test_atendentes_ativos_expoem_departamento(client, atendente_token, fake_repos):
     financeiro = await _departamento(fake_repos, "financeiro")
+    # O escopo de /ativos é por departamento (spec 04, regra 6): o atendente
+    # precisa estar no mesmo departamento para ver a Eva.
+    atendente = await fake_repos.atendentes.get_by_email("atendente@test.com")
+    await fake_repos.atendentes.update(
+        atendente["id"], {"departamento_id": financeiro["id"]}
+    )
     await fake_repos.atendentes.create(
         {
             "nome": "Eva",

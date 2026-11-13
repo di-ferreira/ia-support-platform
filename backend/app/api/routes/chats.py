@@ -86,7 +86,7 @@ async def atualizar_status(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.atualizar_status(chat_id, body.status, Ator.humano(user))
+    chat = await service.atualizar_status(chat_id, body.status, Ator.humano(user), user=user)
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
@@ -144,7 +144,7 @@ async def definir_prioridade(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.definir_prioridade(chat_id, body.prioridade, Ator.humano(user))
+    chat = await service.definir_prioridade(chat_id, body.prioridade, Ator.humano(user), user=user)
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
