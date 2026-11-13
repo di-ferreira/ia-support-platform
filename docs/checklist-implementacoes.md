@@ -252,7 +252,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **14-3** — `qdrant_service.py` sem teste unitário: `search_similar`/`upsert`/`ensure_collection`, dimensão 768, `article_point_id` (**Alta**)
 - [x] **14-4** — Render de prompt com conteúdo dinâmico não quebra mais (constantes + f-string) e o veredito é validado por Pydantic (**Alta**)
 - [x] **14-5** — Webhook de mensagem coberto ponta a ponta: payload bruto Evolution, tipos/caption e dedup por `whatsapp_message_id` (**Alta**)
-- [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito com 8 testes; falta Playwright/E2E)*
+- [ ] **14-6** — Frontend sem infraestrutura de teste (sem `test` script, sem Vitest/Playwright) (**Alta**) *(parcial — Vitest/F4.1 feito; Playwright/E2E criado, falta rodar contra a stack)*
 - [x] **14-7** — n8n sem harness de teste; JSON ativo sem validação automatizada de nós/env (Média)
 - [ ] **14-8** — Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes (Média)
 - [x] **14-9** — CI sem threshold de cobertura; mypy e lint frontend report-only — regressões em IA não bloqueiam merge (Média)

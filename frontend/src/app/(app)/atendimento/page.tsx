@@ -500,7 +500,7 @@ export default function AtendimentoPage() {
             ))}
           </Select>
         </div>
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto" data-testid="inbox-lista-chats">
           {chatsQuery.isLoading && (
             <div className="space-y-2 p-4">
               {[0, 1, 2, 3].map((i) => (
@@ -536,6 +536,7 @@ export default function AtendimentoPage() {
           {chats.map((chat) => (
             <button
               key={chat.id}
+              data-testid="inbox-chat-item"
               onClick={() => setChatAtivo(chat)}
               className={`w-full border-b p-4 text-left transition-colors hover:bg-neutral-50 ${
                 chatAtivo?.id === chat.id
@@ -718,7 +719,10 @@ export default function AtendimentoPage() {
               </div>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-auto p-4">
+            <div
+              className="flex-1 space-y-3 overflow-auto p-4"
+              data-testid="chat-mensagens"
+            >
               {mensagensQuery.isLoading && (
                 <div className="space-y-2">
                   {[0, 1, 2].map((i) => (
@@ -796,7 +800,12 @@ export default function AtendimentoPage() {
                   onChange={(e) => setNovaMsg(e.target.value)}
                   aria-label="Mensagem"
                 />
-                <Button type="submit" size="sm" disabled={!novaMsg.trim()}>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={!novaMsg.trim()}
+                  data-testid="btn-enviar-mensagem"
+                >
                   {sendMsg.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
