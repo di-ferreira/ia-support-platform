@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # EMSoft Support — Backup da stack completa
 #
-# Componentes: postgres, appwrite, qdrant, n8n, evolution, minio, redis
+# Componentes: postgres, appwrite, qdrant, n8n, evolution, redis
 # Cada componente só roda se o container estiver ativo; senão registra
 # "SKIP <nome> (container ausente)" e segue para o próximo.
 #
@@ -232,20 +232,6 @@ backup_evolution() {
   fi
 }
 
-backup_minio() {
-  # Fecha o "MinIO órfão": o bucket fica em volume named minio-data → /data
-  if ! compose_up "$COMPOSE_FILE" minio; then
-    SKIP_REASON="container ausente"
-    return 2
-  fi
-  ARTIFACT="$BACKUP_DIR/minio_${DATE}.tar.gz"
-  log "tar -C /data . (via container minio)"
-  if ! docker compose -f "$COMPOSE_FILE" exec -T minio \
-      tar -czf - -C /data . > "$ARTIFACT"; then
-    return 1
-  fi
-}
-
 backup_redis() {
   # Decisão: SKIP permanente. O Redis aqui é cache descartável (sessões,
   # fila de jobs) — os dados reais vivem no postgres/appwrite. Forçar RDB
@@ -286,7 +272,7 @@ MANIFEST="$BACKUP_DIR/manifest_${DATE}.txt"
   echo
 } > "$MANIFEST"
 
-for comp in postgres appwrite qdrant n8n evolution minio redis; do
+for comp in postgres appwrite qdrant n8n evolution redis; do
   run_component "$comp"
 done
 
@@ -299,7 +285,7 @@ apply_retention
 echo
 echo "=== Resumo ==="
 FAILED=0
-for comp in postgres appwrite qdrant n8n evolution minio redis; do
+for comp in postgres appwrite qdrant n8n evolution redis; do
   status="${RESULTS[$comp]:-NÃO EXECUTADO}"
   printf '%-10s %s\n' "$comp" "$status"
   [[ "$status" == "FALHOU" ]] && FAILED=1

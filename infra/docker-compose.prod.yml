@@ -21,9 +21,6 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       REDIS_URL: redis://redis:6379/0
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
       # Appwrite: stack em infra/appwrite, alcançada pela rede compartilhada "appwrite" (09-1/09-4)
@@ -56,9 +53,8 @@ services:
     networks:
       - default
       - appwrite
+    # Sem dependência de postgres: o backend usa Appwrite; só a Evolution usa o Postgres
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_started
       ollama:
@@ -79,7 +75,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: emsoft
-      POSTGRES_PASSWORD: emsoft
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: emsoft
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -110,16 +106,6 @@ services:
       - ollama-data:/root/.ollama
     restart: unless-stopped
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - minio-data:/data
-    restart: unless-stopped
-
   n8n:
     image: n8nio/n8n:latest
     environment:
@@ -145,7 +131,7 @@ services:
       SERVER_URL: https://evolution.emsoft.app
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: postgresql://emsoft:emsoft@postgres:5432/emsoft
+      DATABASE_CONNECTION_URI: postgresql://emsoft:${POSTGRES_PASSWORD}@postgres:5432/emsoft
       REDIS_ENABLED: "true"
       CACHE_REDIS_URI: redis://redis:6379
     labels:
@@ -163,7 +149,6 @@ volumes:
   redis-data:
   qdrant-data:
   ollama-data:
-  minio-data:
   n8n-data:
   traefik-data:
 

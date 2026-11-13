@@ -25,6 +25,7 @@ Atualizado em 2026-11-12: 12-8 corrigido — worker descarta evento obsoleto por
 Atualizado em 2026-11-13: 14-6 corrigido (T6) — frontend com Vitest (36 testes passando) e E2E Playwright `e2e/login-inbox.spec.ts` rodando o fluxo login→inbox contra a stack (envio real só com `E2E_ENVIA_WHATSAPP`); 52 abertos.
 Atualizado em 2026-11-13: 00-7, 09-5 e 09-6 corrigidos — `scripts/backup.sh` cobre Appwrite, n8n, evolution-db, Qdrant e MinIO com retenção, verificação e manifesto; 49 abertos (152 entregues).
 Atualizado em 2026-11-13: 09-7 corrigido — `infra/systemd/emsoft-backup.{service,timer}` (diário 03:30, `Persistent=true`) + `scripts/install-backup-timer.sh` (modo user/system, idempotente, env em `~/.config/emsoft-backup.env`); 48 abertos (153 entregues).
+Atualizado em 2026-11-13: 09-3 e 09-8 corrigidos — MinIO órfão removido do compose prod (serviço, volume e env) e senha do Postgres via `${POSTGRES_PASSWORD}` (com `.env.example` documentado); 46 abertos (155 entregues).
 
 ## Critério de ordenação
 
@@ -156,7 +157,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 68 | 14-8 | Sem testes de integração reais (Appwrite/Qdrant/Evolution/Emsoft); tudo em fakes |
 | 69 | 14-9 (CORRIGIDO) | CI sem threshold de cobertura; regressões em IA não bloqueiam merge |
 | 70 | 09-14 (CORRIGIDO) | CI: mypy e lint do frontend report-only; sem job de teste do frontend |
-| 71 | 09-8 | Senha do Postgres em claro no compose/string da Evolution |
+| 71 | 09-8 (CORRIGIDO) | Senha do Postgres em claro no compose/string da Evolution |
 | 72 | 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` |
 | 73 | 09-10 | Drift de modelo Ollama (= 05-14) |
 | 74 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado |
@@ -182,7 +183,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 90 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
 | 91 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
 | 92 | 08-7 | `DATABASE_URL` default com credenciais em claro |
-| 93 | 09-3 | MinIO órfão no compose prod sem referência no código |
+| 93 | 09-3 (CORRIGIDO) | MinIO órfão no compose prod sem referência no código |
 | 94 | 09-9 (CORRIGIDO) | Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` 3.12-slim |
 | 95 | 09-16 | `start-prod.sh`: `sleep 5` em vez de aguardar healthcheck; roda Alembic |
 | 96 | 01-1 | `.ai/` mantém docs com vocabulário/estados divergentes (stack antiga) |

@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **153 entregues** `[x]` — gaps CORRIGIDO
-- **48 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **155 entregues** `[x]` — gaps CORRIGIDO
+- **46 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -192,12 +192,12 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **09-1** — Appwrite (store primária) ausente da pilha prod; backend aponta para `127.0.0.1:8020` (**Crítica**)
 - [x] **09-2** — Bloco de env do backend prod incompleto (`SECRET_KEY`, `APPWRITE_*`, `WEBHOOK_SECRET`, `QDRANT_URL`, `OLLAMA_*`, `CORS_ORIGINS`) (**Crítica**)
-- [ ] **09-3** — MinIO órfão no compose prod sem referência no código (Baixa)
+- [x] **09-3** — MinIO órfão no compose prod sem referência no código (Baixa)
 - [x] **09-4** — Pilha do Appwrite em rede isolada; backend prod não a alcança (**Alta**)
 - [x] **09-5** — Backup Qdrant usa bind mount divergente do volume named de prod (**Alta**)
 - [x] **09-6** — Sem backup de Appwrite/n8n/evolution-db; bloco Supabase remanescente (**Alta**)
 - [x] **09-7** — `backup.sh` não é agendado (**Alta**)
-- [ ] **09-8** — Senha do Postgres em claro no compose/string da Evolution (Média)
+- [x] **09-8** — Senha do Postgres em claro no compose/string da Evolution (Média)
 - [x] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)
 - [ ] **09-10** — Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média)
 - [x] **09-11** — `infra/.env.prod` não era gitignored (**Alta**)
