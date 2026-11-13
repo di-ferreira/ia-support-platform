@@ -1,5 +1,6 @@
 import pytest
 
+import app.api.routes.webhooks as webhooks_mod
 from app.core.config import settings
 
 
@@ -103,8 +104,20 @@ async def test_payload_bruto_evolution_texto(client, fake_repos):
     assert msg["tipo"] == "texto"
 
 
+class _FakeMidiaService:
+    def __init__(self, resultado):
+        self.resultado = resultado
+        self.chamadas = []
+
+    async def armazenar(self, midia, tipo, whatsapp_message_id=None, conteudo=None):
+        self.chamadas.append(midia)
+        return self.resultado
+
+
 @pytest.mark.asyncio
-async def test_payload_bruto_evolution_imagem_caption(client, fake_repos):
+async def test_payload_bruto_evolution_imagem_caption(client, fake_repos, monkeypatch):
+    fake = _FakeMidiaService(("appwrite://midias/img1", "tela de erro"))
+    monkeypatch.setattr(webhooks_mod, "MidiaService", lambda: fake)
     headers = {"content-type": "application/json", **_auth_headers()}
     payload = {
         "data": {
@@ -127,7 +140,9 @@ async def test_payload_bruto_evolution_imagem_caption(client, fake_repos):
     assert msg["whatsapp_message_id"] == "IMG1"
     assert msg["conteudo"] == "tela de erro"
     assert msg["tipo"] == "imagem"
-    assert msg["url_arquivo"] == "https://exemplo/img.png"
+    assert msg["url_arquivo"] == "appwrite://midias/img1"
+    assert len(fake.chamadas) == 1
+    assert fake.chamadas[0]["key"]["id"] == "IMG1"
 
 
 # --- Fix A (gaps 01-2, 03-3, 04-7): status delegado à máquina de estados e

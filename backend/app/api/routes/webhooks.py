@@ -52,7 +52,11 @@ async def verify_webhook(request: Request) -> None:
 
 
 def _extrair_mensagem_bruta(message: dict) -> tuple[str | None, str, str | None]:
-    """Deriva (conteudo, tipo, url_arquivo) do bloco `message` do payload bruto."""
+    """Deriva (conteudo, tipo, url_arquivo) do bloco `message` do payload bruto.
+
+    O terceiro elemento é sempre `None`: a URL do CDN do WhatsApp expira e a
+    mídia passa a chegar pelo campo `midia` (processada pela `MidiaService`).
+    """
     if message.get("conversation"):
         return message["conversation"], "texto", None
     texto = (message.get("extendedTextMessage") or {}).get("text")
@@ -67,7 +71,7 @@ def _extrair_mensagem_bruta(message: dict) -> tuple[str | None, str, str | None]
     ):
         bloco = message.get(campo) or {}
         if bloco:
-            return bloco.get("caption") or "", tipo, bloco.get("url")
+            return bloco.get("caption") or "", tipo, None
     return None, "texto", None
 
 
@@ -90,15 +94,15 @@ def _normalizar_payload(body: dict) -> dict:
 
     remote_jid = key.get("remoteJid", "")
     if remote_jid:
-        conteudo, tipo, url_arquivo = _extrair_mensagem_bruta(message)
+        conteudo, tipo, _ = _extrair_mensagem_bruta(message)
         result = {
             "whatsapp_number": remote_jid.removesuffix("@s.whatsapp.net"),
             "conteudo": conteudo,
             "tipo": tipo,
             "whatsapp_message_id": key.get("id"),
         }
-        if url_arquivo:
-            result["url_arquivo"] = url_arquivo
+        if tipo != "texto" and message:
+            result["midia"] = {"key": key, "message": message}
         if remetente:
             result["remetente"] = remetente
         return result
