@@ -68,6 +68,8 @@ Não configurar credencial Emsoft no n8n. Não usar credencial Ollama no n8n; o 
 - Falha no Emsoft: não é responsabilidade do n8n; a outbox backend processa e informa painel.
 - Evitar loops: mensagens do próprio bot e mensagens enviadas por atendentes devem ser identificadas pelo ID e `fromMe`.
 
+- Retry e registro estruturado (06-18): cada nó HTTP tem `retryOnFail` com 3 tentativas e 2s entre elas e `onError: continueErrorOutput`. A saída de erro `[1]` de cada nó HTTP conecta ao nó `Registrar falha`, que faz `POST /webhooks/n8n/erro` no backend (sem retry, para evitar laço); a rota grava uma linha de log estruturada `event=n8n_falha` com `workflow`, `node`, `chat_id`, `execution_id` e `erro`, sem persistência em coleção.
+
 ## Configuração da Evolution
 
 Webhook deve receber apenas o evento necessário (`MESSAGES_UPSERT`) para o escopo desta versão. Não incluir `MESSAGE_UPDATE` como nova mensagem, pois edição/revogação não deve iniciar novo atendimento.

@@ -254,3 +254,35 @@ async def webhook_contexto(
             status_code=status.HTTP_404_NOT_FOUND, detail="Chat não encontrado"
         )
     return contexto
+
+
+@router.post("/n8n/erro")
+async def webhook_n8n_erro(
+    request: Request,
+    webhook_auth: None = Depends(verify_webhook),
+):
+    """06-18: registro estruturado de falhas do workflow n8n.
+
+    O nó "Registrar falha" do workflow aciona esta rota quando um nó HTTP
+    falha após os retries. O payload varia por nó, então nada é validado:
+    o resultado é sempre uma linha de log ``event=n8n_falha`` e um 202.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = None
+    if not isinstance(body, dict) or not body:
+        logger.error(
+            "event=n8n_falha workflow=%s node=%s chat_id=%s execution_id=%s erro=%s",
+            None, None, None, None, "payload inválido",
+        )
+        return JSONResponse({"ok": True}, status_code=202)
+    logger.error(
+        "event=n8n_falha workflow=%s node=%s chat_id=%s execution_id=%s erro=%s",
+        body.get("workflow"),
+        body.get("node"),
+        body.get("chat_id"),
+        body.get("execution_id"),
+        body.get("mensagem") or body.get("message"),
+    )
+    return JSONResponse({"ok": True}, status_code=202)
