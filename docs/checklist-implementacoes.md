@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **177 entregues** `[x]` — gaps CORRIGIDO
-- **25 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **184 entregues** `[x]` — gaps CORRIGIDO
+- **18 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 202 itens
 
 ## Fases do plano (SPEC 13)
@@ -54,7 +54,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 
 - [x] **02-1** — `CLASSIFY_SYSTEM` reconhece 7 categorias (`multiempresa`, `outro`); `CATEGORIA_CONHECIMENTO` tem 5 — artigos dessas áreas não podem ser gravados (**Alta**)
 - [x] **02-2** — `CategoriaConhecimento` sem `multiempresa`, que é área real do negócio (Média)
-- [ ] **02-3** — `TipoMensagem` sem `sticker`/`local`; o normalizador do webhook mapeia sticker→imagem, mas o enum não espelha a Evolution (Média)
+- [x] **02-3** — `TipoMensagem` sem `sticker`/`local`; o normalizador do webhook mapeia sticker→imagem, mas o enum não espelha a Evolution (Média) — CORRIGIDO (2026-11-13): `sticker` e `local` no enum; deploy exige `scripts/atualizar_enum_tipo_mensagem.py` (bootstrap não propaga enum, 02-10)
 - [x] **02-4** — `atendentes.setor` e `chats.setor_alvo` são string livre, sem enum/validação (legado a migrar para departamento) (Média)
 - [ ] **02-5** — `chats.loja_id` nunca é populado (Média)
 - [x] **02-6** — `url_arquivo` existe em `mensagens`/`knowledge_bases`, sem upload/download/storage (Média) — CORRIGIDO: bucket `midias` + `StorageService` + rota de download autenticada; mídia exibida no frontend
@@ -81,7 +81,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **03-4** — `/ai/*` usa query parameter para conteúdo do cliente (PII em access log) (**Alta**)
 - [x] **03-5** — `/ai/solucionar` escrevia no chat furando a máquina de estados (**Alta**)
 - [x] **03-6** — JWT do WebSocket viajava em query string (**Alta**)
-- [ ] **03-7** — 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution (Média)
+- [x] **03-7** — 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution (Média) — CORRIGIDO (2026-11-13): 502 com mensagem fixa; erro do `httpx` só no log
 - [x] **03-8** — Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) (Média)
 - [x] **03-9** — `POST /chats/{id}/assinar` existe (admin/supervisor) sem chamador no frontend (Baixa)
 - [x] **03-10** — `/auth/refresh` e `PATCH /auth/password` existem e não são chamados pelo frontend (**Alta**)
@@ -89,9 +89,9 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **03-12** — `GET /atendentes/ativos` tem a lógica dentro da rota (Baixa)
 - [ ] **03-13** — `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR (Média)
 - [x] **03-14** — Webhook padrão da Evolution aponta para URL hardcoded `/webhook/emsoft-whatsapp` (**Alta**)
-- [ ] **03-15** — Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution (Média)
+- [x] **03-15** — Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution (Média) — CORRIGIDO (2026-11-13): `settings.evolution_instance_name`; `InstanceCreate` usa `default_factory`
 - [x] **03-16** — `WEBHOOK_SECRET` sem validação no startup (Média)
-- [ ] **03-17** — `GET /settings/ia-name` é público e não requer autenticação (Baixa)
+- [x] **03-17** — `GET /settings/ia-name` é público e não requer autenticação (Baixa) — CORRIGIDO (2026-11-13): `GET /settings/ia-name` exige autenticação
 - [ ] **03-18** — `/webhooks/chat/diagnostico` sem chamador (`/contexto` já é chamado pelo n8n) (Média)
 - [x] **03-19** — Endpoints-alvo inexistentes: `/departamentos*`, `/chats/{id}/transferir-departamento`, `/atribuir-atendente`, `/roteamento`, `/ai/classificar-intencao`, `/integracoes/chamados/*` (**Alta**)
 
@@ -127,12 +127,12 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **05-11** — `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536) (**Alta**)
 - [x] **05-12** — `get_llm` caía em Ollama silenciosamente se `LLM_PROVIDER=openai` sem chave (Média)
 - [x] **05-13** — `except: pass` engolia falha de embedding (Média)
-- [ ] **05-14** — Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média)
+- [x] **05-14** — Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média) — CORRIGIDO (2026-11-13): modelo alinhado em `llama3.2` nos `.env.example`
 - [ ] **05-15** — `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado (Média)
 - [x] **05-16** — `prompt.format` quebrava com `{`/`}` de artigo (**Alta**)
 - [x] **05-17** — Categoria `multiempresa` reconhecida pela IA mas ausente do schema (**Alta**)
 - [x] **05-18** — `IADiagnosticoRepository.get_by_chat` sem chamador (Baixa)
-- [ ] **05-19** — Dependência `openai` declarada e nunca importada (clients usam `httpx`) (Baixa)
+- [x] **05-19** — Dependência `openai` declarada e nunca importada (clients usam `httpx`) (Baixa) — CORRIGIDO (2026-11-13): `openai` removido do lock; clients usam `httpx`
 - [x] **05-20** — Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` (**Alta**)
 - [x] **05-21** — Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria (**Alta**)
 - [x] **05-22** — Resolução determinística de regras de roteamento inexistente (**Alta**)
@@ -200,7 +200,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **09-7** — `backup.sh` não é agendado (**Alta**)
 - [x] **09-8** — Senha do Postgres em claro no compose/string da Evolution (Média)
 - [x] **09-9** — Drift Python: pyproject/ruff/mypy/CI em 3.11 vs `Dockerfile` `3.12-slim` (Baixa)
-- [ ] **09-10** — Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média)
+- [x] **09-10** — Drift de modelo Ollama: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` (Média) — CORRIGIDO (2026-11-13): mesma correção do 05-14
 - [x] **09-11** — `infra/.env.prod` não era gitignored (**Alta**)
 - [x] **09-12** — Alembic/Postgres híbrido com runtime em Appwrite (Média) — removido (2026-11-13): caminho morto Alembic/ORM/Postgres eliminado do backend
 - [x] **09-13** — Env do n8n (`BACKEND_URL`/`EVOLUTION_INSTANCE`/`N8N_BLOCK_ENV_ACCESS_IN_NODE`) ausente de compose/.env (**Alta**)

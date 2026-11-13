@@ -37,6 +37,7 @@ Atualizado em 2026-11-13: 04-3 (CORRIGIDO) — ação de transferência escondid
 Atualizado em 2026-11-13: 00-11 (CORRIGIDO) — CSAT 1-5 na coleção `avaliacoes` (captura no webhook, registro interno, resumo no dashboard; `CSAT_ENABLED` default off); 31 abertos (171 entregues).
 Atualizado em 2026-11-13: 00-12, 02-6 e 06-17 (CORRIGIDO) — mídia baixada via `getBase64FromMediaMessage`, salva no bucket `midias` do Appwrite (`StorageService` + rota de download autenticada; nó "Extrair" do n8n repassa `midia`); 28 abertos (174 entregues).
 Atualizado em 2026-11-13: 00-5, 00-6 e 01-1 (CORRIGIDO) — legado documental divergente eliminado: `.ai/PROJECT.md` e `.ai/PROJECT_CONTEXT.md` reduzidos a ponteiro (stack real FastAPI/Appwrite + 8 estados reais de `StatusChat`), `TODO_LIST.md`/`.ai/TODO_LIST.md` e `docs/specs.backup/` removidos; 25 abertos (177 entregues).
+Atualizado em 2026-11-13: 03-7, 03-15, 03-17, 05-19, 05-14, 09-10 e 02-3 (CORRIGIDO) — 502 com mensagem fixa (erro só no log), nome da instância em `settings.evolution_instance_name`, `GET /settings/ia-name` autenticado, modelo `llama3.2` alinhado nos `.env.example`, `openai` removido do lock e `TipoMensagem` com `sticker`/`local` (deploy roda `scripts/atualizar_enum_tipo_mensagem.py`); 18 abertos (184 entregues).
 
 ## Critério de ordenação
 
@@ -153,7 +154,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 52 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR |
 | 53 | 04-8 (CORRIGIDO) | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |
 | 54 | 02-6 (CORRIGIDO) | `url_arquivo` existe em `mensagens`/`knowledge_bases` sem upload/download/storage |
-| 55 | 02-3 | `TipoMensagem` sem `sticker`/`local`; webhook mapeia sticker→imagem sem espelhar o enum |
+| 55 | 02-3 (CORRIGIDO) | `TipoMensagem` sem `sticker`/`local`; webhook mapeia sticker→imagem sem espelhar o enum |
 | 56 | 01-3 | Urgência da IA (`critica`) só no prompt, sem coluna |
 | 57 | 01-5 | `chats.loja_id` nunca é populado |
 | 58 | 02-5 | `chats.loja_id` nunca é populado (= 01-5) |
@@ -161,7 +162,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 60 | 08-12 (CORRIGIDO) | Health check degradado do bootstrap (= 08-3) |
 | 61 | 03-18 | `/webhooks/chat/diagnostico` sem chamador |
 | 62 | 06-18 | `onError: continue` silencia falhas sem retry/registro estruturado |
-| 63 | 03-7 | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution |
+| 63 | 03-7 (CORRIGIDO) | 502 devolve `str(e)` do `httpx`, expondo URL/corpo da Evolution |
 | 64 | 08-5 | Sem logging estruturado nem request-id/correlação |
 | 65 | 08-6 | Sem métricas/tracing/APM; nenhum SLO observável |
 | 66 | 12-7 (CORRIGIDO) | Sem painel de pendência/reprocessamento para operador |
@@ -170,8 +171,8 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 69 | 14-9 (CORRIGIDO) | CI sem threshold de cobertura; regressões em IA não bloqueiam merge |
 | 70 | 09-14 (CORRIGIDO) | CI: mypy e lint do frontend report-only; sem job de teste do frontend |
 | 71 | 09-8 (CORRIGIDO) | Senha do Postgres em claro no compose/string da Evolution |
-| 72 | 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` |
-| 73 | 09-10 | Drift de modelo Ollama (= 05-14) |
+| 72 | 05-14 (CORRIGIDO) | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` |
+| 73 | 09-10 (CORRIGIDO) | Drift de modelo Ollama (= 05-14) |
 | 74 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado |
 | 75 | 09-12 (CORRIGIDO) | Alembic/Postgres híbrido com runtime em Appwrite |
 | 76 | 09-18 | Sem runbook de rollout/rollback da integração Emsoft |
@@ -180,7 +181,7 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 79 | 00-11 (CORRIGIDO) | Sem CSAT/NPS nem coleta de feedback |
 | 80 | 00-16 (CORRIGIDO) | Indicadores de sucesso por departamento/duplicidade sem instrumentação |
 | 81 | 02-16 | Sem foreign key: `chats.cliente_id` pode apontar para cliente inexistente |
-| 82 | 03-15 | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution |
+| 82 | 03-15 (CORRIGIDO) | Nome da instância `"emsoft-support"` hardcoded em mensagens/evolution |
 | 83 | 04-13 (CORRIGIDO) | chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) |
 
 ### T10 — Baixa (15)
@@ -189,9 +190,9 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 84 | 02-9 | `tags` e `chat_tags` órfãs (sem repositório/rota/serviço) |
 | 85 | 03-9 (CORRIGIDO) | `POST /chats/{id}/assinar` existe sem chamador no frontend |
 | 86 | 03-12 | `GET /atendentes/ativos` tem a lógica dentro da rota |
-| 87 | 03-17 | `GET /settings/ia-name` é público e não requer autenticação |
+| 87 | 03-17 (CORRIGIDO) | `GET /settings/ia-name` é público e não requer autenticação |
 | 88 | 04-9 (CORRIGIDO) | `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado |
-| 89 | 05-19 | Dependência `openai` declarada e nunca importada |
+| 89 | 05-19 (CORRIGIDO) | Dependência `openai` declarada e nunca importada |
 | 90 | 07-5 (CORRIGIDO) | `chat-store` não é usado; estado local duplica a fonte |
 | 91 | 07-6 (CORRIGIDO) | Selects de status/prioridade usam `<select>` nativo |
 | 92 | 08-7 (CORRIGIDO) | `DATABASE_URL` default com credenciais em claro |

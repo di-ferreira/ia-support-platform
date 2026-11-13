@@ -127,12 +127,12 @@ Verificado contra o código em 2026-11-06.
 | 05-11 | `VECTOR_SIZE=768` incompatível com `text-embedding-3-small` (1536) | `services/qdrant_service.py`; `ai/provider.py` | **Alta** | **CORRIGIDO** → [ADR-0005](adr/0005-dimensao-de-embedding.md) |
 | 05-12 | `get_llm` caía em Ollama silenciosamente se `LLM_PROVIDER=openai` sem chave | `ai/provider.py:10-20` | Média | **CORRIGIDO** — falha rápido com `LLMIndisponivelError` |
 | 05-13 | `except: pass` engolia falha de embedding | `services/ai_pipeline.py` | Média | **CORRIGIDO** — propaga e responde 503 |
-| 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **ABERTO** |
+| 05-14 | Drift de modelo: `config.py` `llama3.2` vs `infra/.env.example` `deepseek-v4-flash:cloud` | `core/config.py:31`; `infra/.env.example:26` | Média | **CORRIGIDO (2026-11-13)** — modelo alinhado em `llama3.2` nos `.env.example` |
 | 05-15 | `AICache` engole toda exceção em `get`/`set`/`clear`; `clear()` nunca é chamado | `ai/ai_cache.py` | Média | **ABERTO** |
 | 05-16 | `prompt.format` quebrava com `{`/`}` de artigo | `ai/prompts.py` | **Alta** | **CORRIGIDO** — prompts constantes + conteúdo como valor de f-string |
 | 05-17 | Categoria `multiempresa` reconhecida pela IA mas ausente do schema | `ai/prompts.py:16` vs `appwrite/schema.py:52` | **Alta** | **CORRIGIDO** — `CATEGORIA_CONHECIMENTO` inclui `multiempresa` e espelha `CategoriaERP` (teste `test_categorias_do_schema_espelham_os_enums`) |
 | 05-18 | `IADiagnosticoRepository.get_by_chat` sem chamador | `appwrite/repositories/ia_diagnostico.py:10` | Baixa | **CORRIGIDO** — `get_by_chat` (última execução) chamado por `GET /chats/{id}/roteamento` |
-| 05-19 | Dependência `openai` declarada e nunca importada (clients usam `httpx`) | `pyproject.toml:18` | Baixa | **ABERTO** |
+| 05-19 | Dependência `openai` declarada e nunca importada (clients usam `httpx`) | `pyproject.toml:18` | Baixa | **CORRIGIDO (2026-11-13)** — `openai` removido do lock; clients usam `httpx` |
 | 05-20 | Sem teste unitário direto de `ai/router.py`, `ai_cache.py` e clients; pipeline coberto por `test_ai_pipeline.py` | `tests/` | **Alta** | **CORRIGIDO** — `tests/test_ai_router.py`, `tests/test_ai_cache.py` e `tests/test_llm_services.py` (dependências mockadas, sem rede) → [14](14-test-strategy.md) |
 | 05-21 | Classificação de intenção não separa categoria ERP de departamento; `CLASSIFY_SYSTEM` só devolve categoria | `ai/prompts.py` | **Alta** | **CORRIGIDO** — `INTENT_SYSTEM` + `ClassificacaoIntencao` separam intenção, categoria ERP e departamento sugerido; pipeline usa `IntentClassifier` + `RoutingService` como dimensões distintas (F3.2) |
 | 05-22 | Resolução determinística de regras de roteamento inexistente | `services/` | **Alta** | **CORRIGIDO** — `services/routing_service.py` (`resolver`), determinístico e sem LLM na decisão |
