@@ -82,10 +82,12 @@ record() {
 verify_artifact() {
   # verify_artifact <arquivo> <gz|tar> → "OK" ou "FALHOU: <motivo>"
   local file="$1" kind="$2"
+  # Tamanho mínimo = não-vazio: dumps de bancos vazios são pequenos mas válidos;
+  # integridade + não-vazio é o critério correto, tamanho é só informativo no manifesto.
   local size
   size="$(stat -c%s "$file" 2>/dev/null || echo 0)"
-  if [[ "$size" -le 1024 ]]; then
-    echo "FALHOU: tamanho insuficiente (${size} bytes)"
+  if [[ "$size" -le 0 ]]; then
+    echo "FALHOU: arquivo vazio"
     return 0
   fi
   case "$kind" in
