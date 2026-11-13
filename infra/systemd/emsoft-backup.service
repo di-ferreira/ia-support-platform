@@ -11,11 +11,11 @@
 # DOCKER_CONFIG): o usuário define em ~/.config/emsoft-backup.env
 # (model: infra/systemd/backup.env.example). O prefixo `-` torna o
 # arquivo opcional: sem ele, scripts/backup.sh usa seus defaults.
+# Sem dependência da unit de sistema do docker: inválida em modo user,
+# e o `docker` CLI conecta no socket por conta própria.
 
 [Unit]
 Description=EMSoft Support — backup da stack
-After=docker.service
-Wants=docker.service
 
 [Service]
 Type=oneshot

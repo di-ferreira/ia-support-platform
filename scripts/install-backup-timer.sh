@@ -7,20 +7,23 @@
 # APENAS para copiar as units e o daemon-reload — nunca para rodar o backup).
 #
 # Uso:
-#   scripts/install-backup-timer.sh [--help] [--system] [--uninstall]
+#   scripts/install-backup-timer.sh [--help] [--system] [--uninstall] [--dry-run]
 #
 # Comportamento:
 #   - substitui o placeholder __REPO__ pelo realpath deste repositório;
 #   - cria ~/.config/emsoft-backup.env a partir de backup.env.example
 #     apenas se ainda não existir;
-#   - idempotente: rodar duas vezes só reinstala as units (o env é preservado).
+#   - modo --system: o EnvironmentFile vira /etc/emsoft-backup.env (criado
+#     do example, se ausente — %h num unit de sistema resolveria para /root);
+#   - idempotente: rodar duas vezes só reinstala as units (o env é preservado);
+#   - --dry-run: imprime os comandos que rodaria, sem executar.
 #
 # Requisito: systemd com user manager (modo user) — precisa de sessão do
 # usuário; sem XDG_RUNTIME_DIR, ver o aviso do próprio script (lingering).
 
 set -euo pipefail
 
-usage() { sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; }
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   usage
@@ -29,25 +32,40 @@ fi
 
 MODE="user"
 UNINSTALL=0
+DRY_RUN="${DRY_RUN:-0}"
 for arg in "$@"; do
   case "$arg" in
     --system)    MODE="system" ;;
     --uninstall) UNINSTALL=1 ;;
+    --dry-run)   DRY_RUN=1 ;;
     -h|--help)   usage; exit 0 ;;
     *) echo "opção desconhecida: $arg" >&2; usage; exit 2 ;;
   esac
 done
 
+run() { # imprime o comando; só executa se DRY_RUN=0
+  echo "+ $*"
+  if [[ "$DRY_RUN" -eq 0 ]]; then "$@"; fi
+}
+
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 UNITS_SRC="$REPO/infra/systemd"
-ENV_FILE="$HOME/.config/emsoft-backup.env"
+if [[ "$MODE" == "system" ]]; then
+  ENV_FILE="/etc/emsoft-backup.env"
+else
+  ENV_FILE="$HOME/.config/emsoft-backup.env"
+fi
+
+TMP_FILE=""
+cleanup() { if [[ -n "$TMP_FILE" ]]; then rm -f "$TMP_FILE"; fi; }
+trap cleanup EXIT
 
 systemctl_for() { # user|system → imprime o systemctl certo
   if [[ "$MODE" == "system" ]]; then echo "systemctl"; else echo "systemctl --user"; fi
 }
 
 install_units() {
-  local unit dest
+  local unit
   if [[ ! -f "$UNITS_SRC/emsoft-backup.service" || ! -f "$UNITS_SRC/emsoft-backup.timer" ]]; then
     echo "erro: templates ausentes em $UNITS_SRC" >&2
     exit 1
@@ -56,18 +74,34 @@ install_units() {
   if [[ "$MODE" == "system" ]]; then
     DEST="/etc/systemd/system"
     command -v sudo >/dev/null || { echo "erro: --system requer sudo" >&2; exit 1; }
+    # mktemp: process substitution (/dev/fd/N) não sobrevive ao sudo, que
+    # fecha os fds extras por padrão.
+    TMP_FILE="$(mktemp /tmp/emsoft-backup-unit.XXXXXX)"
     for unit in emsoft-backup.service emsoft-backup.timer; do
-      sudo install -m 0644 \
-        <(sed "s|__REPO__|$REPO|g" "$UNITS_SRC/$unit") "$DEST/$unit"
+      # %h num unit de sistema resolveria para o home do root (/root);
+      # em modo system o env vive em /etc.
+      sed "s|__REPO__|$REPO|g; s|EnvironmentFile=-%h/.config/emsoft-backup.env|EnvironmentFile=-/etc/emsoft-backup.env|" \
+        "$UNITS_SRC/$unit" > "$TMP_FILE"
+      if [[ "$DRY_RUN" -eq 1 ]]; then
+        echo "--- $unit (seria instalado em $DEST/$unit) ---"
+        cat "$TMP_FILE"
+      fi
+      run sudo install -m 0644 "$TMP_FILE" "$DEST/$unit"
     done
-    sudo systemctl daemon-reload
+    run sudo systemctl daemon-reload
   else
     DEST="$HOME/.config/systemd/user"
-    mkdir -p "$DEST"
-    for unit in emsoft-backup.service emsoft-backup.timer; do
-      sed "s|__REPO__|$REPO|g" "$UNITS_SRC/$unit" > "$DEST/$unit"
-    done
-    systemctl --user daemon-reload
+    if [[ "$DRY_RUN" -eq 0 ]]; then
+      mkdir -p "$DEST"
+      for unit in emsoft-backup.service emsoft-backup.timer; do
+        sed "s|__REPO__|$REPO|g" "$UNITS_SRC/$unit" > "$DEST/$unit"
+      done
+    else
+      for unit in emsoft-backup.service emsoft-backup.timer; do
+        echo "+ sed 's|__REPO__|$REPO|g' $UNITS_SRC/$unit > $DEST/$unit"
+      done
+    fi
+    run systemctl --user daemon-reload
   fi
   echo "Units instaladas em $DEST (__REPO__ → $REPO)"
 }
@@ -77,9 +111,18 @@ create_env_if_missing() {
     echo "env já existe, preservado: $ENV_FILE"
     return 0
   fi
-  mkdir -p "$(dirname "$ENV_FILE")"
-  cp "$UNITS_SRC/backup.env.example" "$ENV_FILE"
-  chmod 600 "$ENV_FILE"
+  if [[ "$MODE" == "system" ]]; then
+    # Não copia do $HOME do usuário sem avisar: parte do example.
+    run sudo install -m 0600 "$UNITS_SRC/backup.env.example" "$ENV_FILE"
+  else
+    if [[ "$DRY_RUN" -eq 0 ]]; then
+      mkdir -p "$(dirname "$ENV_FILE")"
+      cp "$UNITS_SRC/backup.env.example" "$ENV_FILE"
+      chmod 600 "$ENV_FILE"
+    else
+      echo "+ cp $UNITS_SRC/backup.env.example $ENV_FILE && chmod 600 $ENV_FILE"
+    fi
+  fi
   echo "env criado a partir do example: $ENV_FILE"
   if [[ -n "${DOCKER_CONFIG:-}" ]]; then
     echo "docker usa um DOCKER_CONFIG não padrão (${DOCKER_CONFIG}): o backup" >&2
@@ -94,22 +137,22 @@ uninstall() {
   local dest
   if [[ "$MODE" == "system" ]]; then
     dest="/etc/systemd/system"
-    sudo $sc disable --now emsoft-backup.timer 2>/dev/null || true
-    sudo $sc disable --now emsoft-backup.service 2>/dev/null || true
-    sudo rm -f "$dest/emsoft-backup.service" "$dest/emsoft-backup.timer"
-    sudo systemctl daemon-reload
+    run sudo $sc disable --now emsoft-backup.timer 2>/dev/null || true
+    run sudo $sc disable --now emsoft-backup.service 2>/dev/null || true
+    run sudo rm -f "$dest/emsoft-backup.service" "$dest/emsoft-backup.timer"
+    run sudo systemctl daemon-reload
   else
     dest="$HOME/.config/systemd/user"
-    $sc disable --now emsoft-backup.timer 2>/dev/null || true
-    rm -f "$dest/emsoft-backup.service" "$dest/emsoft-backup.timer"
-    $sc daemon-reload
+    run $sc disable --now emsoft-backup.timer 2>/dev/null || true
+    run rm -f "$dest/emsoft-backup.service" "$dest/emsoft-backup.timer"
+    run $sc daemon-reload
   fi
   echo "Units removidas de $dest (o $ENV_FILE foi preservado)."
 }
 
 check_user_session() {
   # Só se aplica ao modo user; o backup em si nunca precisa de root.
-  if [[ "$MODE" == "system" ]]; then
+  if [[ "$MODE" == "system" || "$DRY_RUN" -eq 1 ]]; then
     return 0
   fi
   if ! systemctl --user show-environment >/dev/null 2>&1; then
@@ -136,9 +179,13 @@ install_units
 create_env_if_missing
 
 sc="$(systemctl_for)"
-$sc enable --now emsoft-backup.timer
+if [[ "$MODE" == "system" ]]; then
+  run sudo $sc enable --now emsoft-backup.timer
+else
+  run $sc enable --now emsoft-backup.timer
+fi
 echo
 echo "Proximos disparos:"
-$sc list-timers emsoft-backup.timer --no-pager | head -5
+run $sc list-timers emsoft-backup.timer --no-pager | head -5
 echo
 echo "Teste manual: $sc start emsoft-backup.service && $sc status emsoft-backup.service --no-pager"
