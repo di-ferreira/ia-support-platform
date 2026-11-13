@@ -2,6 +2,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
 
 type Options = RequestInit & {
   params?: Record<string, string | number | undefined | null>;
+  parse?: "json" | "blob";
 };
 
 // Spec 07/03 (gaps 07-2 e 03-10): tenta renovar o access token expirado
@@ -84,7 +85,7 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  return res.json();
+  return (options.parse === "blob" ? res.blob() : res.json()) as T;
 }
 
 export const api = {
@@ -95,4 +96,5 @@ export const api = {
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  blob: (path: string) => request<Blob>(path, { parse: "blob" }),
 };

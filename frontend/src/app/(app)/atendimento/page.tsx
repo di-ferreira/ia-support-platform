@@ -24,6 +24,7 @@ import { rotuloNota } from "@/lib/csat";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChatStore } from "@/lib/stores/chat-store";
 import { podeTransferirChat } from "@/lib/permissoes";
+import { MidiaMensagem } from "@/components/chat/midia-mensagem";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -879,6 +880,9 @@ export default function AtendimentoPage() {
                               "Cliente"}
                       </span>
                     </div>
+                    {msg.url_arquivo && chatAtivoId ? (
+                      <MidiaMensagem chatId={chatAtivoId} mensagem={msg} />
+                    ) : null}
                     <p>{msg.conteudo}</p>
                     <span className="mt-1 block text-[10px] opacity-50">
                       {new Date(msg.created_at).toLocaleTimeString("pt-BR", {
