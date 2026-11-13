@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from app.appwrite.repositories import Repositories
 from app.models.chat import StatusChat
 from app.models.mensagem import RemetenteMensagem
+from app.services.auditoria_service import Ator
 from app.services.chat_service import ChatService
 
 
@@ -84,11 +85,13 @@ class WebhookService:
                 )
         return mensagem
 
-    async def atualizar_status(self, chat_id: str, novo_status: StatusChat) -> dict:
+    async def atualizar_status(
+        self, chat_id: str, novo_status: StatusChat, ator: Ator | None = None
+    ) -> dict:
         # Spec 01 §Máquina de estados / spec 03: transições de status só são
         # válidas pela máquina de estados; o webhook delega ao mesmo caminho
         # validado dos endpoints REST (400 em transição inválida, 404 inexistente).
-        return await ChatService(self.repos).atualizar_status(chat_id, novo_status)
+        return await ChatService(self.repos).atualizar_status(chat_id, novo_status, ator)
 
     async def atualizar_cliente(self, chat_id: str, data: dict) -> dict:
         chat = await self.repos.chats.get(chat_id)

@@ -4,6 +4,7 @@ from app.api.deps import get_current_user, get_repositories, require_perfil
 from app.api.realtime import emitir_chat_atualizado
 from app.appwrite.repositories import Repositories
 from app.models.chat import PrioridadeChat, StatusChat
+from app.schemas.auditoria import AuditoriaResponse
 from app.schemas.chat import (
     ChatAssign,
     ChatCreate,
@@ -15,6 +16,7 @@ from app.schemas.chat import (
     ChatTransferirGrupo,
     ChatUpdateStatus,
 )
+from app.services.auditoria_service import Ator
 from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/chats", tags=["Chats"])
@@ -54,6 +56,17 @@ async def obter_chat(
     return await service.obter_com_escopo(chat_id, user)
 
 
+@router.get("/{chat_id}/auditoria", response_model=list[AuditoriaResponse])
+async def listar_auditoria(
+    chat_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Trilha de auditoria do chat (spec 04 §Auditoria obrigatória)."""
+    service = ChatService(repos)
+    return await service.listar_auditoria(chat_id, user)
+
+
 @router.post("", response_model=ChatDetailResponse, status_code=201)
 async def criar_chat(
     body: ChatCreate,
@@ -73,7 +86,7 @@ async def atualizar_status(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.atualizar_status(chat_id, body.status)
+    chat = await service.atualizar_status(chat_id, body.status, Ator.humano(user))
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
@@ -117,7 +130,7 @@ async def assinar_chat(
     """
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.assinar(chat_id, body.atendente_id)
+    chat = await service.assinar(chat_id, body.atendente_id, Ator.humano(user))
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
@@ -131,7 +144,7 @@ async def definir_prioridade(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.definir_prioridade(chat_id, body.prioridade)
+    chat = await service.definir_prioridade(chat_id, body.prioridade, Ator.humano(user))
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
@@ -144,7 +157,7 @@ async def pegar_chat(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.pegar(chat_id, user["id"])
+    chat = await service.pegar(chat_id, user["id"], Ator.humano(user))
     await emitir_chat_atualizado(anterior, chat)
     return chat
 
@@ -158,7 +171,7 @@ async def transferir_chat(
 ):
     service = ChatService(repos)
     anterior = await service.obter(chat_id)
-    chat = await service.transferir(chat_id, body.atendente_id, user)
+    chat = await service.transferir(chat_id, body.atendente_id, user, ator=Ator.humano(user))
     await emitir_chat_atualizado(anterior, chat)
     return chat
 

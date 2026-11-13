@@ -26,6 +26,7 @@ Atualizado em 2026-11-13: 14-6 corrigido (T6) — frontend com Vitest (36 testes
 Atualizado em 2026-11-13: 00-7, 09-5 e 09-6 corrigidos — `scripts/backup.sh` cobre Appwrite, n8n, evolution-db, Qdrant e MinIO com retenção, verificação e manifesto; 49 abertos (152 entregues).
 Atualizado em 2026-11-13: 09-7 corrigido — `infra/systemd/emsoft-backup.{service,timer}` (diário 03:30, `Persistent=true`) + `scripts/install-backup-timer.sh` (modo user/system, idempotente, env em `~/.config/emsoft-backup.env`); 48 abertos (153 entregues).
 Atualizado em 2026-11-13: 09-3 e 09-8 corrigidos — MinIO órfão removido do compose prod (serviço, volume e env) e senha do Postgres via `${POSTGRES_PASSWORD}` (com `.env.example` documentado); 46 abertos (155 entregues).
+Atualizado em 2026-11-13: 01-8, 02-20, 04-11, 04-12 e 10-12 corrigidos — trilha de auditoria exposta via `GET /chats/{id}/auditoria` com ator tipado (`Ator`: humano/IA/sistema/serviço) nas rotas REST e webhook de status (coleção `auditoria`); 41 abertos (160 entregues).
 
 ## Critério de ordenação
 
@@ -132,11 +133,11 @@ rótulo de severidade da spec (nas specs: 42 Alta/Bloqueante, 40 Média, 15 Baix
 | 43 | 04-3 (CORRIGIDO) | Frontend oculta ações por perfil, mas sem guarda de rota: digitando URL alcança `/usuarios` e `/configuracoes` |
 | 44 | 07-11 (CORRIGIDO) | Sem guarda de rota por perfil (= 04-3) |
 | 45 | 03-8 (CORRIGIDO) | Rotas que alteram chat não emitem evento WebSocket (`status`, `pegar`, `transferir`, `assinar`, `prioridade`, kanban `mover`) |
-| 46 | 01-8 | Sem tabela de auditoria: não há como saber quem mudou status/atribuição |
-| 47 | 02-20 | Sem trilha de auditoria de atribuição/transferência (= 01-8) |
-| 48 | 04-12 | Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (= 01-8) |
-| 49 | 10-12 | Sem auditoria de transferência/atribuição (= 01-8) |
-| 50 | 04-11 | Identidade de serviço da IA / `actor_type` auditável não implementada |
+| 46 | 01-8 (CORRIGIDO) | Sem tabela de auditoria: não há como saber quem mudou status/atribuição |
+| 47 | 02-20 (CORRIGIDO) | Sem trilha de auditoria de atribuição/transferência (= 01-8) |
+| 48 | 04-12 (CORRIGIDO) | Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (= 01-8) |
+| 49 | 10-12 (CORRIGIDO) | Sem auditoria de transferência/atribuição (= 01-8) |
+| 50 | 04-11 (CORRIGIDO) | Identidade de serviço da IA / `actor_type` auditável não implementada |
 | 51 | 07-3 (CORRIGIDO) | WebSocket sem reconexão nem backoff |
 | 52 | 03-13 | `EvolutionService.criar_instancia` engole 403 e devolve resposta fabricada sem QR |
 | 53 | 04-8 | `criar_instancia` engole 403 e devolve sucesso sem QR (= 03-13) |

@@ -125,6 +125,16 @@ class ChatService:
             )
         return chat
 
+    async def listar_auditoria(self, chat_id: str, user: dict, limite: int = 200) -> list[dict]:
+        """Trilha de auditoria do chat, restrita ao escopo de acesso do usuário."""
+        chat = await self.obter(chat_id)
+        if not self.pode_ver_chat(chat, user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Sem acesso a este chamado",
+            )
+        return await self.repos.auditoria.list_by_chat(chat_id, limite=limite)
+
     async def criar(self, data: dict) -> dict:
         if not await self.repos.clientes.get(data["cliente_id"]):
             raise HTTPException(

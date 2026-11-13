@@ -108,4 +108,4 @@ Verificado contra o código em 2026-11-06. Nenhuma das capacidades desta spec ex
 | 10-9 | Seed idempotente de departamentos inexistente | `scripts/` | Média | **CORRIGIDO** — `services/departamento_seed.py` (`semear`) + `scripts/seed_departamentos.py`, idempotente |
 | 10-10 | Migração de `setor`/`setor_alvo` para `departamento_id` inexistente | `scripts/`; `appwrite/` | **Alta** | **CORRIGIDO** — `services/migracao_setor_service.py` (`migrar`) + `scripts/migrate_setor_departamento.py` |
 | 10-11 | `pegar`/`transferir` não validam departamento/atividade do atendente | `services/chat_service.py:142-172` | **Alta** | **CORRIGIDO** — destino e atendente validados por atividade/departamento nas transferências |
-| 10-12 | Sem auditoria de transferência/atribuição | `app/` | Média | **ABERTO** → [04](04-rbac-matrix.md) |
+| 10-12 | Sem auditoria de transferência/atribuição | `app/` | Média | **CORRIGIDO** (2026-11-13) — coleção `auditoria` grava transferência/atribuição com ator tipado (`Ator`); exposta via `GET /chats/{id}/auditoria` |

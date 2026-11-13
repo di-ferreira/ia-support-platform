@@ -19,6 +19,7 @@ from app.schemas.webhook import (
     WebhookStatusUpdate,
 )
 from app.services.ai_pipeline import AIPipelineService
+from app.services.auditoria_service import Ator
 from app.services.webhook_service import WebhookService
 
 router = APIRouter(
@@ -144,7 +145,7 @@ async def webhook_status(
     webhook_auth: None = Depends(verify_webhook),
 ):
     service = WebhookService(repos)
-    chat = await service.atualizar_status(body.chat_id, body.status)
+    chat = await service.atualizar_status(body.chat_id, body.status, ator=Ator.servico("n8n"))
     await manager.send_event(
         body.chat_id, "status_update",
         {"chat_id": body.chat_id, "status": body.status.value},

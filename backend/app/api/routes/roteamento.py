@@ -12,6 +12,7 @@ from app.schemas.chat import (
     ChatTransferirDepartamento,
 )
 from app.schemas.routing import RoteamentoChatResponse
+from app.services.auditoria_service import Ator
 from app.services.chat_service import ChatService
 
 logger = logging.getLogger("app.roteamento")
@@ -74,7 +75,7 @@ async def atribuir_atendente(
 ):
     service = ChatService(repos)
     return await service.atribuir_atendente(
-        chat_id, body.atendente_id, user, motivo=body.motivo
+        chat_id, body.atendente_id, user, motivo=body.motivo, ator=Ator.humano(user)
     )
 
 

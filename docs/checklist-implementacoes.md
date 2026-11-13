@@ -2,8 +2,8 @@
 
 Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`–`14`); a fonte da verdade segue sendo cada spec.
 
-- **155 entregues** `[x]` — gaps CORRIGIDO
-- **46 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
+- **160 entregues** `[x]` — gaps CORRIGIDO
+- **41 pendentes** `[ ]` — gaps ABERTO (parciais marcados)
 - Total: 201 itens
 
 ## Fases do plano (SPEC 13)
@@ -45,7 +45,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **01-5** — `chats.loja_id` nunca é populado; nenhum endpoint define a loja (Média)
 - [x] **01-6** — `transferir` usa literais de string; `transferir_grupo` usa o enum (Baixa)
 - [x] **01-7** — `chat["status"] == StatusChat.em_atendimento` compara string com membro de `StrEnum` (Baixa)
-- [ ] **01-8** — Sem tabela de auditoria; não há como saber quem mudou status/atribuição (Média)
+- [x] **01-8** — Sem tabela de auditoria; não há como saber quem mudou status/atribuição (Média)
 - [x] **01-9** — Sem entidade departamento nem atribuição por departamento na máquina de estados (**Alta**)
 - [x] **01-10** — Domínio não separa categoria ERP de departamento; intenção não é modelada (**Alta**)
 - [x] **01-11** — Sem distinção de reabertura/confirmação de resolução pelo cliente além de `RESOLVIDO → IA_ANALISANDO` (Média)
@@ -71,7 +71,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **02-17** — Coleções `departamentos`, `regras_roteamento`, `integracao_chamados` e `integration_outbox` inexistentes (**Alta**)
 - [x] **02-18** — `departamento_id` ausente em `atendentes`/`chats` (**Alta**)
 - [x] **02-19** — `ia_diagnosticos` não guarda intenção, categoria ERP, departamento destino, artigos consultados nem razão (**Alta**)
-- [ ] **02-20** — Sem trilha de auditoria de atribuição/transferência (exigida em 04) (Média)
+- [x] **02-20** — Sem trilha de auditoria de atribuição/transferência (exigida em 04) (Média)
 
 ## SPEC 03 — Contrato da API FastAPI
 
@@ -107,8 +107,8 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [ ] **04-8** — `EvolutionService.criar_instancia` engole 403 e devolve sucesso sem QR (Média)
 - [ ] **04-9** — `GET /atendentes/ativos` retorna id/nome/perfil/setor de todos os ativos para qualquer autenticado (Baixa)
 - [x] **04-10** — Escopo por departamento não é aplicado (departamento não existe) (**Alta**)
-- [ ] **04-11** — Identidade de serviço da IA / `actor_type` auditável não implementada (Média)
-- [ ] **04-12** — Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (Média)
+- [x] **04-11** — Identidade de serviço da IA / `actor_type` auditável não implementada (Média)
+- [x] **04-12** — Sem auditoria de atribuição/transferência (ator, motivo, antes/depois) (Média)
 - [x] **04-13** — chat ENCERRADO podia ser assumido/atribuído (`pegar`/`assinar`/`atribuir_atendente`) (Média)
 
 ## SPEC 05 — Pipeline de IA, Classificação, RAG e Decisão
@@ -222,7 +222,7 @@ Gerado em 2026-11-09 a partir dos Registros de Gaps das specs (`docs/specs/00`�
 - [x] **10-9** — Seed idempotente de departamentos inexistente (Média)
 - [x] **10-10** — Migração de `setor`/`setor_alvo` para `departamento_id` inexistente (**Alta**)
 - [x] **10-11** — `pegar`/`transferir` não validam departamento/atividade do atendente (**Alta**)
-- [ ] **10-12** — Sem auditoria de transferência/atribuição (Média)
+- [x] **10-12** — Sem auditoria de transferência/atribuição (Média)
 
 ## SPEC 11 — Integração com a API Interna de Chamados Emsoft
 
